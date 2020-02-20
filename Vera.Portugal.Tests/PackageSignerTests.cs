@@ -13,7 +13,7 @@ namespace Vera.Portugal.Tests
         {
             var package = new Package
             {
-                Date = new DateTime(1999, 10, 20, 13, 31, 22),
+                Timestamp = new DateTime(1999, 10, 20, 13, 31, 22),
                 Number = "t123/1",
                 Net = -123.2323m,
                 Gross =- 123.2323m,

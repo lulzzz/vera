@@ -20,8 +20,8 @@ namespace Vera.Portugal
         {
             const string separator = ";";
 
-            var invoiceDate = package.Date.ToString("yyyy-MM-dd");
-            var systemEntryDate = package.Date.ToString("yyyy-MM-ddTHH:mm:ss");
+            var invoiceDate = package.Timestamp.ToString("yyyy-MM-dd");
+            var systemEntryDate = package.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss");
             var grossTotal = Math.Abs(package.Net).ToString("0.00", CultureInfo.InvariantCulture);
             var invoiceNo = package.Number;
 
