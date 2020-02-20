@@ -1,4 +1,5 @@
 using System;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Vera.Tests
