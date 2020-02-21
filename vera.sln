@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera", "Vera\Vera.csproj", "{D8516F43-5432-48F1-BFF7-28A7FB3197CD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera", "src\Vera\Vera.csproj", "{D8516F43-5432-48F1-BFF7-28A7FB3197CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Tests", "Vera.Tests\Vera.Tests.csproj", "{E91DF8F4-FD6A-43FB-ABA9-D0783BBA2A0E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Tests", "src\Vera.Tests\Vera.Tests.csproj", "{E91DF8F4-FD6A-43FB-ABA9-D0783BBA2A0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal", "Vera.Portugal\Vera.Portugal.csproj", "{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal", "src\Vera.Portugal\Vera.Portugal.csproj", "{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal.Tests", "Vera.Portugal.Tests\Vera.Portugal.Tests.csproj", "{23013BB1-B5BB-4E43-B2CC-2D128877903E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal.Tests", "src\Vera.Portugal.Tests\Vera.Portugal.Tests.csproj", "{23013BB1-B5BB-4E43-B2CC-2D128877903E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
