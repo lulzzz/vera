@@ -13,7 +13,7 @@ namespace Vera.Portugal
             throw new System.NotImplementedException();
         }
 
-        public IInvoiceBucketGenerator CreateInvoiceSequenceGenerator()
+        public IInvoiceBucketGenerator CreateInvoiceBucketGenerator()
         {
             return new InvoiceBucketGenerator();
         }

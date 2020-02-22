@@ -40,7 +40,7 @@ namespace Vera.Tests
             var facade = new InvoiceFacade(
                 store.Object,
                 factory.Object.CreateLocker(),
-                factory.Object.CreateInvoiceSequenceGenerator(),
+                factory.Object.CreateInvoiceBucketGenerator(),
                 factory.Object.CreateInvoiceNumberGenerator(),
                 await factory.Object.CreatePackageSigner()
             );
