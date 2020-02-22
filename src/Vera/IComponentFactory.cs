@@ -7,7 +7,7 @@ namespace Vera
     public interface IComponentFactory
     {
         ILocker CreateLocker();
-        IInvoiceSequenceGenerator CreateInvoiceSequenceGenerator();
+        IInvoiceBucketGenerator CreateInvoiceSequenceGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
         Task<IPackageSigner> CreatePackageSigner();
     }

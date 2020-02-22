@@ -16,21 +16,21 @@ namespace Vera
     {
         private readonly IInvoiceStore _store;
         private readonly ILocker _locker;
-        private readonly IInvoiceSequenceGenerator _invoiceSequenceGenerator;
+        private readonly IInvoiceBucketGenerator _invoiceBucketGenerator;
         private readonly IInvoiceNumberGenerator _invoiceNumberGenerator;
         private readonly IPackageSigner _packageSigner;
 
         public InvoiceFacade(
             IInvoiceStore store,
             ILocker locker,
-            IInvoiceSequenceGenerator invoiceSequenceGenerator,
+            IInvoiceBucketGenerator invoiceBucketGenerator,
             IInvoiceNumberGenerator invoiceNumberGenerator,
             IPackageSigner packageSigner
         )
         {
             _store = store;
             _locker = locker;
-            _invoiceSequenceGenerator = invoiceSequenceGenerator;
+            _invoiceBucketGenerator = invoiceBucketGenerator;
             _invoiceNumberGenerator = invoiceNumberGenerator;
             _packageSigner = packageSigner;
         }
@@ -40,13 +40,13 @@ namespace Vera
             // TODO(kevin): needed?
             var clone = new Invoice(invoice);
 
-            var sequence = _invoiceSequenceGenerator.Generate(clone);
+            var bucket = _invoiceBucketGenerator.Generate(clone);
 
             // Lock on the unique sequence of the invoice
-            await using (await _locker.Lock(sequence, TimeSpan.FromMinutes(1)))
+            await using (await _locker.Lock(bucket, TimeSpan.FromMinutes(1)))
             {
-                // Get last stored invoice based on the unique sequence for the invoice
-                var last = await _store.Last(sequence);
+                // Get last stored invoice based on the bucket for the invoice
+                var last = await _store.Last(bucket);
 
                 clone.Sequence = last.Sequence + 1;
 
