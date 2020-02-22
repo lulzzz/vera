@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Principal;
@@ -48,35 +49,51 @@ namespace Vera.Tests
 
             // await facade.Process(new Invoice());
 
-            var locker = new AzureBlobLocker("DefaultEndpointsProtocol=https;AccountName=dev525;AccountKey=EuZbqMh6tNFHet6bMzjS6W9NK6VgoZ6MNFfe4EtyWaepypdx/8cVUtULI923Qqa85VAHnhq9+noy3nx/GBQupw==;EndpointSuffix=core.windows.net");
-            
-            var tasks = new List<Task>();
-            
-            Func<Task> DoStuff(int id)
+            const string cosmosConnectionString =
+                "AccountEndpoint=https://cdb-dev-eva.documents.azure.com:443/;AccountKey=xb8nifoQ3WuFOzOeVkvpUENUXF9dc6oSVbH1AC5uxZ6j0OiNmRLbXv7AJjUFO44jHYWxaH5BdwKWSb3wjL2U6g==;";
+
+            var storeTest = new CosmosStore(cosmosConnectionString, "EVA", "invoices");
+
+            var invoice = new Invoice
             {
-                return async () =>
-                {
-                    _testOutputHelper.WriteLine("getting lock.. " + id);
+                StoreNumber = "1003",
+                FiscalYear = 2019,
+                FiscalPeriod = 1
+            };
             
-                    await using (await locker.Lock("store-1004", TimeSpan.FromSeconds(30)))
-                    {
-                        _testOutputHelper.WriteLine("got lock, doing work.. " + id);
+            var last = await storeTest.Last(invoice, invoice.StoreNumber);
             
-                        await Task.Delay(150);
-            
-                        _testOutputHelper.WriteLine("done working, releasing.. " + id);
-                    }
-            
-                    _testOutputHelper.WriteLine("released lock " + id);
-                };
-            }
-            
-            for (var i = 1; i <= 10; i++)
-            {
-                tasks.Add(Task.Run(DoStuff(i)));
-            }
-            
-            await Task.WhenAll(tasks);
+            Debugger.Break();
+
+            // var locker = new AzureBlobLocker("DefaultEndpointsProtocol=https;AccountName=dev525;AccountKey=EuZbqMh6tNFHet6bMzjS6W9NK6VgoZ6MNFfe4EtyWaepypdx/8cVUtULI923Qqa85VAHnhq9+noy3nx/GBQupw==;EndpointSuffix=core.windows.net");
+            //
+            // var tasks = new List<Task>();
+            //
+            // Func<Task> DoStuff(int id)
+            // {
+            //     return async () =>
+            //     {
+            //         _testOutputHelper.WriteLine("getting lock.. " + id);
+            //
+            //         await using (await locker.Lock("store-1004", TimeSpan.FromSeconds(30)))
+            //         {
+            //             _testOutputHelper.WriteLine("got lock, doing work.. " + id);
+            //
+            //             await Task.Delay(150);
+            //
+            //             _testOutputHelper.WriteLine("done working, releasing.. " + id);
+            //         }
+            //
+            //         _testOutputHelper.WriteLine("released lock " + id);
+            //     };
+            // }
+            //
+            // for (var i = 1; i <= 10; i++)
+            // {
+            //     tasks.Add(Task.Run(DoStuff(i)));
+            // }
+            //
+            // await Task.WhenAll(tasks);
 
             // Somehow get the audit factory for the country
             // IAuditFactory<AuditPortugal> auditFactory = null;

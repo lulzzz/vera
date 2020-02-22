@@ -2,7 +2,7 @@ using System;
 
 namespace Vera.Models
 {
-    public sealed class Invoice
+    public class Invoice
     {
         public Invoice(Invoice other)
         {
@@ -11,6 +11,8 @@ namespace Vera.Models
             Manual = other.Manual;
             RawSignature = other.RawSignature;
             Signature = other.Signature;
+            FiscalPeriod = other.FiscalPeriod;
+            FiscalYear = other.FiscalYear;
         }
 
         public Invoice() { }
@@ -20,6 +22,9 @@ namespace Vera.Models
         public int Sequence { get; set; }
 
         public bool Manual { get; set; }
+        
+        public int FiscalPeriod { get; set; }
+        public int FiscalYear { get; set; }
 
         public string RawSignature { get; set; }
         public byte[] Signature { get; set; }

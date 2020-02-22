@@ -46,7 +46,7 @@ namespace Vera
             await using (await _locker.Lock(bucket, TimeSpan.FromMinutes(1)))
             {
                 // Get last stored invoice based on the bucket for the invoice
-                var last = await _store.Last(bucket);
+                var last = await _store.Last(clone, bucket);
 
                 clone.Sequence = last.Sequence + 1;
 
@@ -61,7 +61,7 @@ namespace Vera
                 clone.RawSignature = result.Input;
                 clone.Signature = result.Output;
 
-                await _store.Save(clone);
+                await _store.Save(clone, bucket);
             }
         }
     }
