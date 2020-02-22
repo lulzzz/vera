@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Moq;
 using Vera.Audit;
+using Vera.Concurrency;
 using Vera.Models;
 using Vera.Signing;
 using Vera.Stores;
@@ -47,35 +48,35 @@ namespace Vera.Tests
 
             // await facade.Process(new Invoice());
 
-            // var locker = new AzureBlobInvoiceLocker("DefaultEndpointsProtocol=https;AccountName=dev525;AccountKey=EuZbqMh6tNFHet6bMzjS6W9NK6VgoZ6MNFfe4EtyWaepypdx/8cVUtULI923Qqa85VAHnhq9+noy3nx/GBQupw==;EndpointSuffix=core.windows.net");
-            //
-            // var tasks = new List<Task>();
-            //
-            // Func<Task> DoStuff(int id)
-            // {
-            //     return async () =>
-            //     {
-            //         _testOutputHelper.WriteLine("getting lock.. " + id);
-            //
-            //         await using (await locker.Lock("store-1003", TimeSpan.FromSeconds(1)))
-            //         {
-            //             _testOutputHelper.WriteLine("got lock, doing work.. " + id);
-            //
-            //             await Task.Delay(500);
-            //
-            //             _testOutputHelper.WriteLine("done working, releasing.. " + id);
-            //         }
-            //
-            //         _testOutputHelper.WriteLine("released lock " + id);
-            //     };
-            // }
-            //
-            // for (var i = 1; i <= 10; i++)
-            // {
-            //     tasks.Add(Task.Run(DoStuff(i)));
-            // }
-            //
-            // await Task.WhenAll(tasks);
+            var locker = new AzureBlobLocker("DefaultEndpointsProtocol=https;AccountName=dev525;AccountKey=EuZbqMh6tNFHet6bMzjS6W9NK6VgoZ6MNFfe4EtyWaepypdx/8cVUtULI923Qqa85VAHnhq9+noy3nx/GBQupw==;EndpointSuffix=core.windows.net");
+            
+            var tasks = new List<Task>();
+            
+            Func<Task> DoStuff(int id)
+            {
+                return async () =>
+                {
+                    _testOutputHelper.WriteLine("getting lock.. " + id);
+            
+                    await using (await locker.Lock("store-1004", TimeSpan.FromSeconds(30)))
+                    {
+                        _testOutputHelper.WriteLine("got lock, doing work.. " + id);
+            
+                        await Task.Delay(150);
+            
+                        _testOutputHelper.WriteLine("done working, releasing.. " + id);
+                    }
+            
+                    _testOutputHelper.WriteLine("released lock " + id);
+                };
+            }
+            
+            for (var i = 1; i <= 10; i++)
+            {
+                tasks.Add(Task.Run(DoStuff(i)));
+            }
+            
+            await Task.WhenAll(tasks);
 
             // Somehow get the audit factory for the country
             // IAuditFactory<AuditPortugal> auditFactory = null;
