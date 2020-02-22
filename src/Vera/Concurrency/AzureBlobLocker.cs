@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Blobs;
@@ -27,10 +28,22 @@ namespace Vera.Concurrency
         {
             var container = _client.GetBlobContainerClient(_containerName);
             await container.CreateIfNotExistsAsync();
-
+            
             // Create empty blob with resource name to acquire the lease on
             var append = container.GetAppendBlobClient(resource);
-            await append.CreateIfNotExistsAsync();
+
+            try
+            {
+                await append.CreateIfNotExistsAsync();
+            }
+            catch (RequestFailedException e)
+            {
+                // 412 indicates that there is currently a lease, anything else is an unexpected error
+                if (e.Status != (int) HttpStatusCode.PreconditionFailed)
+                {
+                    throw;
+                }
+            }
 
             var lease = append.GetBlobLeaseClient();
             var gotLease = false;
@@ -49,7 +62,7 @@ namespace Vera.Concurrency
                 }
                 catch (RequestFailedException e)
                 {
-                    if (e.Status != 409)
+                    if (e.Status != (int) HttpStatusCode.Conflict)
                     {
                         // Some other error than: "the lease is already in use"
                         throw;
