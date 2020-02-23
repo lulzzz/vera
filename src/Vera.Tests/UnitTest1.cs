@@ -35,17 +35,17 @@ namespace Vera.Tests
 
             // Somehow get the factory for the country based on the configuration
             // for the current principal
-            var factory = new Mock<IComponentFactory>();
+            // var factory = new Mock<IComponentFactory>();
 
-            var store = new Mock<IInvoiceStore>();
+            // var store = new Mock<IInvoiceStore>();
 
-            var facade = new InvoiceFacade(
-                store.Object,
-                factory.Object.CreateLocker(),
-                factory.Object.CreateInvoiceBucketGenerator(),
-                factory.Object.CreateInvoiceNumberGenerator(),
-                await factory.Object.CreatePackageSigner()
-            );
+            // var facade = new InvoiceFacade(
+            //     store.Object,
+            //     factory.Object.CreateLocker(),
+            //     factory.Object.CreateInvoiceBucketGenerator(),
+            //     factory.Object.CreateInvoiceNumberGenerator(),
+            //     await factory.Object.CreatePackageSigner()
+            // );
 
             // await facade.Process(new Invoice());
 
@@ -56,12 +56,16 @@ namespace Vera.Tests
 
             var invoice = new Invoice
             {
-                StoreNumber = "1003",
+                StoreNumber = "1004",
                 FiscalYear = 2019,
-                FiscalPeriod = 1
+                FiscalPeriod = 2
             };
+
+            var bucket = invoice.StoreNumber;
             
-            var last = await storeTest.Last(invoice, invoice.StoreNumber);
+            var last = await storeTest.Last(invoice, bucket);
+            await storeTest.Save(invoice, bucket);
+            last = await storeTest.Last(invoice, bucket);
             
             Debugger.Break();
 

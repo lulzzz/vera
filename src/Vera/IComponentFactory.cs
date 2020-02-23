@@ -9,6 +9,6 @@ namespace Vera
         ILocker CreateLocker();
         IInvoiceBucketGenerator CreateInvoiceBucketGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
-        Task<IPackageSigner> CreatePackageSigner();
+        IPackageSigner CreatePackageSigner();
     }
 }

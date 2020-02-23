@@ -48,7 +48,14 @@ namespace Vera
                 // Get last stored invoice based on the bucket for the invoice
                 var last = await _store.Last(clone, bucket);
 
-                clone.Sequence = last.Sequence + 1;
+                if (last != null)
+                {
+                    clone.Sequence = last.Sequence + 1;
+                }
+                else
+                {
+                    clone.Sequence = 1;
+                }
 
                 // Generate number for this invoice
                 var number = await _invoiceNumberGenerator.Generate(clone, last);

@@ -1,9 +1,7 @@
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
-using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
 using Vera.Models;
 
@@ -11,65 +9,69 @@ namespace Vera.Stores
 {
     public sealed class CosmosStore : IInvoiceStore
     {
-        private readonly string _connectionString;
+        private readonly CosmosClient _client;
         private readonly string _databaseId;
         private readonly string _containerId;
 
         public CosmosStore(string connectionString, string databaseId, string containerId)
         {
-            _connectionString = connectionString;
+            _client = CreateClient(connectionString);
             _databaseId = databaseId;
             _containerId = containerId;
         }
 
         public async Task Save(Invoice invoice, string bucket)
         {
-            using var client = CreateClient();
-            
-            var container = client.GetContainer(_databaseId, _containerId);
+            var container = _client.GetContainer(_databaseId, _containerId);
+            var chain = new CosmosChain(container, bucket);
 
             var partitionKey = GetPartitionKey(invoice);
-            
+
             var document = new InvoiceDocument(invoice)
             {
                 Bucket = bucket,
                 PartitionKey = partitionKey
             };
-            
+
+            // TODO(kevin): want to make sure that the creation and appending to the chain both succeed
+            // otherwise a rollback is required, somehow, by deleting the document(s)
+            await chain.Append(document.Id);
+
+            // TODO(kevin): try/catch and rollback chain
             await container.CreateItemAsync(document, new PartitionKey(partitionKey));
         }
 
         public async Task<Invoice> Last(Invoice invoice, string bucket)
         {
-            using var client = CreateClient();
+            var container = _client.GetContainer(_databaseId, _containerId);
+            var chain = new CosmosChain(container, bucket);
 
-            var container = client.GetContainer(_databaseId, _containerId);
-            
-            var iterator = container.GetItemLinqQueryable<InvoiceDocument>(requestOptions: new QueryRequestOptions
-                {
-                    PartitionKey = new PartitionKey(GetPartitionKey(invoice))
-                })
-                .Where(x => x.Bucket == bucket)
-                .OrderByDescending(x => x.Timestamp)
-                .Take(1)
-                .ToFeedIterator();
+            var tail = await chain.Tail();
 
-            if (!iterator.HasMoreResults)
+            if (tail == null)
             {
                 return null;
             }
 
-            var document = (await iterator.ReadNextAsync()).FirstOrDefault();
+            var last = await container.ReadItemAsync<InvoiceDocument>(
+                tail.Reference.ToString(),
+                new PartitionKey(GetPartitionKey(invoice))
+            );
 
-            return document == null ? null : new Invoice(document);
+            if (last == null)
+            {
+                return null;
+            }
+
+            return new Invoice(last);
         }
 
         private static string GetPartitionKey(Invoice invoice) =>
             $"{invoice.StoreNumber}-{invoice.FiscalPeriod}-{invoice.FiscalYear}";
 
-        private CosmosClient CreateClient()
+        private CosmosClient CreateClient(string connectionString)
         {
-            return new CosmosClientBuilder(_connectionString)
+            return new CosmosClientBuilder(connectionString)
                 .WithRequestTimeout(TimeSpan.FromSeconds(5))
                 .WithConnectionModeDirect()
                 .WithApplicationName("vera")
@@ -79,24 +81,21 @@ namespace Vera.Stores
 
         private class InvoiceDocument : Invoice
         {
-            public InvoiceDocument(Invoice invoice)
+            public InvoiceDocument(Invoice invoice) : base(invoice)
             {
                 Id = Guid.NewGuid();
-                StoreNumber = invoice.StoreNumber;
-                FiscalYear = invoice.FiscalYear;
-                FiscalPeriod = invoice.FiscalPeriod;
             }
-            
+
             public InvoiceDocument() { }
 
             [JsonProperty("id")]
             public Guid Id { get; set; }
-            
+
             [JsonProperty("_ts")]
             public long Timestamp { get; set; }
-            
+
             public string Bucket { get; set; }
-            
+
             public string PartitionKey { get; set; }
         }
     }

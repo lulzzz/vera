@@ -7,10 +7,18 @@ namespace Vera.Portugal
 {
     public sealed class ComponentFactory : IComponentFactory
     {
+        private readonly string _blobConnectionString;
+        private readonly RSA _rsa;
+
+        public ComponentFactory(string blobConnectionString, RSA rsa)
+        {
+            _blobConnectionString = blobConnectionString;
+            _rsa = rsa;
+        }
+
         public ILocker CreateLocker()
         {
-            // TODO(kevin): create blob locker
-            throw new System.NotImplementedException();
+            return new AzureBlobLocker(_blobConnectionString);
         }
 
         public IInvoiceBucketGenerator CreateInvoiceBucketGenerator()
@@ -23,10 +31,9 @@ namespace Vera.Portugal
             return new InvoiceNumberGenerator();
         }
 
-        public Task<IPackageSigner> CreatePackageSigner()
+        public IPackageSigner CreatePackageSigner()
         {
-            // TODO(kevin): get input for RSA from somewhere
-            return Task.FromResult<IPackageSigner>(new PackageSigner(RSA.Create()));
+            return new PackageSigner(_rsa);
         }
     }
 }
