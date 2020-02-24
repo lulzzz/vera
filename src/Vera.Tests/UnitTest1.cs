@@ -49,25 +49,25 @@ namespace Vera.Tests
 
             // await facade.Process(new Invoice());
 
-            const string cosmosConnectionString =
-                "AccountEndpoint=https://cdb-dev-eva.documents.azure.com:443/;AccountKey=xb8nifoQ3WuFOzOeVkvpUENUXF9dc6oSVbH1AC5uxZ6j0OiNmRLbXv7AJjUFO44jHYWxaH5BdwKWSb3wjL2U6g==;";
-
-            var storeTest = new CosmosStore(cosmosConnectionString, "EVA", "invoices");
-
-            var invoice = new Invoice
-            {
-                StoreNumber = "1004",
-                FiscalYear = 2019,
-                FiscalPeriod = 2
-            };
-
-            var bucket = invoice.StoreNumber;
-            
-            var last = await storeTest.Last(invoice, bucket);
-            await storeTest.Save(invoice, bucket);
-            last = await storeTest.Last(invoice, bucket);
-            
-            Debugger.Break();
+            // const string cosmosConnectionString =
+            //     "AccountEndpoint=https://cdb-dev-eva.documents.azure.com:443/;AccountKey=xb8nifoQ3WuFOzOeVkvpUENUXF9dc6oSVbH1AC5uxZ6j0OiNmRLbXv7AJjUFO44jHYWxaH5BdwKWSb3wjL2U6g==;";
+            //
+            // var storeTest = new CosmosStore(cosmosConnectionString, "EVA", "invoices");
+            //
+            // var invoice = new Invoice
+            // {
+            //     StoreNumber = "1004",
+            //     FiscalYear = 2019,
+            //     FiscalPeriod = 2
+            // };
+            //
+            // var bucket = invoice.StoreNumber;
+            //
+            // var last = await storeTest.Last(invoice, bucket);
+            // await storeTest.Save(invoice, bucket);
+            // last = await storeTest.Last(invoice, bucket);
+            //
+            // Debugger.Break();
 
             // var locker = new AzureBlobLocker("DefaultEndpointsProtocol=https;AccountName=dev525;AccountKey=EuZbqMh6tNFHet6bMzjS6W9NK6VgoZ6MNFfe4EtyWaepypdx/8cVUtULI923Qqa85VAHnhq9+noy3nx/GBQupw==;EndpointSuffix=core.windows.net");
             //
