@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Vera.Concurrency;
 using Vera.Signing;
 

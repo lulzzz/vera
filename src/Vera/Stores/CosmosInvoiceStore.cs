@@ -7,15 +7,15 @@ using Vera.Models;
 
 namespace Vera.Stores
 {
-    public sealed class CosmosStore : IInvoiceStore
+    public sealed class CosmosInvoiceStore : IInvoiceStore
     {
         private readonly CosmosClient _client;
         private readonly string _databaseId;
         private readonly string _containerId;
 
-        public CosmosStore(string connectionString, string databaseId, string containerId)
+        public CosmosInvoiceStore(CosmosClient client, string databaseId, string containerId)
         {
-            _client = CreateClient(connectionString);
+            _client = client;
             _databaseId = databaseId;
             _containerId = containerId;
         }
@@ -69,16 +69,6 @@ namespace Vera.Stores
         private static string GetPartitionKey(Invoice invoice) =>
             $"{invoice.StoreNumber}-{invoice.FiscalPeriod}-{invoice.FiscalYear}";
 
-        private CosmosClient CreateClient(string connectionString)
-        {
-            return new CosmosClientBuilder(connectionString)
-                .WithRequestTimeout(TimeSpan.FromSeconds(5))
-                .WithConnectionModeDirect()
-                .WithApplicationName("vera")
-                .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
-                .Build();
-        }
-
         private class InvoiceDocument : Invoice
         {
             public InvoiceDocument(Invoice invoice) : base(invoice)
@@ -90,9 +80,6 @@ namespace Vera.Stores
 
             [JsonProperty("id")]
             public Guid Id { get; set; }
-
-            [JsonProperty("_ts")]
-            public long Timestamp { get; set; }
 
             public string Bucket { get; set; }
 
