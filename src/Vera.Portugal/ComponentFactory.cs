@@ -1,6 +1,4 @@
 using System.Security.Cryptography;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using Vera.Concurrency;
 using Vera.Signing;
 
@@ -8,18 +6,18 @@ namespace Vera.Portugal
 {
     public sealed class ComponentFactory : IComponentFactory
     {
-        private readonly string _blobConnectionString;
+        private readonly ILocker _locker;
         private readonly RSA _rsa;
 
-        public ComponentFactory(string blobConnectionString, RSA rsa)
+        public ComponentFactory(ILocker locker, RSA rsa)
         {
-            _blobConnectionString = blobConnectionString;
+            _locker = locker;
             _rsa = rsa;
         }
 
         public ILocker CreateLocker()
         {
-            return new AzureBlobLocker(_blobConnectionString);
+            return _locker;
         }
 
         public IInvoiceBucketGenerator CreateInvoiceBucketGenerator()

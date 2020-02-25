@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal.Tests", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.WebApi", "src\Vera.WebApi\Vera.WebApi.csproj", "{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Bootstrap", "src\Vera.Bootstrap\Vera.Bootstrap.csproj", "{47A25F25-30E4-4A33-8552-C11F63400948}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,5 +78,17 @@ Global
 		{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}.Release|x64.Build.0 = Release|Any CPU
 		{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}.Release|x86.ActiveCfg = Release|Any CPU
 		{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}.Release|x86.Build.0 = Release|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Debug|x64.Build.0 = Debug|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Debug|x86.Build.0 = Debug|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Release|x64.ActiveCfg = Release|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Release|x64.Build.0 = Release|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Release|x86.ActiveCfg = Release|Any CPU
+		{47A25F25-30E4-4A33-8552-C11F63400948}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

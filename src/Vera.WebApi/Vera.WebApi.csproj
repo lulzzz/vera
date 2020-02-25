@@ -9,6 +9,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Vera.Bootstrap\Vera.Bootstrap.csproj" />
       <ProjectReference Include="..\Vera\Vera.csproj" />
     </ItemGroup>
 

@@ -1,12 +1,12 @@
 using System;
-using System.Diagnostics;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Vera.Concurrency;
+using Vera.Portugal;
 using Vera.Stores;
 
-namespace Vera
+namespace Vera.Bootstrap
 {
     public static class HostBuilderExtensions
     {
@@ -34,7 +34,18 @@ namespace Vera
                         return new CosmosInvoiceStore(cosmosClient, cosmosDatabase, cosmosContainer);
                     });
                 }
+
+                var blobConnectionString = context.Configuration["VERA:BLOB:CONNECTIONSTRING"];
+
+                if (!string.IsNullOrEmpty(blobConnectionString))
+                {
+                    collection.AddSingleton<ILocker>(new AzureBlobLocker(blobConnectionString));
+                }
+
+                collection.AddSingleton<IComponentFactoryCollection, ComponentFactoryCollection>();
             });
+
+            builder.UseVeraPortugal();
 
             return builder;
         }
