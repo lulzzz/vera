@@ -5,7 +5,7 @@ using Vera.Models;
 using Vera.Signing;
 using Vera.Stores;
 
-namespace Vera
+namespace Vera.Invoices
 {
     public interface IInvoiceFacade
     {

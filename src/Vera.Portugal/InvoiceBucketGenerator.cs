@@ -1,4 +1,5 @@
 using System.Text;
+using Vera.Invoices;
 using Vera.Models;
 
 namespace Vera.Portugal

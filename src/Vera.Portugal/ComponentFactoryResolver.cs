@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Vera.Concurrency;
+using Vera.Dependencies;
 
 namespace Vera.Portugal
 {

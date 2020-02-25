@@ -1,4 +1,4 @@
-namespace Vera
+namespace Vera.Dependencies
 {
     public interface IComponentFactoryResolver
     {

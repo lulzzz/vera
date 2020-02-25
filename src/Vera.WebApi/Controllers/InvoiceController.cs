@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Vera.Bootstrap;
+using Vera.Invoices;
+using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.WebApi.Controllers
@@ -28,37 +30,14 @@ namespace Vera.WebApi.Controllers
             _componentFactoryCollection = componentFactoryCollection;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            // var facade = registry.Get(configuration)
-            // facade.Process(..)
-
-            // factory that creates the component factory
-            // factory that creates the factory will be based on the account config
-            // platform config: vera stuff (typed)
-            //   - cosmos
-            //   - blob
-            // account config: provider stuff (untyped?)
-            //   - keys (RSA, AES, etc.)
-            //   - ATrust endpoint/credentials
-
-
-            // Vera.Bootstrap
-            // reference to all the providers
-            // fulfill each provider with their dependencies
-            // reference bootstrap
-            // bootstrap contains register with all the providers
-            // bootstrap registery > Get(account config) > facade
-            // profit?
-
-            // TODO: get invoice storage
-            // TODO: get component factory for provider
-            // TODO: create InvoiceFacade
-
-            var factory = _componentFactoryCollection.Get(new AccountConfig
+            var accountConfig = new AccountConfig
             {
                 Name = "PT"
-            });
+            };
+
+            var factory = _componentFactoryCollection.Get(accountConfig);
 
             var facade = new InvoiceFacade(
                 _invoiceStore,
@@ -67,6 +46,8 @@ namespace Vera.WebApi.Controllers
                 factory.CreateInvoiceNumberGenerator(),
                 factory.CreatePackageSigner()
             );
+
+            await facade.Process(new Invoice());
 
             return Ok(new
             {

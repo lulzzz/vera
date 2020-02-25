@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Vera.Concurrency;
+using Vera.Invoices;
 using Vera.Signing;
 
 namespace Vera.Portugal

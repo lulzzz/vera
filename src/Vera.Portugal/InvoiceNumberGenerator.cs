@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Vera.Invoices;
 using Vera.Models;
 
 namespace Vera.Portugal

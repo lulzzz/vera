@@ -1,6 +1,6 @@
 using Vera.Models;
 
-namespace Vera
+namespace Vera.Invoices
 {
     public sealed class UniqueBucketPerStoreGenerator : IInvoiceBucketGenerator
     {
