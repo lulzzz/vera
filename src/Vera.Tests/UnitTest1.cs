@@ -10,6 +10,7 @@ using Moq;
 using Vera.Audit;
 using Vera.Concurrency;
 using Vera.Models;
+using Vera.Security;
 using Vera.Signing;
 using Vera.Stores;
 using Xunit;
@@ -29,6 +30,48 @@ namespace Vera.Tests
         [Fact]
         public async Task Test1()
         {
+            var user = new User
+            {
+                Type = UserType.Admin,
+                Username = "kevin",
+                Authentication = new Authentication
+                {
+                    Method = "PBKDF2"
+                }
+            };
+
+            var account = new Account
+            {
+                Id = Guid.NewGuid(),
+                Name = "Rituals Portugal",
+                Country = "PT"
+            };
+
+            var company = new Company
+            {
+                Id = Guid.NewGuid(),
+                Name = "Rituals BV",
+                Accounts = new List<Account>
+                {
+                    account
+                },
+                Users = new List<User>
+                {
+                    user
+                }
+            };
+
+            var pwd = "hello_world";
+            var salt = new byte[16];
+
+            var rng = new RNGCryptoServiceProvider();
+            rng.GetBytes(salt);
+
+            var pbkdf2 = new Rfc2898DeriveBytes(pwd, salt, 100_000, HashAlgorithmName.SHA512);
+            var hash = pbkdf2.GetBytes(16);
+
+            Debugger.Break();
+
             // Azure functions
             // gRPC call
             // ASP.NET MVC
