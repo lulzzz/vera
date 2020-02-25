@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Newtonsoft.Json;
+using Serilog;
 using Vera.Models;
 
 namespace Vera.Stores
@@ -33,12 +34,23 @@ namespace Vera.Stores
                 PartitionKey = partitionKey
             };
 
-            // TODO(kevin): want to make sure that the creation and appending to the chain both succeed
-            // otherwise a rollback is required, somehow, by deleting the document(s)
-            await chain.Append(document.Id);
+            try
+            {
+                // Try to insert the invoice first, if that fails then the chain need never be created
+                await container.CreateItemAsync(document, new PartitionKey(partitionKey));
 
-            // TODO(kevin): try/catch and rollback chain
-            await container.CreateItemAsync(document, new PartitionKey(partitionKey));
+                await chain.Append(document.Id);
+            }
+            catch (CosmosException)
+            {
+                // TODO(kevin): check what exception happened
+                using var response = await container.DeleteItemStreamAsync(
+                    document.Id.ToString(),
+                    new PartitionKey(partitionKey)
+                );
+
+                throw;
+            }
         }
 
         public async Task<Invoice> Last(Invoice invoice, string bucket)
@@ -58,28 +70,26 @@ namespace Vera.Stores
                 new PartitionKey(GetPartitionKey(invoice))
             );
 
-            if (last == null)
-            {
-                return null;
-            }
-
-            return new Invoice(last);
+            return last?.Resource.Invoice;
         }
 
         private static string GetPartitionKey(Invoice invoice) =>
-            $"{invoice.StoreNumber}-{invoice.FiscalPeriod}-{invoice.FiscalYear}";
+            $"{invoice.Store.Number}-{invoice.FiscalYear}-{invoice.FiscalPeriod}";
 
-        private class InvoiceDocument : Invoice
+        private class InvoiceDocument
         {
-            public InvoiceDocument(Invoice invoice) : base(invoice)
+            public InvoiceDocument(Invoice invoice)
             {
                 Id = Guid.NewGuid();
+                Invoice = new Invoice(invoice);
             }
 
             public InvoiceDocument() { }
 
             [JsonProperty("id")]
             public Guid Id { get; set; }
+
+            public Invoice Invoice { get; set; }
 
             public string Bucket { get; set; }
 

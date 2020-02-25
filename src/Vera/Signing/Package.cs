@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Vera.Models;
 
 namespace Vera.Signing
@@ -7,7 +8,14 @@ namespace Vera.Signing
     {
         public Package() { }
 
-        public Package(Invoice invoice, Invoice previous) { }
+        public Package(Invoice invoice, Invoice previous)
+        {
+            Timestamp = invoice.Timestamp;
+            Number = invoice.Number;
+            Net = invoice.Lines.Sum(l => l.Net);
+            Gross = invoice.Lines.Sum(l => l.Gross);
+            PreviousSignature = previous?.Signature;
+        }
 
         /// <summary>
         /// Date and time that the package was created.
@@ -32,6 +40,6 @@ namespace Vera.Signing
         /// <summary>
         /// Signature of the previous package (may be null if this is the first package).
         /// </summary>
-        public string PreviousSignature { get; set; }
+        public byte[] PreviousSignature { get; set; }
     }
 }

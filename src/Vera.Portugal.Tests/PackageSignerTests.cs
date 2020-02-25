@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos.Fluent;
 using Vera.Models;
@@ -21,10 +22,11 @@ namespace Vera.Portugal.Tests
                 Number = "t123/1",
                 Net = -123.2323m,
                 Gross =- 123.2323m,
-                PreviousSignature= "abcdefg"
+                PreviousSignature = Encoding.UTF8.GetBytes("abcdefg")
             };
 
-            const string expectedSignature = "1999-10-20;1999-10-20T13:31:22;t123/1;123.23;abcdefg";
+            var expectedSignature = "1999-10-20;1999-10-20T13:31:22;t123/1;123.23;" +
+                                    Convert.ToBase64String(package.PreviousSignature);
 
             var signer = new PackageSigner(RSA.Create());
             var result = await signer.Sign(package);

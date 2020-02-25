@@ -1,12 +1,8 @@
-using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Vera.Bootstrap;
 using Vera.Invoices;
-using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.WebApi.Controllers
@@ -30,7 +26,8 @@ namespace Vera.WebApi.Controllers
             _componentFactoryCollection = componentFactoryCollection;
         }
 
-        public async Task<IActionResult> Index()
+        [HttpPost]
+        public async Task<IActionResult> Index(Models.Invoice invoice)
         {
             var accountConfig = new AccountConfig
             {
@@ -47,11 +44,14 @@ namespace Vera.WebApi.Controllers
                 factory.CreatePackageSigner()
             );
 
-            await facade.Process(new Invoice());
+            var result = await facade.Process(invoice.ToModel());
 
             return Ok(new
             {
-                Id = 1
+                Number = result.Number,
+                Sequence = result.Sequence,
+                RawSignature = result.RawSignature,
+                Signature = result.Signature
             });
         }
     }

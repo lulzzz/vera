@@ -7,9 +7,32 @@ using Vera.Stores;
 
 namespace Vera.Invoices
 {
+    public class InvoiceResult
+    {
+        /// <summary>
+        /// Sequence number of the invoice.
+        /// </summary>
+        public int Sequence { get; set; }
+
+        /// <summary>
+        /// Generated invoice number.
+        /// </summary>
+        public string Number { get; set; }
+
+        /// <summary>
+        /// Input that was used to generate the <see cref="Signature"/>.
+        /// </summary>
+        public string RawSignature { get; set; }
+
+        /// <summary>
+        /// Resulting signature.
+        /// </summary>
+        public byte[] Signature { get; set; }
+    }
+
     public interface IInvoiceFacade
     {
-        Task Process(Invoice invoice);
+        Task<InvoiceResult> Process(Invoice invoice);
     }
 
     public sealed class InvoiceFacade : IInvoiceFacade
@@ -35,33 +58,38 @@ namespace Vera.Invoices
             _packageSigner = packageSigner;
         }
 
-        public async Task Process(Invoice invoice)
+        public async Task<InvoiceResult> Process(Invoice invoice)
         {
-            // TODO(kevin): needed?
-            var clone = new Invoice(invoice);
-
-            var bucket = _invoiceBucketGenerator.Generate(clone);
+            var bucket = _invoiceBucketGenerator.Generate(invoice);
 
             // Lock on the unique sequence of the invoice
             await using (await _locker.Lock(bucket, TimeSpan.FromMinutes(1)))
             {
                 // Get last stored invoice based on the bucket for the invoice
-                var last = await _store.Last(clone, bucket);
+                var last = await _store.Last(invoice, bucket);
 
-                clone.Sequence = last?.Sequence + 1 ?? 1;
+                invoice.Sequence = last?.Sequence + 1 ?? 1;
 
                 // Generate number for this invoice
-                var number = await _invoiceNumberGenerator.Generate(clone, last);
+                var number = await _invoiceNumberGenerator.Generate(invoice, last);
 
-                var result = await _packageSigner.Sign(new Package(clone, last)
+                var result = await _packageSigner.Sign(new Package(invoice, last)
                 {
                     Number = number
                 });
 
-                clone.RawSignature = result.Input;
-                clone.Signature = result.Output;
+                invoice.RawSignature = result.Input;
+                invoice.Signature = result.Output;
 
-                await _store.Save(clone, bucket);
+                await _store.Save(invoice, bucket);
+
+                return new InvoiceResult
+                {
+                    Sequence = invoice.Sequence,
+                    Number = number,
+                    RawSignature = result.Input,
+                    Signature = result.Output
+                };
             }
         }
     }

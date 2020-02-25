@@ -25,7 +25,7 @@ namespace Vera.Portugal
             var grossTotal = Math.Abs(package.Net).ToString("0.00", CultureInfo.InvariantCulture);
             var invoiceNo = package.Number;
 
-            var signature = new StringBuilder()
+            var signatureBuilder = new StringBuilder()
                 .Append(invoiceDate)
                 .Append(separator)
                 .Append(systemEntryDate)
@@ -33,9 +33,14 @@ namespace Vera.Portugal
                 .Append(invoiceNo)
                 .Append(separator)
                 .Append(grossTotal)
-                .Append(separator)
-                .Append(package.PreviousSignature)
-                .ToString();
+                .Append(separator);
+
+            if (package.PreviousSignature != null)
+            {
+                signatureBuilder.Append(Convert.ToBase64String(package.PreviousSignature));
+            }
+
+            var signature = signatureBuilder.ToString();
 
             var result = _rsa.SignData(
                 Encoding.UTF8.GetBytes(signature),
