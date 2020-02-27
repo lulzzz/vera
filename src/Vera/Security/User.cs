@@ -21,6 +21,7 @@ namespace Vera.Security
         public string Method { get; set; }
         public byte[] Hash { get; set; }
         public byte[] Salt { get; set; }
+        public int Iterations { get; set; }
     }
 
     public enum UserType

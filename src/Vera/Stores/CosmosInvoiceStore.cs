@@ -10,21 +10,16 @@ namespace Vera.Stores
 {
     public sealed class CosmosInvoiceStore : IInvoiceStore
     {
-        private readonly CosmosClient _client;
-        private readonly string _databaseId;
-        private readonly string _containerId;
+        private readonly Container _container;
 
-        public CosmosInvoiceStore(CosmosClient client, string databaseId, string containerId)
+        public CosmosInvoiceStore(Container container)
         {
-            _client = client;
-            _databaseId = databaseId;
-            _containerId = containerId;
+            _container = container;
         }
 
         public async Task Save(Invoice invoice, string bucket)
         {
-            var container = _client.GetContainer(_databaseId, _containerId);
-            var chain = new CosmosChain(container, bucket);
+            var chain = new CosmosChain(_container, bucket);
 
             var partitionKey = GetPartitionKey(invoice);
 
@@ -37,14 +32,14 @@ namespace Vera.Stores
             try
             {
                 // Try to insert the invoice first, if that fails then the chain need never be created
-                await container.CreateItemAsync(document, new PartitionKey(partitionKey));
+                await _container.CreateItemAsync(document, new PartitionKey(partitionKey));
 
                 await chain.Append(document.Id);
             }
             catch (CosmosException)
             {
                 // TODO(kevin): check what exception happened
-                using var response = await container.DeleteItemStreamAsync(
+                using var response = await _container.DeleteItemStreamAsync(
                     document.Id.ToString(),
                     new PartitionKey(partitionKey)
                 );
@@ -55,8 +50,7 @@ namespace Vera.Stores
 
         public async Task<Invoice> Last(Invoice invoice, string bucket)
         {
-            var container = _client.GetContainer(_databaseId, _containerId);
-            var chain = new CosmosChain(container, bucket);
+            var chain = new CosmosChain(_container, bucket);
 
             var tail = await chain.Tail();
 
@@ -65,7 +59,7 @@ namespace Vera.Stores
                 return null;
             }
 
-            var last = await container.ReadItemAsync<InvoiceDocument>(
+            var last = await _container.ReadItemAsync<InvoiceDocument>(
                 tail.Reference.ToString(),
                 new PartitionKey(GetPartitionKey(invoice))
             );

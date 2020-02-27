@@ -6,7 +6,6 @@ namespace Vera.Security
     public interface ICompanyStore
     {
         Task Store(Company company);
-
-        Task<Company> Get(Guid companyId);
+        Task<Company> GetByName(string name);
     }
 }

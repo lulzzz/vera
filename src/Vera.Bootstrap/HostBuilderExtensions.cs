@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
 using Vera.Portugal;
+using Vera.Security;
 using Vera.Stores;
 
 namespace Vera.Bootstrap
@@ -14,40 +15,75 @@ namespace Vera.Bootstrap
         {
             builder.ConfigureServices((context, collection) =>
             {
-                var cosmosConnectionString = context.Configuration["VERA:COSMOS:CONNECTIONSTRING"];
-                var cosmosDatabase = context.Configuration["VERA:COSMOS:DATABASE"];
-                var cosmosContainer = context.Configuration["VERA:COSMOS:CONTAINER"];
+                RegisterDefaults(collection);
 
-                if (!string.IsNullOrEmpty(cosmosConnectionString) &&
-                    !string.IsNullOrEmpty(cosmosDatabase) &&
-                    !string.IsNullOrEmpty(cosmosContainer))
-                {
-                    collection.AddSingleton<IInvoiceStore>(provider =>
-                    {
-                        var cosmosClient = new CosmosClientBuilder(cosmosConnectionString)
-                            .WithRequestTimeout(TimeSpan.FromSeconds(5))
-                            .WithConnectionModeDirect()
-                            .WithApplicationName("vera")
-                            .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
-                            .Build();
-
-                        return new CosmosInvoiceStore(cosmosClient, cosmosDatabase, cosmosContainer);
-                    });
-                }
-
-                var blobConnectionString = context.Configuration["VERA:BLOB:CONNECTIONSTRING"];
-
-                if (!string.IsNullOrEmpty(blobConnectionString))
-                {
-                    collection.AddSingleton<ILocker>(new AzureBlobLocker(blobConnectionString));
-                }
-
-                collection.AddSingleton<IComponentFactoryCollection, ComponentFactoryCollection>();
+                UseCosmosStores(context, collection);
+                UseBlobLocker(context, collection);
             });
 
             builder.UseVeraPortugal();
 
             return builder;
+        }
+
+        private static void RegisterDefaults(IServiceCollection collection)
+        {
+            collection.AddSingleton<IPasswordStrategy, Pbkdf2PasswordStrategy>();
+            collection.AddSingleton<IComponentFactoryCollection, ComponentFactoryCollection>();
+        }
+
+        private static void UseCosmosStores(HostBuilderContext context, IServiceCollection collection)
+        {
+            var cosmosConnectionString = context.Configuration["VERA:COSMOS:CONNECTIONSTRING"];
+            var cosmosDatabase = context.Configuration["VERA:COSMOS:DATABASE"];
+
+            if (string.IsNullOrEmpty(cosmosConnectionString) || string.IsNullOrEmpty(cosmosDatabase))
+            {
+                return;
+            }
+
+            var cosmosContainerInvoices = context.Configuration["VERA:COSMOS:CONTAINER:INVOICES"];
+            var cosmosContainerUsers = context.Configuration["VERA:COSMOS:CONTAINER:USERS"];
+
+            var cosmosClient = new CosmosClientBuilder(cosmosConnectionString)
+                .WithRequestTimeout(TimeSpan.FromSeconds(5))
+                .WithConnectionModeDirect()
+                .WithApplicationName("vera")
+                .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
+                .Build();
+
+            if (!string.IsNullOrEmpty(cosmosContainerInvoices))
+            {
+                collection.AddSingleton<IInvoiceStore>(provider => new CosmosInvoiceStore(
+                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerInvoices)
+                ));
+            }
+
+            if (!string.IsNullOrEmpty(cosmosContainerUsers))
+            {
+                collection.AddTransient<ICompanyStore>(provider => new CosmosCompanyStore(
+                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers)
+                ));
+
+                collection.AddTransient<IAccountStore>(provider => new CosmosAccountStore(
+                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers)
+                ));
+
+                collection.AddTransient<IUserStore>(provider => new CosmosUserStore(
+                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers),
+                    provider.GetService<IPasswordStrategy>()
+                ));
+            }
+        }
+
+        private static void UseBlobLocker(HostBuilderContext context, IServiceCollection collection)
+        {
+            var blobConnectionString = context.Configuration["VERA:BLOB:CONNECTIONSTRING"];
+
+            if (!string.IsNullOrEmpty(blobConnectionString))
+            {
+                collection.AddSingleton<ILocker>(new AzureBlobLocker(blobConnectionString));
+            }
         }
     }
 }

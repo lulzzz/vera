@@ -61,14 +61,21 @@ namespace Vera.Tests
                 }
             };
 
-            var pwd = "hello_world";
-            var salt = new byte[16];
+            ICompanyStore companyStore;
+            IAccountStore accountStore;
+            IUserStore userStore;
 
-            var rng = new RNGCryptoServiceProvider();
-            rng.GetBytes(salt);
-
-            var pbkdf2 = new Rfc2898DeriveBytes(pwd, salt, 100_000, HashAlgorithmName.SHA512);
-            var hash = pbkdf2.GetBytes(16);
+            // await companyStore.Store(company);
+            //
+            // await accountStore.Store(account);
+            //
+            // await userStore.Store(new UserToCreate
+            // {
+            //     Username = "kevin",
+            //     Company = company.Id,
+            //     Password = "hello_world",
+            //     Type = UserType.Admin
+            // });
 
             Debugger.Break();
 

@@ -13,7 +13,7 @@ namespace Vera.Security
 
     public interface IUserStore
     {
-        Task Store(UserToCreate toCreate);
+        Task<User> Store(UserToCreate toCreate);
 
         Task<User> Get(string username, Guid companyId);
     }
