@@ -43,6 +43,7 @@ namespace Vera.Bootstrap
             }
 
             var cosmosContainerInvoices = context.Configuration["VERA:COSMOS:CONTAINER:INVOICES"];
+            var cosmosContainerCompanies = context.Configuration["VERA:COSMOS:CONTAINER:COMPANIES"];
             var cosmosContainerUsers = context.Configuration["VERA:COSMOS:CONTAINER:USERS"];
 
             var cosmosClient = new CosmosClientBuilder(cosmosConnectionString)
@@ -59,14 +60,14 @@ namespace Vera.Bootstrap
                 ));
             }
 
-            if (!string.IsNullOrEmpty(cosmosContainerUsers))
+            if (!string.IsNullOrEmpty(cosmosContainerCompanies))
             {
                 collection.AddTransient<ICompanyStore>(provider => new CosmosCompanyStore(
-                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers)
+                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerCompanies)
                 ));
 
                 collection.AddTransient<IAccountStore>(provider => new CosmosAccountStore(
-                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers)
+                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerCompanies)
                 ));
 
                 collection.AddTransient<IUserStore>(provider => new CosmosUserStore(

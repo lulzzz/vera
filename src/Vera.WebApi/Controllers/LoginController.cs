@@ -36,7 +36,7 @@ namespace Vera.WebApi.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Index(Login model)
         {
-            var company = await _companyStore.GetByName(model.Company);
+            var company = await _companyStore.GetByName(model.CompanyName);
 
             if (company == null)
             {
@@ -63,6 +63,8 @@ namespace Vera.WebApi.Controllers
 
         private string GenerateJwt(User user)
         {
+            // TODO(kevin): https://fullstackmark.com/post/19/jwt-authentication-flow-with-refresh-tokens-in-aspnet-core-web-api
+
             var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(_configuration["VERA:JWT:KEY"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 

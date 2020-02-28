@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
+using Newtonsoft.Json;
 
 namespace Vera.Security
 {
@@ -18,7 +19,12 @@ namespace Vera.Security
 
         public async Task<User> Store(User user)
         {
-            var document = await _container.CreateItemAsync(new UserDocument(user));
+            var toCreate = new UserDocument(user);
+
+            var document = await _container.CreateItemAsync(
+                toCreate,
+                new PartitionKey(toCreate.PartitionKey)
+            );
 
             return document.Resource.User;
         }
@@ -49,6 +55,7 @@ namespace Vera.Security
                 PartitionKey = user.Username.ToLower();
             }
 
+            [JsonProperty("id")]
             public Guid Id { get; set; }
             public User User { get; set; }
             public string PartitionKey { get; set; }
