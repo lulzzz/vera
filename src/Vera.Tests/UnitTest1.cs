@@ -30,55 +30,6 @@ namespace Vera.Tests
         [Fact]
         public async Task Test1()
         {
-            var user = new User
-            {
-                Type = UserType.Admin,
-                Username = "kevin",
-                Authentication = new Authentication
-                {
-                    Method = "PBKDF2"
-                }
-            };
-
-            var account = new Account
-            {
-                Id = Guid.NewGuid(),
-                Name = "Rituals Portugal",
-                Country = "PT"
-            };
-
-            var company = new Company
-            {
-                Id = Guid.NewGuid(),
-                Name = "Rituals BV",
-                Accounts = new List<Account>
-                {
-                    account
-                },
-                Users = new List<User>
-                {
-                    user
-                }
-            };
-
-            ICompanyStore companyStore;
-            IAccountStore accountStore;
-            IUserStore userStore;
-
-            // await companyStore.Store(company);
-            //
-            // await accountStore.Store(account);
-            //
-            // await userStore.Store(new UserToCreate
-            // {
-            //     Username = "kevin",
-            //     Company = company.Id,
-            //     Password = "hello_world",
-            //     Type = UserType.Admin
-            // });
-
-            Debugger.Break();
-
             // Azure functions
             // gRPC call
             // ASP.NET MVC

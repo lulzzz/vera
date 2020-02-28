@@ -70,8 +70,7 @@ namespace Vera.Bootstrap
                 ));
 
                 collection.AddTransient<IUserStore>(provider => new CosmosUserStore(
-                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers),
-                    provider.GetService<IPasswordStrategy>()
+                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers)
                 ));
             }
         }

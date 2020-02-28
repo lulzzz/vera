@@ -14,6 +14,8 @@ namespace Vera.Security
         public UserType Type { get; set; }
 
         public Authentication Authentication { get; set; }
+
+        public Guid CompanyId { get; set; }
     }
 
     public class Authentication

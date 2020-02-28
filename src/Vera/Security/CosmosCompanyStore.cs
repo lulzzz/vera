@@ -15,21 +15,41 @@ namespace Vera.Security
             _container = container;
         }
 
-        public Task Store(Company company)
+        public async Task<Company> Store(Company company)
         {
-            return _container.CreateItemAsync(company);
+            var document = await _container.CreateItemAsync(new CompanyDocument(company));
+
+            return document.Resource.Company;
         }
 
         public async Task<Company> GetByName(string name)
         {
-            var iterator = _container.GetItemLinqQueryable<Company>()
-                .Where(c => c.Name == name)
+            var iterator = _container.GetItemLinqQueryable<CompanyDocument>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(name.ToLower())
+                })
                 .Take(1)
                 .ToFeedIterator();
 
             var response = await iterator.ReadNextAsync();
 
-            return response.FirstOrDefault();
+            return response.FirstOrDefault()?.Company;
+        }
+
+        private class CompanyDocument
+        {
+            public CompanyDocument() { }
+
+            public CompanyDocument(Company company)
+            {
+                Id = company.Id;
+                Company = company;
+                PartitionKey = company.Name.ToLower();
+            }
+
+            public Guid Id { get; set; }
+            public Company Company { get; set; }
+            public string PartitionKey { get; set; }
         }
     }
 }

@@ -1,39 +1,57 @@
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 
 namespace Vera.Security
 {
     public sealed class CosmosUserStore : IUserStore
     {
         private readonly Container _container;
-        private readonly IPasswordStrategy _passwordStrategy;
 
-        public CosmosUserStore(Container container, IPasswordStrategy passwordStrategy)
+        public CosmosUserStore(Container container)
         {
             _container = container;
-            _passwordStrategy = passwordStrategy;
         }
 
-        public async Task<User> Store(UserToCreate toCreate)
+        public async Task<User> Store(User user)
         {
-            var user = new User
+            var document = await _container.CreateItemAsync(new UserDocument(user));
+
+            return document.Resource.User;
+        }
+
+        public async Task<User> GetByCompany(Guid companyId, string username)
+        {
+            var iterator = _container.GetItemLinqQueryable<UserDocument>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(username.ToLower())
+                })
+                .Where(x => x.User.CompanyId == companyId)
+                .Take(1)
+                .ToFeedIterator();
+
+            var result = await iterator.ReadNextAsync();
+
+            return result.FirstOrDefault()?.User;
+        }
+
+        private class UserDocument
+        {
+            public UserDocument() { }
+
+            public UserDocument(User user)
             {
-                Id = Guid.NewGuid(),
-                Username = toCreate.Username,
-                Authentication = _passwordStrategy.Encrypt(toCreate.Password),
-                Type = toCreate.Type
-            };
+                Id = user.Id;
+                User = user;
+                PartitionKey = user.Username.ToLower();
+            }
 
-            await _container.CreateItemAsync(user);
-
-            return user;
-        }
-
-        public Task<User> Get(string username, Guid companyId)
-        {
-            throw new NotImplementedException();
+            public Guid Id { get; set; }
+            public User User { get; set; }
+            public string PartitionKey { get; set; }
         }
     }
 }

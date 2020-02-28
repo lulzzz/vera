@@ -1,5 +1,7 @@
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Vera.Bootstrap;
 using Vera.Invoices;
@@ -9,6 +11,7 @@ namespace Vera.WebApi.Controllers
 {
     [ApiController]
     [Route("invoice")]
+    [Authorize]
     public class InvoiceController : ControllerBase
     {
         private readonly ILogger<InvoiceController> _logger;

@@ -21,6 +21,5 @@ namespace Vera.Security
         public string Name { get; set; }
 
         public ICollection<Account> Accounts { get; set; }
-        public ICollection<User> Users { get; set; }
     }
 }
