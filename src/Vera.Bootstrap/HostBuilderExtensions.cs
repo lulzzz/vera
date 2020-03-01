@@ -28,6 +28,7 @@ namespace Vera.Bootstrap
 
         private static void RegisterDefaults(IServiceCollection collection)
         {
+            collection.AddSingleton<ITokenFactory, RandomTokenFactory>();
             collection.AddSingleton<IPasswordStrategy, Pbkdf2PasswordStrategy>();
             collection.AddSingleton<IComponentFactoryCollection, ComponentFactoryCollection>();
         }

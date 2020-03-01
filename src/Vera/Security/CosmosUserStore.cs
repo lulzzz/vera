@@ -29,6 +29,17 @@ namespace Vera.Security
             return document.Resource.User;
         }
 
+        public async Task Update(User user)
+        {
+            var document = new UserDocument(user);
+
+            await _container.ReplaceItemAsync<UserDocument>(
+                document,
+                document.Id.ToString(),
+                new PartitionKey(document.PartitionKey)
+            );
+        }
+
         public async Task<User> GetByCompany(Guid companyId, string username)
         {
             var iterator = _container.GetItemLinqQueryable<UserDocument>(requestOptions: new QueryRequestOptions

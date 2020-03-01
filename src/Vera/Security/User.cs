@@ -15,6 +15,8 @@ namespace Vera.Security
 
         public Authentication Authentication { get; set; }
 
+        public string RefreshToken { get; set; }
+
         public Guid CompanyId { get; set; }
     }
 
