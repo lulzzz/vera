@@ -12,6 +12,9 @@ namespace Vera.WebApi.Models
     public class Invoice
     {
         [Required]
+        public Guid Account { get; set; }
+
+        [Required]
         public string SystemId { get; set; }
 
         [Required]

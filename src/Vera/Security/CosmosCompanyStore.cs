@@ -28,6 +28,19 @@ namespace Vera.Security
             return document.Resource.Company;
         }
 
+        public async Task<Company> Update(Company company)
+        {
+            var document = new CompanyDocument(company);
+
+            await _container.ReplaceItemAsync<CompanyDocument>(
+                document,
+                document.Id.ToString(),
+                new PartitionKey(document.PartitionKey)
+            );
+
+            return company;
+        }
+
         public async Task<Company> GetByName(string name)
         {
             var iterator = _container.GetItemLinqQueryable<CompanyDocument>(requestOptions: new QueryRequestOptions
@@ -40,6 +53,17 @@ namespace Vera.Security
             var response = await iterator.ReadNextAsync();
 
             return response.FirstOrDefault()?.Company;
+        }
+
+        public async Task<Company> Get(Guid companyId)
+        {
+            // TODO(kevin): this does a cross partition query
+            var document = await _container.ReadItemAsync<CompanyDocument>(
+                companyId.ToString(),
+                PartitionKey.None
+            );
+
+            return document.Resource.Company;
         }
 
         private class CompanyDocument

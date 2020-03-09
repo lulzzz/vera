@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,12 +33,11 @@ namespace Vera.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(Models.Invoice invoice)
         {
-            var accountConfig = new AccountConfig
-            {
-                Name = "PT"
-            };
+            // invoice.Account
+            // TODO(kevin): somehow get the account of the current user
+            var account = new Account();
 
-            var factory = _componentFactoryCollection.Get(accountConfig);
+            var factory = _componentFactoryCollection.Get(account);
 
             var facade = new InvoiceFacade(
                 _invoiceStore,

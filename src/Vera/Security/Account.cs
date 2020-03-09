@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Vera
 {
@@ -9,8 +10,8 @@ namespace Vera
 
         public string Name { get; set; }
 
-        public string Country { get; set; }
+        public string Certification { get; set; }
 
-        // TODO(kevin): configuration
+        public IDictionary<string, string> Configuration { get; set; }
     }
 }

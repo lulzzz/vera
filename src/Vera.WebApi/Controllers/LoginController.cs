@@ -1,13 +1,12 @@
 using System;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using Vera.Security;
 using Vera.WebApi.Models;
+using Vera.WebApi.Security;
 
 namespace Vera.WebApi.Controllers
 {
@@ -21,13 +20,15 @@ namespace Vera.WebApi.Controllers
         private readonly IUserStore _userStore;
         private readonly ITokenFactory _tokenFactory;
         private readonly IPasswordStrategy _passwordStrategy;
+        private readonly ISecurityTokenGenerator _securityTokenGenerator;
 
         public LoginController(
             IConfiguration configuration,
             ICompanyStore companyStore,
             IUserStore userStore,
             ITokenFactory tokenFactory,
-            IPasswordStrategy passwordStrategy
+            IPasswordStrategy passwordStrategy,
+            ISecurityTokenGenerator securityTokenGenerator
         )
         {
             _configuration = configuration;
@@ -35,6 +36,7 @@ namespace Vera.WebApi.Controllers
             _userStore = userStore;
             _tokenFactory = tokenFactory;
             _passwordStrategy = passwordStrategy;
+            _securityTokenGenerator = securityTokenGenerator;
         }
 
         [HttpPost]
@@ -67,8 +69,8 @@ namespace Vera.WebApi.Controllers
         [Route("refresh")]
         public async Task<IActionResult> Refresh(Refresh model)
         {
-            var username = HttpContext.User.FindFirstValue(ClaimTypes.Username);
-            var companyId = Guid.Parse(HttpContext.User.FindFirstValue(ClaimTypes.CompanyId));
+            var username = User.FindFirstValue(ClaimTypes.Username);
+            var companyId = Guid.Parse(User.FindFirstValue(ClaimTypes.CompanyId));
 
             var user = await _userStore.GetByCompany(companyId, username);
 
@@ -91,31 +93,9 @@ namespace Vera.WebApi.Controllers
 
             return Ok(new
             {
-                token = GenerateJwt(user),
+                token = _securityTokenGenerator.Generate(user),
                 refreshToken
             });            
-        }
-
-        private string GenerateJwt(User user)
-        {
-            var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(_configuration["VERA:JWT:KEY"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]{
-                new Claim(ClaimTypes.Id, user.Id.ToString()),
-                new Claim(ClaimTypes.CompanyId, user.CompanyId.ToString()),
-                new Claim(ClaimTypes.Username, user.Username),
-            };
-
-            var token = new JwtSecurityToken(
-                _configuration["VERA:JWT:ISSUER"],
-                _configuration["VERA:JWT:ISSUER"],
-                claims,
-                expires: DateTime.UtcNow.AddHours(2),
-                signingCredentials: credentials
-            );
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -6,7 +6,7 @@ namespace Vera.Bootstrap
 {
     public interface IComponentFactoryCollection
     {
-        IComponentFactory Get(AccountConfig config);
+        IComponentFactory Get(Account account);
     }
 
     public sealed class ComponentFactoryCollection : IComponentFactoryCollection
@@ -18,9 +18,9 @@ namespace Vera.Bootstrap
             _resolvers = resolvers;
         }
 
-        public IComponentFactory Get(AccountConfig config)
+        public IComponentFactory Get(Account account)
         {
-            return _resolvers.Single(x => x.Name == config.Name).Resolve(config);
+            return _resolvers.Single(x => x.Name == account.Certification).Resolve(account);
         }
     }
 }

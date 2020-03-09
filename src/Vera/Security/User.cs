@@ -18,6 +18,7 @@ namespace Vera.Security
         public string RefreshToken { get; set; }
 
         public Guid CompanyId { get; set; }
+        public Guid? AccountId { get; set; }
     }
 
     public class Authentication
@@ -32,6 +33,7 @@ namespace Vera.Security
     {
         Normal = 1,
         Admin = 2,
-        Service = 3
+        Service = 3,
+        Robot = 4
     }
 }

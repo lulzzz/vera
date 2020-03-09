@@ -34,6 +34,11 @@ namespace Vera.Tests
             // gRPC call
             // ASP.NET MVC
 
+            var tokenFactory = new RandomTokenFactory();
+            var x = tokenFactory.Create(32);
+
+            Debugger.Break();
+
             // Somehow get the factory for the country based on the configuration
             // for the current principal
             // var factory = new Mock<IComponentFactory>();

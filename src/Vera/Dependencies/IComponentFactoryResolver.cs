@@ -2,7 +2,7 @@ namespace Vera.Dependencies
 {
     public interface IComponentFactoryResolver
     {
-        IComponentFactory Resolve(AccountConfig config);
+        IComponentFactory Resolve(Account account);
 
         string Name { get; }
     }
