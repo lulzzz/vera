@@ -32,7 +32,7 @@ namespace Vera.Security
         {
             var document = new CompanyDocument(company);
 
-            await _container.ReplaceItemAsync<CompanyDocument>(
+            await _container.ReplaceItemAsync(
                 document,
                 document.Id.ToString(),
                 new PartitionKey(document.PartitionKey)

@@ -1,9 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Security;
 using Vera.Concurrency;
 using Vera.Dependencies;
 
@@ -20,25 +22,21 @@ namespace Vera.Portugal
 
         public IComponentFactory Resolve(Account account)
         {
+            RSA rsa;
+
             var privateKey = account.Configuration["PrivateKey"];
 
             using (var sr = new StringReader(Encoding.ASCII.GetString(Convert.FromBase64String(privateKey))))
             {
                 var reader = new PemReader(sr);
-                var o = reader.ReadPemObject() as AsymmetricCipherKeyPair;
+                var keyPair = (AsymmetricCipherKeyPair) reader.ReadObject();
 
+                var rsaParameters = DotNetUtilities.ToRSAParameters(keyPair.Private as RsaPrivateCrtKeyParameters);
+
+                rsa = RSA.Create(rsaParameters);
             }
-            
 
-            using (var reader = File.OpenText(@"c:\myprivatekey.pem")) // file containing RSA PKCS1 private key
-    keyPair = (AsymmetricCipherKeyPair) new PemReader(reader).ReadObject(); 
-
-            // account.Configuration
-
-            // TODO(kevin): get the RSA key and pass it to the factory
-            // TODO(kevin): use account.Configuration to get the RSA key
-
-            return new ComponentFactory(_locker, RSA.Create());
+            return new ComponentFactory(_locker, rsa);
         }
 
         public string Name => "PT";

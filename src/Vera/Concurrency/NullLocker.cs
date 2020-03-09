@@ -5,6 +5,8 @@ namespace Vera.Concurrency
 {
     public sealed class NullLocker : ILocker
     {
+        public static readonly ILocker Instance = new NullLocker();
+
         private NullLocker() { }
 
         public Task<IAsyncDisposable> Lock(string resource, TimeSpan timeout)
