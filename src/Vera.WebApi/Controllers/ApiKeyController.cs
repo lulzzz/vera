@@ -37,7 +37,7 @@ namespace Vera.WebApi.Controllers
 
         public async Task<IActionResult> Index(RobotUser model)
         {
-            var companyId = Guid.Parse(User.FindFirstValue(ClaimTypes.CompanyId));
+            var companyId = Guid.Parse(User.FindFirstValue(Security.ClaimTypes.CompanyId));
 
             var existingUser = await _userStore.GetByCompany(companyId, model.Username);
 
@@ -47,7 +47,7 @@ namespace Vera.WebApi.Controllers
                 return BadRequest();
             }
 
-            var company = await _companyStore.GetByName(User.FindFirstValue(ClaimTypes.CompanyName));
+            var company = await _companyStore.GetByName(User.FindFirstValue(Security.ClaimTypes.CompanyName));
 
             var auth = _passwordStrategy.Encrypt(_tokenFactory.Create());
 

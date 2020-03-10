@@ -33,7 +33,7 @@ namespace Vera.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(Models.Invoice invoice)
         {
-            var company = await _companyStore.GetByName(User.FindFirstValue(ClaimTypes.CompanyName));
+            var company = await _companyStore.GetByName(User.FindFirstValue(Security.ClaimTypes.CompanyName));
             var account = company.Accounts.FirstOrDefault(a => a.Id == invoice.Account);
 
             if (account == null)

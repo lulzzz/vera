@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Vera.Security;
 using Vera.WebApi.Models;
 using Vera.WebApi.Security;
@@ -15,7 +14,6 @@ namespace Vera.WebApi.Controllers
     [Authorize]
     public class LoginController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
         private readonly ICompanyStore _companyStore;
         private readonly IUserStore _userStore;
         private readonly ITokenFactory _tokenFactory;
@@ -23,7 +21,6 @@ namespace Vera.WebApi.Controllers
         private readonly ISecurityTokenGenerator _securityTokenGenerator;
 
         public LoginController(
-            IConfiguration configuration,
             ICompanyStore companyStore,
             IUserStore userStore,
             ITokenFactory tokenFactory,
@@ -31,7 +28,6 @@ namespace Vera.WebApi.Controllers
             ISecurityTokenGenerator securityTokenGenerator
         )
         {
-            _configuration = configuration;
             _companyStore = companyStore;
             _userStore = userStore;
             _tokenFactory = tokenFactory;
@@ -69,8 +65,8 @@ namespace Vera.WebApi.Controllers
         [Route("refresh")]
         public async Task<IActionResult> Refresh(Refresh model)
         {
-            var username = User.FindFirstValue(ClaimTypes.Username);
-            var companyId = Guid.Parse(User.FindFirstValue(ClaimTypes.CompanyId));
+            var username = User.FindFirstValue(Security.ClaimTypes.Username);
+            var companyId = Guid.Parse(User.FindFirstValue(Security.ClaimTypes.CompanyId));
 
             var user = await _userStore.GetByCompany(companyId, username);
 
@@ -80,7 +76,7 @@ namespace Vera.WebApi.Controllers
                 return BadRequest();
             }
 
-            var company = await _companyStore.GetByName(User.FindFirstValue(ClaimTypes.CompanyName));
+            var company = await _companyStore.GetByName(User.FindFirstValue(Security.ClaimTypes.CompanyName));
 
             return await Authorize(user, company);
         }

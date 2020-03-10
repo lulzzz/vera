@@ -15,22 +15,17 @@ namespace Vera.WebApi.Controllers
     public class AccountController : ControllerBase
     {
         private readonly ICompanyStore _companyStore;
-        private readonly IAccountStore _accountStore;
 
-        public AccountController(
-            ICompanyStore companyStore,
-            IAccountStore accountStore
-        ) 
+        public AccountController(ICompanyStore companyStore)
         {
             _companyStore = companyStore;
-            _accountStore = accountStore;
          }
 
         [HttpPost]
         [Route("create")]
         public async Task<IActionResult> Create(Models.Account model)
         {
-            var companyId = User.FindFirstValue(ClaimTypes.CompanyId);
+            var companyId = User.FindFirstValue(Security.ClaimTypes.CompanyId);
             var company = await _companyStore.Get(Guid.Parse(companyId));
 
             var accounts = company.Accounts ?? new List<Account>();
