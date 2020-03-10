@@ -1,11 +1,11 @@
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Extensions.Logging;
 using Vera.Bootstrap;
 using Vera.Invoices;
+using Vera.Security;
 using Vera.Stores;
 
 namespace Vera.WebApi.Controllers
@@ -15,17 +15,17 @@ namespace Vera.WebApi.Controllers
     [Authorize]
     public class InvoiceController : ControllerBase
     {
-        private readonly ILogger<InvoiceController> _logger;
+        private readonly ICompanyStore _companyStore;
         private readonly IInvoiceStore _invoiceStore;
         private readonly IComponentFactoryCollection _componentFactoryCollection;
 
         public InvoiceController(
-            ILogger<InvoiceController> logger,
+            ICompanyStore companyStore,
             IInvoiceStore invoiceStore,
             IComponentFactoryCollection componentFactoryCollection
         )
         {
-            _logger = logger;
+            _companyStore = companyStore;
             _invoiceStore = invoiceStore;
             _componentFactoryCollection = componentFactoryCollection;
         }
@@ -33,9 +33,15 @@ namespace Vera.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Index(Models.Invoice invoice)
         {
-            // invoice.Account
-            // TODO(kevin): somehow get the account of the current user
-            var account = new Account();
+            var company = await _companyStore.GetByName(User.FindFirstValue(ClaimTypes.CompanyName));
+            var account = company.Accounts.FirstOrDefault(a => a.Id == invoice.Account);
+
+            if (account == null)
+            {
+                // Not allowed to create an invoice for this account because it does not belong to the company
+                // to which the user has rights
+                return Unauthorized();
+            }
 
             var factory = _componentFactoryCollection.Get(account);
 

@@ -74,6 +74,9 @@ namespace Vera.Security
             {
                 Id = company.Id;
                 Company = company;
+
+                // TODO(kevin): better to use the Id as the partition key instead?
+                // have that available on the user and feels like a more logical option
                 PartitionKey = company.Name.ToLower();
             }
 

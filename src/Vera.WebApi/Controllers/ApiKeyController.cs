@@ -15,18 +15,21 @@ namespace Vera.WebApi.Controllers
     public class ApiKeyController : ControllerBase
     {
         private readonly IUserStore _userStore;
+        private readonly ICompanyStore _companyStore;
         private readonly ITokenFactory _tokenFactory;
         private readonly IPasswordStrategy _passwordStrategy;
         private readonly ISecurityTokenGenerator _securityTokenGenerator;
 
         public ApiKeyController(
-            IUserStore userStore, 
+            IUserStore userStore,
+            ICompanyStore companyStore,
             ITokenFactory tokenFactory, 
             IPasswordStrategy passwordStrategy,
             ISecurityTokenGenerator securityTokenGenerator
         )
         {
             _userStore = userStore;
+            _companyStore = companyStore;
             _tokenFactory = tokenFactory;
             _passwordStrategy = passwordStrategy;
             _securityTokenGenerator = securityTokenGenerator;
@@ -44,6 +47,8 @@ namespace Vera.WebApi.Controllers
                 return BadRequest();
             }
 
+            var company = await _companyStore.GetByName(User.FindFirstValue(ClaimTypes.CompanyName));
+
             var auth = _passwordStrategy.Encrypt(_tokenFactory.Create());
 
             var user = new User
@@ -59,7 +64,7 @@ namespace Vera.WebApi.Controllers
 
             await _userStore.Store(user);
 
-            var token = _securityTokenGenerator.Generate(user);
+            var token = _securityTokenGenerator.Generate(user, company);
 
             return Ok(new
             {

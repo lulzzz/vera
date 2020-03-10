@@ -62,7 +62,7 @@ namespace Vera.WebApi.Controllers
                 return Unauthorized();
             }
 
-            return await Authorize(user);
+            return await Authorize(user, company);
         }
 
         [HttpPost]
@@ -80,10 +80,12 @@ namespace Vera.WebApi.Controllers
                 return BadRequest();
             }
 
-            return await Authorize(user);
+            var company = await _companyStore.GetByName(User.FindFirstValue(ClaimTypes.CompanyName));
+
+            return await Authorize(user, company);
         }
 
-        private async Task<IActionResult> Authorize(User user)
+        private async Task<IActionResult> Authorize(User user, Company company)
         {
             var refreshToken = _tokenFactory.Create();
 
@@ -93,7 +95,7 @@ namespace Vera.WebApi.Controllers
 
             return Ok(new
             {
-                token = _securityTokenGenerator.Generate(user),
+                token = _securityTokenGenerator.Generate(user, company),
                 refreshToken
             });            
         }

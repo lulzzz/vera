@@ -9,7 +9,7 @@ namespace Vera.WebApi.Security
 {
     public interface ISecurityTokenGenerator
     {
-        string Generate(User user);
+        string Generate(User user, Company company);
     }
 
     public class JwtSecurityTokenGenerator : ISecurityTokenGenerator
@@ -21,15 +21,16 @@ namespace Vera.WebApi.Security
             _configuration = configuration;
         }
 
-        public string Generate(User user)
+        public string Generate(User user, Company company)
         {
             var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(_configuration["VERA:JWT:KEY"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]{
                 new Claim(ClaimTypes.Id, user.Id.ToString()),
-                new Claim(ClaimTypes.CompanyId, user.CompanyId.ToString()),
                 new Claim(ClaimTypes.Username, user.Username),
+                new Claim(ClaimTypes.CompanyId, company.Id.ToString()),
+                new Claim(ClaimTypes.CompanyName, company.Name)
             };
 
             var token = new JwtSecurityToken(
