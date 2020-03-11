@@ -108,6 +108,27 @@ namespace Vera.Documents
             _writer.WriteEndObject();
         }
 
+        public void Visit(SpacingThermalNode node)
+        {
+            _writer.WriteStartObject();
+
+            WriteNodeType(node);
+
+            _writer.WritePropertyName("value");
+            _writer.WriteValue(node.Value);
+
+            _writer.WriteEndObject();
+        }
+
+        public void Visit(LineThermalNode node)
+        {
+            _writer.WriteStartObject();
+
+            WriteNodeType(node);
+
+            _writer.WriteEndObject();
+        }
+
         private void WriteNodeType(IThermalNode node)
         {
             _writer.WritePropertyName("type");

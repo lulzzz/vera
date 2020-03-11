@@ -17,5 +17,7 @@ namespace Vera.Documents.Nodes
         public override string Type => "scope";
 
         public string Align { get; }
+
+        public bool Bold { get; set; }
     }
 }

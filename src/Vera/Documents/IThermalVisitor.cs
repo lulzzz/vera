@@ -10,5 +10,7 @@ namespace Vera.Documents
         void Visit(ImageThermalNode node);
         void Visit(ScopeThermalNode node);
         void Visit(BarcodeThermalNode node);
+        void Visit(SpacingThermalNode node);
+        void Visit(LineThermalNode node);
     }
 }

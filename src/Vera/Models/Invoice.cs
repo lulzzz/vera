@@ -34,6 +34,8 @@ namespace Vera.Models
 
         public string Number { get; set; }
 
+        public DateTime Date { get; set; }
+
         public Store Store { get; set; }
         public Customer Customer { get; set; }
         public Employee Employee { get; set; }
@@ -51,8 +53,13 @@ namespace Vera.Models
         public string RawSignature { get; set; }
         public byte[] Signature { get; set; }
 
+        public ICollection<TaxInformation> Taxes { get; set; }
         public ICollection<InvoiceLine> Lines { get; set; }
         public ICollection<Payment> Payments { get; set; }
         public ICollection<Settlement> Settlements { get; set; }
+
+        public decimal TotalAmount => Lines.Sum(l => l.Gross);
+        public decimal TotalAmountInTax => Lines.Sum(l => l.Net);
+        public string Remark { get; set; }
     }
 }
