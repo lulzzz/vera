@@ -1,14 +1,8 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos.Fluent;
-using Vera.Concurrency;
-using Vera.Models;
 using Vera.Signing;
-using Vera.Stores;
 using Xunit;
 
 namespace Vera.Portugal.Tests

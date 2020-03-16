@@ -42,11 +42,10 @@ namespace Vera.Portugal
 
             // TODO(kevin): print the account details (name, tax number, etc.)
 
-            // TODO(kevin): supplier details (store)
             yield return new TextThermalNode(model.Supplier.Name);
-            // yield return new TextThermalNode("supplier name");
-            // yield return new TextThermalNode("supplier address");
-            // yield return new TextThermalNode("supplier country");
+            yield return new TextThermalNode($"{model.Supplier.Address.Street} {model.Supplier.Address.Number}");
+            yield return new TextThermalNode($"{model.Supplier.Address.PostalCode} {model.Supplier.Address.City}");
+            yield return new TextThermalNode(model.Supplier.Address.Country);
 
             yield return new SpacingThermalNode(1);
 
