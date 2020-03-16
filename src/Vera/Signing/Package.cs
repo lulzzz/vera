@@ -10,10 +10,10 @@ namespace Vera.Signing
 
         public Package(Invoice invoice, Invoice previous)
         {
-            Timestamp = invoice.Timestamp;
+            Timestamp = invoice.Date;
             Number = invoice.Number;
-            Net = invoice.Lines.Sum(l => l.Net);
-            Gross = invoice.Lines.Sum(l => l.Gross);
+            Net = invoice.Lines.Sum(l => l.Amount);
+            Gross = invoice.Lines.Sum(l => l.AmountInTax);
             PreviousSignature = previous?.Signature;
         }
 

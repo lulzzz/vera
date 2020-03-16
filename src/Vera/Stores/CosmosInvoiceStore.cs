@@ -68,7 +68,7 @@ namespace Vera.Stores
         }
 
         private static string GetPartitionKey(Invoice invoice) =>
-            $"{invoice.Store.Number}-{invoice.FiscalYear}-{invoice.FiscalPeriod}";
+            $"{invoice.Supplier.SystemID}-{invoice.FiscalYear}-{invoice.FiscalPeriod}";
 
         private class InvoiceDocument
         {

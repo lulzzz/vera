@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Vera.Models;
+using Vera.StandardAuditFileTaxation;
 
 namespace Vera.WebApi.Models
 {
@@ -45,56 +46,8 @@ namespace Vera.WebApi.Models
 
         public Vera.Models.Invoice ToModel()
         {
-            return new Vera.Models.Invoice
-            {
-                SystemId = SystemId,
-                Store = new Vera.Models.Store
-                {
-                    SystemId = Store.SystemId,
-                    Name = Store.Name,
-                    Number = Store.Number,
-                    Address = new Vera.Models.Address()
-                },
-                Customer = new Vera.Models.Customer
-                {
-
-                },
-                Employee = new Vera.Models.Employee
-                {
-
-                },
-                Payments = Payments.Select(p => new Vera.Models.Payment
-                {
-                    Reference = p.Reference,
-                    Description = p.Description,
-                    Amount = p.Amount
-                }).ToList(),
-                Lines = Lines.Select(l => new Vera.Models.InvoiceLine
-                {
-                    Description = l.Description,
-                    Quantity = l.Quantity,
-                    Product = l.Product == null ? null : new Vera.Models.Product
-                    {
-                        Description = l.Product.Description,
-                        ArticleCode = l.Product.ArticleCode
-                    },
-                    Tax = new TaxInformation
-                    {
-
-                    },
-                    Settlements = l.Discounts?.Select(s => new Vera.Models.Settlement
-                    {
-
-                    }).ToList(),
-                    Gross = l.Gross,
-                    Net = l.Gross
-                }).ToList(),
-                Manual = Manual,
-                Timestamp = Timestamp,
-                TerminalId = TerminalId,
-                FiscalPeriod = Period,
-                FiscalYear = PeriodYear
-            };
+            // TODO(kevin): implement this
+            return new Vera.Models.Invoice();
         }
     }
 

@@ -15,5 +15,15 @@ namespace Vera.Documents.Nodes
         public string Type => "text";
 
         public string Value { get; }
+
+        public FontSize FontSize { get; set; }
+        public bool Bold { get; set; }
+    }
+
+    public enum FontSize
+    {
+        Small = 1,
+        Medium = 2,
+        Large = 3
     }
 }

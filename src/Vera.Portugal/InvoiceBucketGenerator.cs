@@ -8,7 +8,7 @@ namespace Vera.Portugal
     {
         public string Generate(Invoice invoice)
         {
-            var sb = new StringBuilder(invoice.Store.Number)
+            var sb = new StringBuilder(invoice.Supplier.SystemID)
                 .Append("-")
                 .Append(InvoiceTypeHelper.DetermineType(invoice));
 

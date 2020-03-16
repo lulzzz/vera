@@ -1,65 +1,59 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Vera.Models
 {
+    // Invoice that is saved
+    // Invoice model that is used for printing and auditing
+
     public class Invoice
     {
-        public Invoice(Invoice other)
+        public Invoice()
         {
-            Id = other.Id;
-            SystemId = other.SystemId;
-            Number = other.Number;
-            Store = other.Store;
-            Customer = other.Customer;
-            Employee = other.Employee;
-            Timestamp = other.Timestamp;
-            TerminalId = other.TerminalId;
-            Manual = other.Manual;
-            FiscalPeriod = other.FiscalPeriod;
-            FiscalYear = other.FiscalYear;
-            Sequence = other.Sequence;
-            RawSignature = other.RawSignature;
-            Signature = other.Signature;
-            Lines = new List<InvoiceLine>(other.Lines ?? Enumerable.Empty<InvoiceLine>());
-            Payments = new List<Payment>(other.Payments ?? Enumerable.Empty<Payment>());
-            Settlements = new List<Settlement>(other.Settlements ?? Enumerable.Empty<Settlement>());
         }
 
-        public Invoice() { }
+        public Invoice(Invoice other)
+        {
+            // TODO(kevin): map properties
+        }
 
-        public Guid Id { get; set; }
+        public Guid AccountId { get; set; }
+
         public string SystemId { get; set; }
 
+        public DateTime Date { get; set; }
         public string Number { get; set; }
 
-        public DateTime Date { get; set; }
-
-        public Store Store { get; set; }
-        public Customer Customer { get; set; }
-        public Employee Employee { get; set; }
-
-        public DateTime Timestamp { get; set; }
-
-        public string TerminalId { get; set; }
-
+        /// <summary>
+        /// Indicates if the invoice was created manually.
+        /// </summary>
         public bool Manual { get; set; }
-
-        public int FiscalPeriod { get; set; }
-        public int FiscalYear { get; set; }
 
         public int Sequence { get; set; }
         public string RawSignature { get; set; }
         public byte[] Signature { get; set; }
 
-        public ICollection<TaxInformation> Taxes { get; set; }
-        public ICollection<InvoiceLine> Lines { get; set; }
-        public ICollection<Payment> Payments { get; set; }
-        public ICollection<Settlement> Settlements { get; set; }
+        public Billable Supplier { get; set; }
+        public Billable Employee { get; set; }
+        public Customer Customer { get; set; }
 
-        public decimal TotalAmount => Lines.Sum(l => l.Gross);
-        public decimal TotalAmountInTax => Lines.Sum(l => l.Net);
+        /// <summary>
+        /// Identifier of the cash register that created the invoice.
+        /// </summary>
+        public string TerminalId { get; set; }
+
+        public int FiscalPeriod { get; set; }
+        public int FiscalYear { get; set; }
+
+        /// <summary>
+        /// Identifiers of the orders from which this invoice is made up.
+        /// </summary>
+        public ICollection<string> OrderReferences { get; } = new List<string>();
+
         public string Remark { get; set; }
+
+        public ICollection<InvoiceLine> Lines { get; set; } = new List<InvoiceLine>();
+        public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public ICollection<Print> Prints { get; set; } = new List<Print>();
     }
 }

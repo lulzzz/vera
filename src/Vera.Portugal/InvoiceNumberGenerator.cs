@@ -11,7 +11,7 @@ namespace Vera.Portugal
             var type = InvoiceTypeHelper.DetermineType(invoice);
 
             var subtype = $"{(invoice.Manual ? "m" : "it")}{type}";
-            var series = $"{invoice.Store.Number}{(invoice.Manual ? "m" : string.Empty)}";
+            var series = $"{invoice.Supplier.SystemID}{(invoice.Manual ? "m" : string.Empty)}";
 
             return Task.FromResult($"{subtype} {series}/{invoice.Sequence}");
         }

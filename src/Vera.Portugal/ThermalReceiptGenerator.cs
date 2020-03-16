@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Microsoft.Azure.Cosmos.Linq;
 using Vera.Documents;
 using Vera.Documents.Nodes;
+using Vera.Invoices;
 using Vera.Models;
 
 namespace Vera.Portugal
@@ -15,40 +15,64 @@ namespace Vera.Portugal
     {
         private static readonly CultureInfo Culture = CultureInfo.CreateSpecificCulture("pt-PT");
 
-        public IThermalNode Generate(Invoice model)
+        private readonly IInvoiceTotalCalculator _invoiceTotalCalculator;
+
+        public ThermalReceiptGenerator(IInvoiceTotalCalculator invoiceTotalCalculator)
         {
+            _invoiceTotalCalculator = invoiceTotalCalculator;
+        }
+
+        public IThermalNode Generate(ThermalReceiptContext context, Invoice model)
+        {
+            var totals = _invoiceTotalCalculator.Calculate(model);
+
             var nodes = new List<IThermalNode>();
-
-            nodes.AddRange(GenerateHeader(model));
-
+            nodes.AddRange(GenerateHeader(model, totals));
             nodes.AddRange(GenerateInvoiceLines(model));
-
-            nodes.AddRange(GenerateTaxLines(model));
-
-            nodes.AddRange(GenerateFooter(model));
+            nodes.AddRange(GenerateTaxLines(totals));
+            nodes.AddRange(GenerateFooter(model, totals));
 
             return new DocumentThermalNode(nodes);
         }
 
-        private IEnumerable<IThermalNode> GenerateHeader(Invoice model)
+        private IEnumerable<IThermalNode> GenerateHeader(Invoice model, Totals totals)
         {
-            // TODO(kevin): supplier details
+            // TODO(kevin): static receipt header
+            // {#partial InvoiceReceiptHeader}
+
+            // TODO(kevin): print the account details (name, tax number, etc.)
+
+            // TODO(kevin): supplier details (store)
+            yield return new TextThermalNode(model.Supplier.Name);
             // yield return new TextThermalNode("supplier name");
             // yield return new TextThermalNode("supplier address");
             // yield return new TextThermalNode("supplier country");
 
-            if (model.TotalAmount > 0)
+            yield return new SpacingThermalNode(1);
+
+            if (totals.AmountInTax > 0)
             {
-                // TODO(kevin): font size
-                yield return new TextThermalNode("FATURA SIMPLIFICADA");
+                yield return new TextThermalNode("FATURA SIMPLIFICADA")
+                {
+                    Bold = true,
+                    FontSize = FontSize.Large
+                };
+
                 yield return new TextThermalNode($"Fatura: {model.Number}");
             }
             else
             {
-                // TODO(kevin): font size
-                yield return new TextThermalNode("NOTA DE CRÉDITO");
+                yield return new TextThermalNode("NOTA DE CRÉDITO")
+                {
+                    Bold = true,
+                    FontSize = FontSize.Large
+                };
+
                 yield return new TextThermalNode($"Nota de crédito: {model.Number}");
             }
+
+            yield return new SpacingThermalNode(1);
+            yield return new LineThermalNode();
 
             // TODO(kevin): fix this piece below
             // {{if ReturnedInvoiceNumber}}
@@ -60,28 +84,40 @@ namespace Vera.Portugal
                 yield return new TextThermalNode($"Cópia do documento original -FTM {model.Number}");
             }
 
-            // TODO(kevin): need an "original" print flag
-            yield return new TextThermalNode("ORIGINAL");
+            if (model.Prints.Count == 0)
+            {
+                yield return new TextThermalNode("ORIGINAL");
+            }
+            else
+            {
+                // Duplicate print
 
-            // TODO(kevin): duplicate data
-//             {#duplicate}
-//                 {{if ReturnedOrderReprint}}
-//                     DUPLICADO REIMPRESSAO
-//                 {{else}}
-//                     DUPLICADO
-//                 {{/if}}
-//                     #{#duplicatenumber}
-//             {#/duplicate}
+                // TODO(kevin): if return AND it is a duplicate
+                // DUPLICADO REIMPRESSAO
+
+                yield return new TextThermalNode($"DUPLICADO {model.Prints.Count}");
+
+                // TODO(kevin): duplicate data
+    //             {#duplicate}
+    //                 {{if ReturnedOrderReprint}}
+    //                     DUPLICADO REIMPRESSAO
+    //                 {{else}}
+    //                     DUPLICADO
+    //                 {{/if}}
+    //                     #{#duplicatenumber}
+    //             {#/duplicate}
+            }
+
 
             if (model.Customer != null)
             {
-                // yield return new TextThermalNode(model.Customer.Name);
-                // yield return new TextThermalNode(model.Customer.RegistrationNumber);
-                // yield return new TextThermalNode(model.Customer.TaxRegistrationNumber);
+                yield return new TextThermalNode(model.Customer.FirstName + " " + model.Customer.LastName);
+                yield return new TextThermalNode(model.Customer.RegistrationNumber);
+                yield return new TextThermalNode(model.Customer.TaxRegistrationNumber);
 
-                // yield return new TextThermalNode($"{model.Customer.Street} {model.Customer.HouseNumber}");
-                // yield return new TextThermalNode($"{model.Customer.PostalCode} {model.Customer.City}");
-                // yield return new TextThermalNode(model.Customer.CountryID);
+                yield return new TextThermalNode($"{model.Customer.Address.Street} {model.Customer.Address.Number}");
+                yield return new TextThermalNode($"{model.Customer.Address.PostalCode} {model.Customer.Address.City}");
+                yield return new TextThermalNode(model.Customer.Address.Country);
             }
 
             yield return new TextThermalNode($"Data: {model.Date:YYYY-MM-DD}");
@@ -117,8 +153,8 @@ namespace Vera.Portugal
 
                 sb.Append(line.Quantity.ToString().PadRight(5));
                 sb.Append(line.Description.PadRight(34).Substring(0, 34));
-                sb.Append((line.Tax.Rate - 1).ToString("P", Culture));
-                sb.Append(line.Gross.ToString("C", Culture));
+                sb.Append((line.TaxRate - 1).ToString("P", Culture));
+                sb.Append(line.AmountInTax.ToString("C", Culture));
 
                 yield return new TextThermalNode(sb.ToString());
 
@@ -133,7 +169,7 @@ namespace Vera.Portugal
             }
         }
 
-        private IEnumerable<IThermalNode> GenerateTaxLines(Invoice model)
+        private IEnumerable<IThermalNode> GenerateTaxLines(Totals totals)
         {
             var sb = new StringBuilder();
             sb.Append("Taxa".PadRight(19));
@@ -143,7 +179,7 @@ namespace Vera.Portugal
 
             yield return new TextThermalNode(sb.ToString());
 
-            foreach (var tax in model.Taxes)
+            foreach (var tax in totals.Taxes)
             {
                 sb.Clear();
 
@@ -158,9 +194,9 @@ namespace Vera.Portugal
             sb.Clear();
 
             sb.Append("SUBTOTAL".PadRight(19));
-            sb.Append(model.TotalAmount.ToString("C", Culture));
-            sb.Append((model.TotalAmountInTax - model.TotalAmount).ToString("C", Culture));
-            sb.Append(model.TotalAmountInTax.ToString("C", Culture));
+            sb.Append(totals.Amount.ToString("C", Culture));
+            sb.Append((totals.AmountInTax - totals.Amount).ToString("C", Culture));
+            sb.Append(totals.AmountInTax.ToString("C", Culture));
         }
 
         private IEnumerable<IThermalNode> GeneratePayments(Invoice model)
@@ -211,12 +247,14 @@ namespace Vera.Portugal
             // {{/if}}
         }
 
-        private IEnumerable<IThermalNode> GenerateFooter(Invoice model)
+        private IEnumerable<IThermalNode> GenerateFooter(Invoice model, Totals totals)
         {
-            var prefix = model.TotalAmountInTax >= 0 ? "TOTAL FATURA" : "TROCO";
+            var prefix = totals.AmountInTax >= 0 ? "TOTAL FATURA" : "TROCO";
 
-            // TODO(kevin): font size BIG
-            yield return new TextThermalNode($"{prefix}: {model.TotalAmountInTax.ToString("C", Culture)}");
+            yield return new TextThermalNode($"{prefix}: {totals.AmountInTax.ToString("C", Culture)}")
+            {
+                FontSize = FontSize.Large
+            };
 
             yield return new TextThermalNode($"{model.Lines.Count}/{Math.Abs(model.Lines.Sum(l => l.Quantity))} articles");
 
@@ -225,14 +263,14 @@ namespace Vera.Portugal
                 yield return node;
             }
 
-            // TODO(kevin): print debit/credit customer receipt
+            // TODO(kevin): print debit/credit (PIN) customer receipt
 
             if (!string.IsNullOrEmpty(model.Remark))
             {
                 yield return new TextThermalNode($"COMENTARIO: {model.Remark}");
             }
 
-            yield return new TextThermalNode($"Atendido por: {model.Employee.Number}");
+            yield return new TextThermalNode($"Atendido por: {model.Employee.SystemID}");
             yield return new TextThermalNode($"Loja: {model.TerminalId}");
 
             // TODO(kevin): get software version from account config
@@ -247,8 +285,10 @@ namespace Vera.Portugal
             // TODO(kevin): static footer (from config?)
             // {#partial InvoiceReceiptFooter}
 
-            // TODO(kevin): used to print the barcode for the order here
-            // <barcode data="{{:OrderBarcode}}" type="Code39" />
+            foreach (var orderReference in model.OrderReferences)
+            {
+                yield return new BarcodeThermalNode("code39", orderReference);
+            }
 
             // TODO(kevin): get certificate name from account config
             yield return new TextThermalNode($"LICENCIADO A: ");

@@ -3,8 +3,13 @@ using Vera.Models;
 
 namespace Vera.Documents
 {
+    public sealed class ThermalReceiptContext
+    {
+        public Account Account { get; set; }
+    }
+
     public interface IThermalReceiptGenerator
     {
-        IThermalNode Generate(Invoice model);
+        IThermalNode Generate(ThermalReceiptContext context, Invoice model);
     }
 }
