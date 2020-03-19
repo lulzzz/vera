@@ -27,7 +27,7 @@ namespace Vera.Portugal
             var totals = _invoiceTotalCalculator.Calculate(model);
 
             var nodes = new List<IThermalNode>();
-            nodes.AddRange(GenerateHeader(model, totals));
+            nodes.AddRange(GenerateHeader(model, totals, context.Account));
             nodes.AddRange(GenerateInvoiceLines(model));
             nodes.AddRange(GenerateTaxLines(totals));
             nodes.AddRange(GenerateFooter(model, totals));
@@ -35,12 +35,15 @@ namespace Vera.Portugal
             return new DocumentThermalNode(nodes);
         }
 
-        private IEnumerable<IThermalNode> GenerateHeader(Invoice model, Totals totals)
+        private IEnumerable<IThermalNode> GenerateHeader(Invoice model, Totals totals, Account account)
         {
-            // TODO(kevin): static receipt header
-            // {#partial InvoiceReceiptHeader}
+            // TODO(kevin): static receipt header (logo only so far)
 
-            // TODO(kevin): print the account details (name, tax number, etc.)
+            yield return new TextThermalNode(account.Name);
+            yield return new TextThermalNode($"{account.Address.Street} {account.Address.Number}");
+            yield return new TextThermalNode($"{account.Address.PostalCode} {account.Address.City}");
+            // TODO(kevin): missing data for Capital Social: 258.501,00 (check what this ist)
+            yield return new TextThermalNode($"Contribuinte: {account.RegistrationNumber}");
 
             yield return new TextThermalNode(model.Supplier.Name);
             yield return new TextThermalNode($"{model.Supplier.Address.Street} {model.Supplier.Address.Number}");
@@ -83,30 +86,15 @@ namespace Vera.Portugal
                 yield return new TextThermalNode($"Cópia do documento original -FTM {model.Number}");
             }
 
-            if (model.Prints.Count == 0)
-            {
-                yield return new TextThermalNode("ORIGINAL");
-            }
-            else
-            {
-                // Duplicate print
+            string printNumberPrefix;
 
-                // TODO(kevin): if return AND it is a duplicate
-                // DUPLICADO REIMPRESSAO
-
-                yield return new TextThermalNode($"DUPLICADO {model.Prints.Count}");
-
-                // TODO(kevin): duplicate data
-    //             {#duplicate}
-    //                 {{if ReturnedOrderReprint}}
-    //                     DUPLICADO REIMPRESSAO
-    //                 {{else}}
-    //                     DUPLICADO
-    //                 {{/if}}
-    //                     #{#duplicatenumber}
-    //             {#/duplicate}
+            if (string.IsNullOrEmpty(model.ReturnedInvoiceNumber)) {
+                printNumberPrefix = model.Prints.Count == 0 ? "ORIGINAL" : $"DUPLICADO #{model.Prints.Count}";
+            } else {
+                printNumberPrefix = $"DUPLICADO REIMPRESSAO #{model.Prints.Count}";
             }
 
+            yield return new TextThermalNode($"{printNumberPrefix}");
 
             if (model.Customer != null)
             {

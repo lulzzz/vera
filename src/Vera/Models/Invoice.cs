@@ -23,6 +23,7 @@ namespace Vera.Models
 
         public DateTime Date { get; set; }
         public string Number { get; set; }
+        public string ReturnedInvoiceNumber { get; set; }
 
         /// <summary>
         /// Indicates if the invoice was created manually.
@@ -45,15 +46,22 @@ namespace Vera.Models
         public int FiscalPeriod { get; set; }
         public int FiscalYear { get; set; }
 
+        public string Remark { get; set; }
+
         /// <summary>
         /// Identifiers of the orders from which this invoice is made up.
         /// </summary>
         public ICollection<string> OrderReferences { get; } = new List<string>();
-
-        public string Remark { get; set; }
-
         public ICollection<InvoiceLine> Lines { get; set; } = new List<InvoiceLine>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public ICollection<Print> Prints { get; set; } = new List<Print>();
+        public ICollection<PinReceipt> Receipts { get; set; } = new List<PinReceipt>();
+    }
+
+    public class PinReceipt
+    {
+        public IEnumerable<string> Lines { get; set; }
+        public byte[] SignatureData { get; set; }
+        public string SignatureMimeType { get; set; }
     }
 }
