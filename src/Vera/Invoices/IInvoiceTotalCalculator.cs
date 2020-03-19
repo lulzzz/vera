@@ -8,7 +8,7 @@ namespace Vera.Invoices
         Totals Calculate(Invoice invoice);
     }
 
-    public class InvoiceTotalCalculator
+    public class InvoiceTotalCalculator : IInvoiceTotalCalculator
     {
         public Totals Calculate(Invoice invoice)
         {

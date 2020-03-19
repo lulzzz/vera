@@ -51,7 +51,7 @@ namespace Vera.Models
         /// <summary>
         /// Identifiers of the orders from which this invoice is made up.
         /// </summary>
-        public ICollection<string> OrderReferences { get; } = new List<string>();
+        public ICollection<string> OrderReferences { get; set; } = new List<string>();
         public ICollection<InvoiceLine> Lines { get; set; } = new List<InvoiceLine>();
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
         public ICollection<Print> Prints { get; set; } = new List<Print>();

@@ -27,9 +27,16 @@ namespace Vera.Portugal
             var totals = _invoiceTotalCalculator.Calculate(model);
 
             var nodes = new List<IThermalNode>();
+            
             nodes.AddRange(GenerateHeader(model, totals, context.Account));
+            nodes.Add(new SpacingThermalNode(1));
+
             nodes.AddRange(GenerateInvoiceLines(model));
+            nodes.Add(new SpacingThermalNode(1));
+
             nodes.AddRange(GenerateTaxLines(totals));
+            nodes.Add(new SpacingThermalNode(1));
+
             nodes.AddRange(GenerateFooter(model, totals));
 
             return new DocumentThermalNode(nodes);
@@ -44,6 +51,8 @@ namespace Vera.Portugal
             yield return new TextThermalNode($"{account.Address.PostalCode} {account.Address.City}");
             // TODO(kevin): missing data for Capital Social: 258.501,00 (check what this ist)
             yield return new TextThermalNode($"Contribuinte: {account.RegistrationNumber}");
+
+            yield return new SpacingThermalNode(1);
 
             yield return new TextThermalNode(model.Supplier.Name);
             yield return new TextThermalNode($"{model.Supplier.Address.Street} {model.Supplier.Address.Number}");
@@ -75,11 +84,12 @@ namespace Vera.Portugal
 
             yield return new SpacingThermalNode(1);
             yield return new LineThermalNode();
+            yield return new SpacingThermalNode(1);
 
-            // TODO(kevin): fix this piece below
-            // {{if ReturnedInvoiceNumber}}
-            //     Fatura de referencia: {{:ReturnedInvoiceNumber}}
-            // {{/if}
+            if (!string.IsNullOrEmpty(model.ReturnedInvoiceNumber))
+            {
+                yield return new TextThermalNode($"Fatura de referencia: {model.ReturnedInvoiceNumber}");
+            }
 
             if (model.Manual)
             {
@@ -107,7 +117,7 @@ namespace Vera.Portugal
                 yield return new TextThermalNode(model.Customer.Address.Country);
             }
 
-            yield return new TextThermalNode($"Data: {model.Date:YYYY-MM-DD}");
+            yield return new TextThermalNode($"Data: {model.Date:yyyy-MM-dd}");
             yield return new TextThermalNode($"Hora: {model.Date:HH:mm:ss}");
 
             var taxPayerNo = "Consumidor Final";
@@ -126,11 +136,16 @@ namespace Vera.Portugal
 
         private IEnumerable<IThermalNode> GenerateInvoiceLines(Invoice model)
         {
+            const string format = "{0,5}{1,32}{2,7}{3,10}";
+
             var sb = new StringBuilder();
-            sb.Append("Qt".PadRight(5));
-            sb.Append("Artigo".PadRight(34));
-            sb.Append("IVA".PadLeft(5));
-            sb.Append("VALOR".PadLeft(10));
+            sb.AppendFormat(
+                format, 
+                "Qt".PadRight(5), 
+                "Artigo".PadRight(32), 
+                "IVA".PadLeft(7), 
+                "VALOR".PadLeft(10)
+            );
 
             yield return new TextThermalNode(sb.ToString());
 
@@ -138,10 +153,13 @@ namespace Vera.Portugal
             {
                 sb.Clear();
 
-                sb.Append(line.Quantity.ToString().PadRight(5));
-                sb.Append(line.Description.PadRight(34).Substring(0, 34));
-                sb.Append((line.TaxRate - 1).ToString("P", Culture));
-                sb.Append(line.AmountInTax.ToString("C", Culture));
+                sb.AppendFormat(
+                    format, 
+                    line.Quantity.ToString().PadRight(5), 
+                    line.Description.PadRight(32), 
+                    (line.TaxRate - 1).ToString("P", Culture).PadLeft(7),
+                    line.AmountInTax.ToString("C", Culture).PadLeft(10)
+                );
 
                 yield return new TextThermalNode(sb.ToString());
 
@@ -158,11 +176,16 @@ namespace Vera.Portugal
 
         private IEnumerable<IThermalNode> GenerateTaxLines(Totals totals)
         {
+            const string format = "{0,19}{1,20}{2,6}{3,8}";
+
             var sb = new StringBuilder();
-            sb.Append("Taxa".PadRight(19));
-            sb.Append("Base".PadRight(20));
-            sb.Append("Q.IVA".PadLeft(6));
-            sb.Append("Total".PadLeft(8));
+            sb.AppendFormat(
+                format,
+                "Taxa".PadRight(19),
+                "Base".PadRight(20),
+                "Q.IVA".PadLeft(6),
+                "Total".PadLeft(9)
+            );
 
             yield return new TextThermalNode(sb.ToString());
 
@@ -170,68 +193,70 @@ namespace Vera.Portugal
             {
                 sb.Clear();
 
-                sb.Append((tax.Rate - 1).ToString("P", Culture).PadRight(19));
-                sb.Append(tax.Base.ToString("C", Culture).PadRight(20));
-                sb.Append(tax.Amount.ToString("C", Culture).PadLeft(6));
-                sb.Append((tax.Amount + tax.Base).ToString("C", Culture).PadLeft(8));
+                sb.AppendFormat(
+                    format,
+                    (tax.Rate - 1).ToString("P", Culture).PadRight(19),
+                    tax.Base.ToString("C", Culture).PadRight(20),
+                    tax.Amount.ToString("C", Culture).PadLeft(6),
+                    (tax.Amount + tax.Base).ToString("C", Culture).PadLeft(9)
+                );
 
                 yield return new TextThermalNode(sb.ToString());
             }
 
             sb.Clear();
 
-            sb.Append("SUBTOTAL".PadRight(19));
-            sb.Append(totals.Amount.ToString("C", Culture));
-            sb.Append((totals.AmountInTax - totals.Amount).ToString("C", Culture));
-            sb.Append(totals.AmountInTax.ToString("C", Culture));
+            sb.AppendFormat(
+                format,
+                "SUBTOTAL".PadRight(19),
+                totals.Amount.ToString("C", Culture).PadLeft(20),
+                (totals.AmountInTax - totals.Amount).ToString("C", Culture).PadLeft(6),
+                totals.AmountInTax.ToString("C", Culture).PadLeft(8)
+            );
         }
 
         private IEnumerable<IThermalNode> GeneratePayments(Invoice model)
         {
+            const string format = "{0,45}{1,10}";
+
             yield return new TextThermalNode("MODO DE PAGAMENTO");
 
             var sb = new StringBuilder();
-            foreach (var payment in model.Payments)
+            foreach (var payment in model.Payments.Where(p => p.Category != PaymentCategory.Change))
             {
-                // TODO(kevin): exception for PIN
+                if (payment.Category == PaymentCategory.Credit || payment.Category == PaymentCategory.Debit)
+                {
+                    // TOOD(kevin): not always Adyen, what to do?
+                    sb.AppendFormat(format, "PROCESSADO POR ADYEN", payment.Amount.ToString("C", Culture).PadLeft(10));
 
-                sb.Append(payment.Description.Substring(0, 46));
-                sb.Append(payment.Amount.ToString("C", Culture).PadLeft(10));
+                    yield return new TextThermalNode("COPIA CLIENTE");
+                }
+                else
+                {
+                    sb.AppendFormat(
+                        format, 
+                        payment.Description.PadRight(45), 
+                        payment.Amount.ToString("C", Culture).PadLeft(10)
+                    );
+                }
 
                 yield return new TextThermalNode(sb.ToString());
 
                 sb.Clear();
             }
 
-            // TODO(kevin): print "change" somewhere
+            var change = model.Payments.FirstOrDefault(p => p.Category == PaymentCategory.Change);
 
-            //     <grid positions="0,46">
-            // {{for Payments}}
-            // {{if Description == "PIN"}}
-            // <row>
-            //     <col>COPIA CLIENTE</col>
-            //     </row>
-            //     <row>
-            //     <col>PROCESSADO POR ADYEN</col>
-            //     <col width="10" align="right">{{:~currencyAbs(Amount, ~root.CurrencyID)}}</col>
-            //     </row>
-            // {{else}}
-            // <row>
-            //     <col>{{>Description}}</col>
-            //     <col width="10" align="right">{{:~currencyAbs(Amount, ~root.CurrencyID)}}</col>
-            //     </row>
-            // {{/if}}
-            // {{/for}}
-            // </grid>
-            //
-            // {{if Change}}
-            // <grid positions="0,46">
-            //     <row>
-            //     <col>Troco</col>
-            //     <col width="10" align="right">{{:~currencyAbs(Change, ~root.CurrencyID)}}</col>
-            //     </row>
-            //     </grid>
-            // {{/if}}
+            if (change != null)
+            {
+                sb.AppendFormat(
+                    format,
+                    "Troco",
+                    change.Amount.ToString("C", Culture).PadLeft(10)
+                );
+
+                yield return new TextThermalNode(sb.ToString());
+            }
         }
 
         private IEnumerable<IThermalNode> GenerateFooter(Invoice model, Totals totals)
@@ -244,13 +269,36 @@ namespace Vera.Portugal
             };
 
             yield return new TextThermalNode($"{model.Lines.Count}/{Math.Abs(model.Lines.Sum(l => l.Quantity))} articles");
+            
+            yield return new SpacingThermalNode(1);
+            yield return new LineThermalNode();
 
             foreach (var node in GeneratePayments(model))
             {
                 yield return node;
             }
 
-            // TODO(kevin): print debit/credit (PIN) customer receipt
+            
+            if (model.Receipts.Count != 0)
+            {
+                yield return new SpacingThermalNode(1);
+
+                // Output credit/debit receipt
+                foreach (var receipt in model.Receipts)
+                {
+                    foreach (var line in receipt.Lines)
+                    {
+                        yield return new TextThermalNode(line);
+                    }
+
+                    if (receipt.SignatureData != null)
+                    {
+                        yield return new ImageThermalNode(receipt.SignatureMimeType, receipt.SignatureData);
+                    }
+                }                
+
+                yield return new SpacingThermalNode(1);
+            }
 
             if (!string.IsNullOrEmpty(model.Remark))
             {
@@ -268,6 +316,7 @@ namespace Vera.Portugal
             yield return new TextThermalNode("preços unitários com iva incluido");
 
             yield return new QRCodeThermalNode(Convert.ToBase64String(model.Signature));
+            yield return new SpacingThermalNode(1);
 
             // TODO(kevin): static footer (from config?)
             // {#partial InvoiceReceiptFooter}
@@ -276,6 +325,8 @@ namespace Vera.Portugal
             {
                 yield return new BarcodeThermalNode("code39", orderReference);
             }
+
+            yield return new LineThermalNode();
 
             // TODO(kevin): get certificate name from account config
             yield return new TextThermalNode($"LICENCIADO A: ");
