@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using Newtonsoft.Json;
 using Vera.Documents;
 using Vera.Invoices;
 using Vera.Models;
@@ -21,22 +23,6 @@ namespace Vera.Portugal.Tests
         [Fact]
         public void Should_generate_receipt()
         {
-            var context = new Documents.ThermalReceiptContext
-            {
-                Account = new Account
-                {
-                    Name = "Rituals Portugal",
-                    RegistrationNumber = "123.123.123",
-                    Address = new Address
-                    {
-                        City = "Lisboa",
-                        Number = "180",
-                        PostalCode = "1500",
-                        Street = "Lalala"
-                    }
-                }
-            };
-
             var invoice = new Invoice
             {
                 Supplier = new Billable
@@ -102,19 +88,38 @@ namespace Vera.Portugal.Tests
                 }
             };
 
-            var generator = new ThermalReceiptGenerator(new InvoiceTotalCalculator());
-            var node = generator.Generate(context, invoice);
+            var context = new Documents.ThermalReceiptContext
+            {
+                Account = new Account
+                {
+                    Name = "Rituals Portugal",
+                    RegistrationNumber = "123.123.123",
+                    Address = new Address
+                    {
+                        City = "Lisboa",
+                        Number = "180",
+                        PostalCode = "1500",
+                        Street = "Lalala"
+                    }
+                },
+                Invoice = invoice,
+                Totals = new InvoiceTotalCalculator().Calculate(invoice)
+            };
+
+            var generator = new ThermalReceiptGenerator(258501m);
+            var node = generator.Generate(context);
 
             var sb = new StringBuilder();
             
             var visitor = new StringThermalVisitor(sb);
             node.Accept(visitor);
 
+            var sw = new StringWriter();
+            var jsonVisitor = new JsonThermalVisitor(new JsonTextWriter(sw));
+            node.Accept(jsonVisitor);
+
             _testOutputHelper.WriteLine(sb.ToString());
-
-            var x = sb.ToString();
-
-            System.Diagnostics.Debugger.Break();
+            _testOutputHelper.WriteLine(sw.ToString());
         }
     }
 }
