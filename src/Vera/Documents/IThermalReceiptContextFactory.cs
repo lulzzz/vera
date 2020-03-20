@@ -1,16 +1,27 @@
 using System.Linq;
 using Vera.Models;
 
-namespace Vera.Invoices
+namespace Vera.Documents
 {
-    public interface IInvoiceTotalCalculator
+    public interface IThermalReceiptContextFactory
     {
-        Totals Calculate(Invoice invoice);
+        ThermalReceiptContext Create(Account account, Invoice invoice);
     }
 
-    public class InvoiceTotalCalculator : IInvoiceTotalCalculator
+    public class ThermalReceiptContextFactory
     {
-        public Totals Calculate(Invoice invoice)
+        public ThermalReceiptContext Create(Account account, Invoice invoice)
+        {
+            return new ThermalReceiptContext
+            {
+                Account = account,
+                Invoice = invoice,
+                Totals = CalculateInvoiceTotals(invoice),
+                // TODO(kevin): get other properties from the account config
+            };
+        }
+
+        private Totals CalculateInvoiceTotals(Invoice invoice)
         {
             var totals = new Totals();
 

@@ -4,6 +4,6 @@ namespace Vera.Audit
 {
     public interface IAuditTransformer<T>
     {
-        Task<T> Transform(StandardAuditFileTaxation.Audit audit);
+        Task<T> Transform(AuditContext context, StandardAuditFileTaxation.Audit audit);
     }
 }

@@ -24,6 +24,7 @@ namespace Vera.Portugal
         {
             RSA rsa;
 
+            // TODO(kevin): use configuration object instead
             var privateKey = account.Configuration["PrivateKey"];
 
             using (var sr = new StringReader(Encoding.ASCII.GetString(Convert.FromBase64String(privateKey))))

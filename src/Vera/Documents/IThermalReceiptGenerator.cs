@@ -1,19 +1,16 @@
 using System.Collections.Generic;
+using Vera.Audit;
 using Vera.Documents.Nodes;
 using Vera.Models;
 
 namespace Vera.Documents
 {
-    public sealed class ThermalReceiptContext
+    public class ThermalReceiptContext : AuditContext
     {
-        public Account Account { get; set; }
         public Invoice Invoice { get; set; }
         public Totals Totals { get; set; }
 
-        public string SoftwareVersion { get; set; }
-        public string CertificateName { get; set; }
-        public string CertificateNumber { get; set; }
-
+        // Image to print on top of the receipt
         public byte[] HeaderImage { get; set; }
         public string HeaderImageMimeType { get; set; }
         

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Text;
 using Newtonsoft.Json;
@@ -23,6 +25,8 @@ namespace Vera.Portugal.Tests
         [Fact]
         public void Should_generate_receipt()
         {
+            // TODO(kevin): test that receipt contains correct values
+
             var invoice = new Invoice
             {
                 Supplier = new Billable
@@ -88,25 +92,23 @@ namespace Vera.Portugal.Tests
                 }
             };
 
-            var context = new Documents.ThermalReceiptContext
+            var account = new Account
             {
-                Account = new Account
+                Name = "Rituals Portugal",
+                RegistrationNumber = "123.123.123",
+                Address = new Address
                 {
-                    Name = "Rituals Portugal",
-                    RegistrationNumber = "123.123.123",
-                    Address = new Address
-                    {
-                        City = "Lisboa",
-                        Number = "180",
-                        PostalCode = "1500",
-                        Street = "Lalala"
-                    }
-                },
-                Invoice = invoice,
-                Totals = new InvoiceTotalCalculator().Calculate(invoice)
+                    City = "Lisboa",
+                    Number = "180",
+                    PostalCode = "1500",
+                    Street = "Lalala"
+                }
             };
 
-            var generator = new ThermalReceiptGenerator(258501m);
+            var context = new ThermalReceiptContextFactory().Create(account, invoice);
+            var captialSocial = 258501m;
+
+            var generator = new ThermalReceiptGenerator(captialSocial);
             var node = generator.Generate(context);
 
             var sb = new StringBuilder();
@@ -114,12 +116,48 @@ namespace Vera.Portugal.Tests
             var visitor = new StringThermalVisitor(sb);
             node.Accept(visitor);
 
-            var sw = new StringWriter();
-            var jsonVisitor = new JsonThermalVisitor(new JsonTextWriter(sw));
-            node.Accept(jsonVisitor);
+            var result = sb.ToString();
 
-            _testOutputHelper.WriteLine(sb.ToString());
-            _testOutputHelper.WriteLine(sw.ToString());
+            Assert.Contains("FATURA SIMPLIFICADA", result);
+            Assert.DoesNotContain("NOTA DE CRÉDITO", result);
         }
+
+        [Fact]
+        public void Lala()
+        {
+            var config = new PortugalConfiguration();
+            var results = new List<ValidationResult>();
+
+            Validator.TryValidateObject(config, new ValidationContext(config), results);
+
+            System.Diagnostics.Debugger.Break();
+        }
+    }
+
+    public class PortugalConfiguration
+    {
+        [Required]
+        [Display(
+            Name = "PrivateKey",
+            GroupName = "Security",
+            Description = "RSA private key to use for signing the invoices"
+        )]
+        public byte[] PrivateKey { get; set; }
+
+        [Required]
+        [Display(
+            Name = "ProductCompanyId",
+            GroupName = "General",
+            Description = "???"
+        )]
+        public string ProductCompanyId { get; set; }
+
+        [Required]
+        [Display(
+            Name = "SocialCapital",
+            GroupName = "General",
+            Description = "Required to be printed on all the receipts. Social capital of the company."
+        )]
+        public decimal SocialCapital { get; set; }
     }
 }
