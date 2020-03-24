@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Fluent;
+using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
-using Serilog;
+using Vera.Audit;
 using Vera.Models;
 
 namespace Vera.Stores
@@ -65,6 +67,29 @@ namespace Vera.Stores
             );
 
             return last?.Resource.Invoice;
+        }
+        
+        public async IAsyncEnumerable<Invoice> List(AuditCriteria criteria)
+        {
+            // TODO(kevin): paging
+            var iterator = _container.GetItemLinqQueryable<InvoiceDocument>()
+                .Where(x => x.Invoice.Supplier.SystemID == criteria.SupplierSystemId &&
+                            x.Invoice.FiscalYear >= criteria.StartFiscalYear && 
+                            x.Invoice.FiscalYear <= criteria.EndFiscalYear &&
+                            x.Invoice.FiscalPeriod >= criteria.StartFiscalPeriod && 
+                            x.Invoice.FiscalPeriod <= criteria.EndFiscalPeriod
+                )
+                .ToFeedIterator();
+
+            while (iterator.HasMoreResults)
+            {
+                var results = await iterator.ReadNextAsync();
+
+                foreach (var result in results)
+                {
+                    yield return result.Invoice;
+                }
+            }
         }
 
         private static string GetPartitionKey(Invoice invoice) =>

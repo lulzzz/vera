@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Vera.Audit;
 using Vera.Models;
 
 namespace Vera.Stores
@@ -21,5 +23,7 @@ namespace Vera.Stores
         /// <param name="bucket"></param>
         /// <returns></returns>
         Task<Invoice> Last(Invoice invoice, string bucket);
+
+        IAsyncEnumerable<Invoice> List(AuditCriteria criteria);
     }
 }

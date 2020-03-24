@@ -4,7 +4,7 @@ namespace Vera.Audit
 {
     public interface IAuditFactory<T>
     {
-        Task<IAuditArchive<T>> CreateAuditArchive();
-        Task<IAuditTransformer<T>> CreateAuditTransformer();
+        IAuditArchive<T> CreateAuditArchive();
+        IAuditTransformer<T> CreateAuditTransformer();
     }
 }

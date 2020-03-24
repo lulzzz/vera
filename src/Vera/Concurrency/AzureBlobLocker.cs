@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Net;
 using System.Threading.Tasks;
 using Azure;
@@ -27,8 +26,6 @@ namespace Vera.Concurrency
 
         public async Task<IAsyncDisposable> Lock(string resource, TimeSpan timeout)
         {
-            var sw = Stopwatch.StartNew();
-
             var container = _client.GetBlobContainerClient(_containerName);
             await container.CreateIfNotExistsAsync();
             
@@ -47,12 +44,6 @@ namespace Vera.Concurrency
                     throw;
                 }
             }
-            
-            sw.Stop();
-
-            var ms1 = sw.ElapsedMilliseconds;
-
-            sw.Restart();
 
             var lease = append.GetBlobLeaseClient();
             var gotLease = false;
@@ -90,10 +81,6 @@ namespace Vera.Concurrency
             {
                 throw new TimeoutException($"Timeout reached while trying to acquire the lock ({timeout})");
             }
-
-            sw.Stop();
-
-            var ms2 = sw.ElapsedMilliseconds;
 
             return new Lease(lease);
         }

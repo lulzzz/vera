@@ -20,7 +20,7 @@ namespace Vera.Portugal
         private const string UnitOfMeasure = "UN";
         private const string DefaultFiscalID = "999999990";
 
-        public Task<AuditFile> Transform(AuditContext context, StandardAuditFileTaxation.Audit audit)
+        public AuditFile Transform(AuditContext context, AuditCriteria criteria, StandardAuditFileTaxation.Audit audit)
         {
             // TODO(kevin): see if it is nicer to pass the typed configuration as a parameter or part of the context instead of doing this
             var config = context.Account.GetConfiguration<Configuration>();
@@ -196,7 +196,7 @@ namespace Vera.Portugal
             salesInvoices.TotalDebit = Round(audit.SourceDocuments.SalesInvoices.TotalDebitExTax, 2);
             salesInvoices.TotalCredit = Round(audit.SourceDocuments.SalesInvoices.TotalCreditExTax, 2);
 
-            return Task.FromResult(auditFile);
+            return auditFile;
         }
 
         private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(Invoice invoice, string taxCountryRegion, InvoiceLine line, int index)

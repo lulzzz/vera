@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Vera.StandardAuditFileTaxation
 {
-  public sealed class SourceDocuments<T>
+  public sealed class SourceDocuments<T> where T : SourceDocument
   {
     public decimal TotalDebitExTax { get; private set; }
     public decimal TotalDebitInTax { get; private set; }
@@ -11,19 +11,22 @@ namespace Vera.StandardAuditFileTaxation
 
     public ICollection<T> Sources { get; } = new List<T>();
 
-    public void Add(T source, decimal amountInTax, decimal amountExTax)
+    public void Add(T source)
     {
       Sources.Add(source);
 
-      if (amountInTax > 0)
+      var gross = source.Totals.Gross;
+      var net = source.Totals.Net;
+
+      if (gross > 0)
       {
-        TotalCreditExTax += decimal.Round(amountExTax, 2);
-        TotalCreditInTax += decimal.Round(amountInTax, 2);
+        TotalCreditExTax += decimal.Round(net, 2);
+        TotalCreditInTax += decimal.Round(gross, 2);
       }
       else
       {
-        TotalDebitExTax += decimal.Round(amountExTax, 2);
-        TotalDebitInTax += decimal.Round(amountInTax, 2);
+        TotalDebitExTax += decimal.Round(net, 2);
+        TotalDebitInTax += decimal.Round(gross, 2);
       }
     }
   }
