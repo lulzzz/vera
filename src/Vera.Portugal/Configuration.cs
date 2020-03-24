@@ -1,9 +1,33 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Vera.Configuration;
 
 namespace Vera.Portugal
 {
-    public class Configuration
+    // TODO(kevin): extract magic strings for the keys of the fields
+    public class Configuration : AbstractAuditConfiguration
     {
+        public override void Initialize(IDictionary<string, object> config)
+        {
+            object o;
+
+            if (config.TryGetValue("PrivateKey", out o))
+            {
+                PrivateKey = o as byte[];
+            }
+
+            if (config.TryGetValue("ProductCompanyTaxId", out o))
+            {
+                ProductCompanyTaxId = Convert.ToString(o);
+            }
+
+            if (config.TryGetValue("SocialCapital", out o))
+            {
+                SocialCapital = Convert.ToDecimal(o);
+            }
+        }
+
         [Required]
         [Display(
             Name = "PrivateKey",
@@ -14,7 +38,7 @@ namespace Vera.Portugal
 
         [Required]
         [Display(
-            Name = "ProductCompanyId",
+            Name = "ProductCompanyTaxId",
             GroupName = "General",
             Description = "???"
         )]
@@ -26,6 +50,6 @@ namespace Vera.Portugal
             GroupName = "General",
             Description = "Required to be printed on all the receipts. Social capital of the company."
         )]
-        public decimal SocialCapital { get; set; }        
+        public decimal SocialCapital { get; set; }
     }
 }

@@ -9,11 +9,11 @@ using Vera.Models;
 
 namespace Vera.Portugal
 {
-    public class ThermalReceiptGenerator : IThermalReceiptGenerator<Configuration>
+    public class ThermalReceiptGenerator : IThermalReceiptGenerator
     {
         private static readonly CultureInfo Culture = CultureInfo.CreateSpecificCulture("pt-PT");
 
-        public IThermalNode Generate(ThermalReceiptContext<Configuration> context)
+        public IThermalNode Generate(ThermalReceiptContext context)
         {
             var nodes = new List<IThermalNode>();
             
@@ -37,10 +37,11 @@ namespace Vera.Portugal
             return new DocumentThermalNode(nodes);
         }
 
-        private IEnumerable<IThermalNode> GenerateHeader(ThermalReceiptContext<Configuration> context)
+        private IEnumerable<IThermalNode> GenerateHeader(ThermalReceiptContext context)
         {
             var account = context.Account;
             var invoice = context.Invoice;
+            var config = account.GetConfiguration<Configuration>();
 
             if (!string.IsNullOrEmpty(context.HeaderImageMimeType) && context.HeaderImage != null)
             {
@@ -50,7 +51,7 @@ namespace Vera.Portugal
             yield return new TextThermalNode(account.Name);
             yield return new TextThermalNode($"{account.Address.Street} {account.Address.Number}");
             yield return new TextThermalNode($"{account.Address.PostalCode} {account.Address.City}");
-            yield return new TextThermalNode($"Capital Social: {_shareCapital:N}");
+            yield return new TextThermalNode($"Capital Social: {config.SocialCapital:N}");
             yield return new TextThermalNode($"Contribuinte: {account.RegistrationNumber}");
 
             yield return new SpacingThermalNode(1);
@@ -135,7 +136,7 @@ namespace Vera.Portugal
             yield return new TextThermalNode($"Contribuinte: {taxPayerNo}");
         }
 
-        private IEnumerable<IThermalNode> GenerateInvoiceLines(ThermalReceiptContext<Configuration> context)
+        private IEnumerable<IThermalNode> GenerateInvoiceLines(ThermalReceiptContext context)
         {
             const string format = "{0,5}{1,32}{2,7}{3,10}";
 
@@ -175,7 +176,7 @@ namespace Vera.Portugal
             }
         }
 
-        private IEnumerable<IThermalNode> GenerateTaxLines(ThermalReceiptContext<Configuration> context)
+        private IEnumerable<IThermalNode> GenerateTaxLines(ThermalReceiptContext context)
         {
             const string format = "{0,19}{1,20}{2,6}{3,8}";
 
@@ -219,7 +220,7 @@ namespace Vera.Portugal
             yield return new TextThermalNode(sb.ToString());
         }
 
-        private IEnumerable<IThermalNode> GenerateTotals(ThermalReceiptContext<Configuration> context)
+        private IEnumerable<IThermalNode> GenerateTotals(ThermalReceiptContext context)
         {
             var totals = context.Totals;
             var prefix = totals.AmountInTax >= 0 ? "TOTAL FATURA" : "TROCO";
@@ -237,7 +238,7 @@ namespace Vera.Portugal
             yield return new LineThermalNode();
         }
 
-        private IEnumerable<IThermalNode> GeneratePayments(ThermalReceiptContext<Configuration> context)
+        private IEnumerable<IThermalNode> GeneratePayments(ThermalReceiptContext context)
         {
             const string format = "{0,45}{1,9}";
 
@@ -305,7 +306,7 @@ namespace Vera.Portugal
             }            
         }
 
-        private IEnumerable<IThermalNode> GenerateFooter(ThermalReceiptContext<Configuration> context)
+        private IEnumerable<IThermalNode> GenerateFooter(ThermalReceiptContext context)
         {
             if (!string.IsNullOrEmpty(context.Invoice.Remark))
             {

@@ -1,6 +1,6 @@
 namespace Vera.Audit
 {
-    public class AuditContext<T>
+    public class AuditContext
     {
         public Account Account { get; set; }
         public string SoftwareName { get; set; }
@@ -11,7 +11,5 @@ namespace Vera.Audit
 
         // Number of the certificate that was given by the authority
         public string CertificateNumber { get; set; }
-
-        public T Configuration { get; set; }
     }
 }

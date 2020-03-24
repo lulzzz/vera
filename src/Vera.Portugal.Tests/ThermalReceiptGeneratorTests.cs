@@ -1,12 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Text;
-using Newtonsoft.Json;
 using Vera.Documents;
-using Vera.Invoices;
 using Vera.Models;
 using Xunit;
 using Xunit.Abstractions;
@@ -105,10 +100,14 @@ namespace Vera.Portugal.Tests
                 }
             };
 
-            var context = new ThermalReceiptContextFactory().Create(account, invoice);
-            var captialSocial = 258501m;
+            account.SetConfiguration(new Configuration
+            {
+                SocialCapital = 258501m
+            });
 
-            var generator = new ThermalReceiptGenerator(captialSocial);
+            var context = new ThermalReceiptContextFactory().Create(account, invoice);
+            
+            var generator = new ThermalReceiptGenerator();
             var node = generator.Generate(context);
 
             var sb = new StringBuilder();
@@ -120,6 +119,8 @@ namespace Vera.Portugal.Tests
 
             Assert.Contains("FATURA SIMPLIFICADA", result);
             Assert.DoesNotContain("NOTA DE CRÉDITO", result);
+
+            _testOutputHelper.WriteLine(result);
         }
     }
 }

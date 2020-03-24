@@ -7,7 +7,7 @@ using Vera.StandardAuditFileTaxation;
 
 namespace Vera.Portugal
 {
-    public class AuditTransformer : IAuditTransformer<AuditFile, Configuration>
+    public class AuditTransformer : IAuditTransformer<AuditFile>
     {
         private const string UnknownLabel = "Desconhecido";
         private const string AuditFileVersion = "1.04_01";
@@ -20,12 +20,15 @@ namespace Vera.Portugal
         private const string UnitOfMeasure = "UN";
         private const string DefaultFiscalID = "999999990";
 
-        public Task<AuditFile> Transform(AuditContext<Configuration> context, StandardAuditFileTaxation.Audit audit)
+        public Task<AuditFile> Transform(AuditContext context, StandardAuditFileTaxation.Audit audit)
         {
+            // TODO(kevin): see if it is nicer to pass the typed configuration as a parameter or part of the context instead of doing this
+            var config = context.Account.GetConfiguration<Configuration>();
+
             var productID = context.SoftwareVersion + "/" + context.CertificateName;
             var softwareCertificateNumber = context.CertificateNumber;
 
-            var taxCountryRegion = audit.Header.Company.Address.Country;
+            var taxCountryRegion = audit.Header.Company.StreetAddress.Country;
             var startDate = audit.Header.SelectionCriteria.SelectionStartDate;
             var endDate = audit.Header.SelectionCriteria.SelectionEndDate;
 
@@ -49,11 +52,11 @@ namespace Vera.Portugal
                     BusinessName = audit.Header.SoftwareCompanyName,
                     CompanyAddress = new AddressStructurePT
                     {
-                        AddressDetail = audit.Header.Company.Address?.Street + " " + audit.Header.Company.Address?.Number,
-                        City = audit.Header.Company.Address?.City,
-                        PostalCode = audit.Header.Company.Address?.PostalCode,
-                        Region = audit.Header.Company.Address?.Region,
-                        Country = audit.Header.Company.Address?.Country
+                        AddressDetail = audit.Header.Company.StreetAddress?.Street + " " + audit.Header.Company.StreetAddress?.Number,
+                        City = audit.Header.Company.StreetAddress?.City,
+                        PostalCode = audit.Header.Company.StreetAddress?.PostalCode,
+                        Region = audit.Header.Company.StreetAddress?.Region,
+                        Country = audit.Header.Company.StreetAddress?.Country
                     },
                     FiscalYear = startDate.Year.ToString(),
                     StartDate = startDate,
@@ -61,7 +64,7 @@ namespace Vera.Portugal
                     CurrencyCode = audit.Header.DefaultCurrencyCode,
                     DateCreated = DateTime.Today,
                     TaxEntity = TaxEntity,
-                    ProductCompanyTaxID = context.Configuration.ProductCompanyTaxId,
+                    ProductCompanyTaxID = config.ProductCompanyTaxId,
                     SoftwareCertificateNumber = softwareCertificateNumber,
                     ProductID = productID,
                     ProductVersion = context.SoftwareVersion,
@@ -105,21 +108,21 @@ namespace Vera.Portugal
                 SelfBillingIndicator = SelfBillingIndicator,
                 BillingAddress = new AddressStructure
                 {
-                    AddressDetail = c.Address?.Street ?? UnknownLabel,
-                    City = c.Address?.City ?? UnknownLabel,
-                    PostalCode = c.Address?.PostalCode ?? UnknownLabel,
-                    Region = c.Address?.Region ?? UnknownLabel,
-                    Country = c.Address?.Country ?? UnknownLabel
+                    AddressDetail = c.BillingAddress?.Street ?? UnknownLabel,
+                    City = c.BillingAddress?.City ?? UnknownLabel,
+                    PostalCode = c.BillingAddress?.PostalCode ?? UnknownLabel,
+                    Region = c.BillingAddress?.Region ?? UnknownLabel,
+                    Country = c.BillingAddress?.Country ?? UnknownLabel
                 },
                 ShipToAddress = new[]
               {
                 new AddressStructure
                 {
-                    AddressDetail = c.Address?.Street ?? UnknownLabel,
-                    City = c.Address?.City ?? UnknownLabel,
-                    PostalCode = c.Address?.PostalCode ?? UnknownLabel,
-                    Region = c.Address?.Region ?? UnknownLabel,
-                    Country = c.Address?.Country ?? UnknownLabel
+                    AddressDetail = c.ShipToAddress?.Street ?? UnknownLabel,
+                    City = c.ShipToAddress?.City ?? UnknownLabel,
+                    PostalCode = c.ShipToAddress?.PostalCode ?? UnknownLabel,
+                    Region = c.ShipToAddress?.Region ?? UnknownLabel,
+                    Country = c.ShipToAddress?.Country ?? UnknownLabel
                 }
                 }
             }).Concat(new[] { anonymous }).ToArray();

@@ -24,10 +24,10 @@ namespace Vera.Portugal
         {
             RSA rsa;
 
-            // TODO(kevin): use configuration object instead
-            var privateKey = account.Configuration["PrivateKey"];
+            var config = account.GetConfiguration<Configuration>();
+            var privateKey = config.PrivateKey;
 
-            using (var sr = new StringReader(Encoding.ASCII.GetString(Convert.FromBase64String(privateKey))))
+            using (var sr = new StringReader(Encoding.ASCII.GetString(privateKey)))
             {
                 var reader = new PemReader(sr);
                 var keyPair = (AsymmetricCipherKeyPair) reader.ReadObject();

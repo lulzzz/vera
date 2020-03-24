@@ -21,18 +21,16 @@ namespace Vera.StandardAuditFileTaxation
 
     public string Name { get; set; }
 
-    [Obsolete("Please use  the Addresses property")]
-    public Address Address { get; set; }
-
     public ICollection<Address> Addresses { get; set; } = new List<Address>();
-
-    public Address BillingAddress => Addresses.FirstOrDefault(a => a.Type == AddressType.Billing);
-    public Address ShipToAddress => Addresses.FirstOrDefault(a => a.Type == AddressType.ShipTo);
 
     public Contact Contact { get; set; }
 
     public TaxRegistration TaxRegistration { get; set; }
 
     public BankAccount BankAccount { get; set; }
+
+    public Address StreetAddress => Addresses.FirstOrDefault(a => a.Type == AddressType.Street);
+    public Address BillingAddress => Addresses.FirstOrDefault(a => a.Type == AddressType.Billing);
+    public Address ShipToAddress => Addresses.FirstOrDefault(a => a.Type == AddressType.ShipTo);
   }
 }

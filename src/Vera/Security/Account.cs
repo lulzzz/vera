@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Vera.Configuration;
 using Vera.Models;
 
 namespace Vera
@@ -15,6 +16,25 @@ namespace Vera
         
         public string Certification { get; set; }
 
-        public IDictionary<string, string> Configuration { get; set; }
+        public IDictionary<string, object> Configuration { get; set; }
+
+        // TODO(kevin): move T to Configuration property?
+        public T GetConfiguration<T>() where T : AbstractAuditConfiguration, new()
+        {
+            if (Configuration == null)
+            {
+                return new T();
+            }
+
+            var config = new T();
+            config.Initialize(Configuration);
+
+            return config;
+        }
+
+        public void SetConfiguration(AbstractAuditConfiguration config)
+        {
+            Configuration = config?.ToDictionary() ?? new Dictionary<string, object>();
+        }
     }
 }
