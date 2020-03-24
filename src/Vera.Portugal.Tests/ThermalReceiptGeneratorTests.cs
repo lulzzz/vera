@@ -121,43 +121,5 @@ namespace Vera.Portugal.Tests
             Assert.Contains("FATURA SIMPLIFICADA", result);
             Assert.DoesNotContain("NOTA DE CRÉDITO", result);
         }
-
-        [Fact]
-        public void Lala()
-        {
-            var config = new PortugalConfiguration();
-            var results = new List<ValidationResult>();
-
-            Validator.TryValidateObject(config, new ValidationContext(config), results);
-
-            System.Diagnostics.Debugger.Break();
-        }
-    }
-
-    public class PortugalConfiguration
-    {
-        [Required]
-        [Display(
-            Name = "PrivateKey",
-            GroupName = "Security",
-            Description = "RSA private key to use for signing the invoices"
-        )]
-        public byte[] PrivateKey { get; set; }
-
-        [Required]
-        [Display(
-            Name = "ProductCompanyId",
-            GroupName = "General",
-            Description = "???"
-        )]
-        public string ProductCompanyId { get; set; }
-
-        [Required]
-        [Display(
-            Name = "SocialCapital",
-            GroupName = "General",
-            Description = "Required to be printed on all the receipts. Social capital of the company."
-        )]
-        public decimal SocialCapital { get; set; }
     }
 }

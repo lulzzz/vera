@@ -2,8 +2,8 @@ using System.Threading.Tasks;
 
 namespace Vera.Audit
 {
-    public interface IAuditTransformer<T>
+    public interface IAuditTransformer<TResult, TConfig>
     {
-        Task<T> Transform(AuditContext context, StandardAuditFileTaxation.Audit audit);
+        Task<TResult> Transform(AuditContext<TConfig> context, StandardAuditFileTaxation.Audit audit);
     }
 }

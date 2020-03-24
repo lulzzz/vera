@@ -5,7 +5,7 @@ using Vera.Models;
 
 namespace Vera.Documents
 {
-    public class ThermalReceiptContext : AuditContext
+    public class ThermalReceiptContext<T> : AuditContext<T>
     {
         public Invoice Invoice { get; set; }
         public Totals Totals { get; set; }
@@ -21,8 +21,8 @@ namespace Vera.Documents
         public IEnumerable<string> Footer { get; set; }
     }
 
-    public interface IThermalReceiptGenerator
+    public interface IThermalReceiptGenerator<T>
     {
-        IThermalNode Generate(ThermalReceiptContext context);
+        IThermalNode Generate(ThermalReceiptContext<T> context);
     }
 }

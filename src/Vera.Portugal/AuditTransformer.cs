@@ -7,16 +7,11 @@ using Vera.StandardAuditFileTaxation;
 
 namespace Vera.Portugal
 {
-    public class AuditTransformer : IAuditTransformer<AuditFile>
+    public class AuditTransformer : IAuditTransformer<AuditFile, Configuration>
     {
         private const string UnknownLabel = "Desconhecido";
-
         private const string AuditFileVersion = "1.04_01";
         private const string TaxEntity = "Global";
-
-        // TODO(kevin): figure out what this is and where it should be coming from
-        private const string ProductCompanyTaxID = "514698420";
-
         private const string Atcud = "0";
         private const string SourceID = "2";
         private const string SelfBillingIndicator = "0";
@@ -25,7 +20,7 @@ namespace Vera.Portugal
         private const string UnitOfMeasure = "UN";
         private const string DefaultFiscalID = "999999990";
 
-        public Task<AuditFile> Transform(AuditContext context, StandardAuditFileTaxation.Audit audit)
+        public Task<AuditFile> Transform(AuditContext<Configuration> context, StandardAuditFileTaxation.Audit audit)
         {
             var productID = context.SoftwareVersion + "/" + context.CertificateName;
             var softwareCertificateNumber = context.CertificateNumber;
@@ -33,9 +28,6 @@ namespace Vera.Portugal
             var taxCountryRegion = audit.Header.Company.Address.Country;
             var startDate = audit.Header.SelectionCriteria.SelectionStartDate;
             var endDate = audit.Header.SelectionCriteria.SelectionEndDate;
-
-            // TODO(kevin): get 'product company ID' from configuration
-            context.Account
 
             // TODO(kevin): wtf?
             {
@@ -69,7 +61,7 @@ namespace Vera.Portugal
                     CurrencyCode = audit.Header.DefaultCurrencyCode,
                     DateCreated = DateTime.Today,
                     TaxEntity = TaxEntity,
-                    ProductCompanyTaxID = ProductCompanyTaxID,
+                    ProductCompanyTaxID = context.Configuration.ProductCompanyTaxId,
                     SoftwareCertificateNumber = softwareCertificateNumber,
                     ProductID = productID,
                     ProductVersion = context.SoftwareVersion,
