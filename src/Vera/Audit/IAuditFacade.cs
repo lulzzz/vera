@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Vera.Audit.Extract;
 using Vera.Stores;
 
 namespace Vera.Audit
@@ -57,37 +58,28 @@ namespace Vera.Audit
                 }
             });
 
+            var extractors = new IAuditDataExtractor[]
+            {
+                new CustomerAuditDataExtractor(),
+                new EmployeeAuditDataExtractor(), 
+                new TaxTableAuditExtractor(), 
+                new InvoiceSourceDocumentExtractor(),
+                new PaymentSourceDocumentExtractor()
+            };
+            
             await foreach (var invoice in _invoiceStore.List(criteria))
             {
-                // TODO(kevin): apply the invoice to the audit one by one and fill it up
-                // audit.MasterFiles.Customers
-                // audit.MasterFiles.Employees
-                // audit.MasterFiles.Periods
-                // audit.MasterFiles.Products
-                // audit.MasterFiles.TaxTable
-
-                // audit.SourceDocuments.Payments
-                // audit.SourceDocuments.SalesInvoices
-
-                audit.SourceDocuments.Payments.Add(new StandardAuditFileTaxation.Payment
+                foreach (var e in extractors)
                 {
-                    
-                });
-
-                // audit.SourceDocuments.SalesInvoices.Add(new StandardAuditFileTaxation.Invoice
-                // {
-                //     Number = invoice.Number,
-                //     Date = invoice.Date,
-                //     IsManual = invoice.Manual,
-                //     Period = invoice.FiscalPeriod,
-                //     PeriodYear = invoice.FiscalYear,
-                //     TerminalID = invoice.TerminalId,
-                //     SystemID = invoice.SystemId,
-                //     Signature = invoice.Signature,
-                //     RawSignature = invoice.RawSignature
-                // });
+                    e.Extract(invoice);
+                }
             }
-
+            
+            foreach (var e in extractors)
+            {
+                e.Apply(audit);
+            }
+            
             var transformer = _auditFactory.CreateAuditTransformer();
             var result = transformer.Transform(context, criteria, audit);
 

@@ -10,5 +10,12 @@ namespace Vera.Models
         public decimal Amount { get; set; }
         public decimal AmountInTax => Amount * TaxRate;
         public ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
+        public Taxes Taxes { get; set; }
+    }
+
+    public class Taxes
+    {
+        public decimal Rate { get; set; }
+        public string Code { get; set; }
     }
 }
