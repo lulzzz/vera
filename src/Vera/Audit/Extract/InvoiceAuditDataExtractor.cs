@@ -32,11 +32,11 @@ namespace Vera.Audit.Extract
 
                 // TODO(kevin): where to get this field from?
                 SignatureKeyVersion = 1,
-                
+
                 Period = invoice.FiscalPeriod,
                 PeriodYear = invoice.FiscalYear,
-                
-                Lines = invoice.Lines.Select(ExtractLine).ToList()
+
+                Lines = invoice.Lines.Select((l, i) => ExtractLine(i, l)).ToList()
             };
 
             _invoices.Add(i);
@@ -49,12 +49,37 @@ namespace Vera.Audit.Extract
                 audit.SourceDocuments.SalesInvoices.Add(invoice);
             }
         }
-        
-        private StandardAuditFileTaxation.InvoiceLine ExtractLine(InvoiceLine l)
+
+        private StandardAuditFileTaxation.InvoiceLine ExtractLine(int i, InvoiceLine l)
         {
+            var settlements = new List<Settlement>();
+
+            if (l.Settlements != null)
+            {
+                settlements.AddRange(l.Settlements.Select(settlement => new Settlement
+                {
+                    Amount = new Amount(settlement.Amount), Description = settlement.Description,
+                    SystemID = settlement.SystemId
+                }));
+            }
+
             return new StandardAuditFileTaxation.InvoiceLine
             {
-                Description = l.Description
+                Number = (i + 1).ToString(),
+                ProductCode = l.Product?.Code,
+                Description = l.Description,
+                Quantity = l.Quantity,
+                UnitPrice = l.UnitPrice,
+                Amount = new Amount(l.Amount),
+                Settlements = settlements,
+                Taxes = new []
+                {
+                    new TaxInformation
+                    {
+                        Code = l.Taxes.Code,
+                        Rate = l.Taxes.Rate
+                    }
+                }
             };
         }
     }
