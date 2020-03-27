@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Vera.Audit.Extract;
+using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.Audit
@@ -61,10 +62,12 @@ namespace Vera.Audit
             var extractors = new IAuditDataExtractor[]
             {
                 new CustomerAuditDataExtractor(),
-                new EmployeeAuditDataExtractor(), 
+                new EmployeeAuditDataExtractor(),
+                new PaymentAuditDataExtractor(),
+                new ProductAuditDataExtractor(),
                 new TaxTableAuditExtractor(), 
-                new InvoiceSourceDocumentExtractor(),
-                new PaymentSourceDocumentExtractor()
+                new InvoiceAuditDataExtractor(),
+                new PaymentAuditDataExtractor()
             };
             
             // Extract data from all the invoices

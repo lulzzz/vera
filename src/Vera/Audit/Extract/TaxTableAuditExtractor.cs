@@ -7,22 +7,41 @@ namespace Vera.Audit.Extract
 {
     public class TaxTableAuditExtractor : IAuditDataExtractor
     {
-        private readonly ICollection<TaxTableEntry> _taxes;
+        private readonly IDictionary<string, TaxTableEntry> _taxes;
 
         public TaxTableAuditExtractor()
         {
-            _taxes = new List<TaxTableEntry>();
+            _taxes = new Dictionary<string, TaxTableEntry>();
         }
 
         public void Extract(Invoice invoice)
         {
-            // TODO(kevin): where to get the tax codes from?
-            throw new System.NotImplementedException();
+            var taxes = invoice.Lines
+                .Select(l => l.Taxes)
+                .Where(t => !_taxes.ContainsKey(t.Code));
+
+            foreach (var t in taxes)
+            {
+                _taxes[t.Code] = new TaxTableEntry
+                {
+                    Details = new []
+                    {
+                        new TaxCodeDetails
+                        {
+                            Code = t.Code,
+                            Percentage = t.Rate,
+                        }
+                    }
+                };
+            }
         }
 
         public void Apply(StandardAuditFileTaxation.Audit audit)
         {
-            throw new System.NotImplementedException();
+            foreach (var entry in _taxes)
+            {
+                audit.MasterFiles.TaxTable.Add(entry.Value);
+            }
         }
     }
 }

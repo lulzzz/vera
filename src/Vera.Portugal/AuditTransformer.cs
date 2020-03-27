@@ -176,6 +176,8 @@ namespace Vera.Portugal
                 HashControl = GetHashControl(invoice.SignatureKeyVersion, invoice),
                 Period = invoice.Date.Month.ToString(),
                 InvoiceDate = GetDateTime(invoice.Date),
+
+                // TODO(kevin): check how this should be mapped based on the information of the pushed invoice
                 InvoiceType = ((InvoiceType?)invoice.Type) ?? InvoiceType.FT,
 
                 SpecialRegimes = new SpecialRegimes

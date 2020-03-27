@@ -4,11 +4,11 @@ using Payment = Vera.StandardAuditFileTaxation.Payment;
 
 namespace Vera.Audit.Extract
 {
-    public class PaymentSourceDocumentExtractor : IAuditDataExtractor
+    public class PaymentAuditDataExtractor : IAuditDataExtractor
     {
         private readonly ICollection<Payment> _payments;
 
-        public PaymentSourceDocumentExtractor()
+        public PaymentAuditDataExtractor()
         {
             _payments = new List<Payment>();
         }

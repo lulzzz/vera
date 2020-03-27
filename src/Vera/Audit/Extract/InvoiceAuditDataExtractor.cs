@@ -6,11 +6,11 @@ using InvoiceLine = Vera.Models.InvoiceLine;
 
 namespace Vera.Audit.Extract
 {
-    public class InvoiceSourceDocumentExtractor : IAuditDataExtractor
+    public class InvoiceAuditDataExtractor : IAuditDataExtractor
     {
         private readonly ICollection<StandardAuditFileTaxation.Invoice> _invoices;
 
-        public InvoiceSourceDocumentExtractor()
+        public InvoiceAuditDataExtractor()
         {
             _invoices = new List<StandardAuditFileTaxation.Invoice>();
         }
@@ -29,6 +29,9 @@ namespace Vera.Audit.Extract
 
                 Signature = invoice.Signature,
                 RawSignature = invoice.RawSignature,
+
+                // TODO(kevin): where to get this field from?
+                SignatureKeyVersion = 1,
                 
                 Period = invoice.FiscalPeriod,
                 PeriodYear = invoice.FiscalYear,
