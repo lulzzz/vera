@@ -16,29 +16,7 @@ namespace Vera.Audit.Extract
 
         public void Extract(Models.Invoice invoice)
         {
-            var employee = invoice.Employee;
-
-            if (employee == null || _employees.Any(e => employee.SystemID == e.SystemID))
-            {
-                return;
-            }
-            
-            // TODO(kevin): fill in all of the data
-            _employees.Add(new Employee
-            {
-                ID = invoice.Employee.SystemID,
-                Contact = new Contact
-                {
-                    Person = new PersonName
-                    {
-                    }
-                },
-                RegistrationNumber = invoice.Employee.RegistrationNumber,
-                TaxRegistration = new TaxRegistration
-                {
-                    Number = invoice.Employee.TaxRegistrationNumber
-                }
-            });
+            // TODO(kevin): map employees
         }
 
         public void Apply(StandardAuditFileTaxation.Audit audit)

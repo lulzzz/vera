@@ -15,14 +15,7 @@ namespace Vera.Audit.Extract
 
         public void Extract(Invoice invoice)
         {
-            foreach (var p in invoice.Payments)
-            {
-                // TODO(kevin): fully map these
-                _payments.Add(new Payment
-                {
-                    Description = p.Description
-                });
-            }
+            // TODO(kevin): map the payments
         }
 
         public void Apply(StandardAuditFileTaxation.Audit audit)

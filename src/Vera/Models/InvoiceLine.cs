@@ -11,11 +11,27 @@ namespace Vera.Models
         public decimal AmountInTax => Amount * TaxRate;
         public ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
         public Taxes Taxes { get; set; }
+        public Product Product { get; set; }
     }
 
     public class Taxes
     {
         public decimal Rate { get; set; }
         public string Code { get; set; }
+    }
+    
+    public class Product
+    {
+        public string SystemId { get; set; }
+        public ProductTypes Type { get; set; }
+        public string Code { get; set; }
+        public string Barcode { get; set; }
+        public string Description { get; set; }
+    }
+
+    public enum ProductTypes
+    {
+        Service = 1,
+        Goods = 2
     }
 }

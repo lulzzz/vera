@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using Vera.StandardAuditFileTaxation;
 using Invoice = Vera.Models.Invoice;
 
@@ -23,8 +24,31 @@ namespace Vera.Audit.Extract
                 return;
             }
 
+            var addresses = new List<Address>();
+
+            if (customer.BillingAddress != null)
+            {
+                addresses.Add(ExtractAddress(customer.BillingAddress, AddressType.Billing));
+            }
+
+            if (customer.ShippingAddress != null)
+            {
+                addresses.Add(ExtractAddress(customer.ShippingAddress, AddressType.ShipTo));
+            }
+
             _customers.Add(new Customer
             {
+                SystemID = customer.SystemID,
+                Name = customer.CompanyName,
+                RegistrationNumber = customer.RegistrationNumber,
+                TaxRegistration = new TaxRegistration
+                {
+                    Number = customer.TaxRegistrationNumber
+                },
+                BankAccount = new BankAccount
+                {
+                    AccountNumber = customer.BankAccount.Number
+                },
                 Contact = new Contact
                 {
                     Email = customer.Email,
@@ -34,21 +58,31 @@ namespace Vera.Audit.Extract
                         LastName = customer.LastName
                     }
                 },
-                RegistrationNumber = customer.RegistrationNumber,
-                TaxRegistration = new TaxRegistration
-                {
-                    Number = customer.TaxRegistrationNumber
-                }
+                Addresses = addresses
             });
         }
 
         public void Apply(StandardAuditFileTaxation.Audit audit)
-
         {
             foreach (var customer in _customers)
             {
                 audit.MasterFiles.Customers.Add(customer);
             }
+        }
+        
+        // TODO(kevin): extract to helper method
+        private Address ExtractAddress(Models.Address address, AddressType type)
+        {
+            return new Address
+            {
+                City = address.City,
+                Country = address.Country,
+                Number = address.Number,
+                Region = address.Region,
+                Street = address.Street,
+                PostalCode = address.PostalCode,
+                Type = type
+            };
         }
     }
 }

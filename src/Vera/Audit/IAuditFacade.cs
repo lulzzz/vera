@@ -67,6 +67,7 @@ namespace Vera.Audit
                 new PaymentSourceDocumentExtractor()
             };
             
+            // Extract data from all the invoices
             await foreach (var invoice in _invoiceStore.List(criteria))
             {
                 foreach (var e in extractors)
@@ -75,6 +76,7 @@ namespace Vera.Audit
                 }
             }
             
+            // Apply the extracted data to the auditing model
             foreach (var e in extractors)
             {
                 e.Apply(audit);
