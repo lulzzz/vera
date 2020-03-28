@@ -13,19 +13,19 @@ namespace Vera.Portugal
         private const string AuditFileVersion = "1.04_01";
         private const string TaxEntity = "Global";
         private const string Atcud = "0";
-        private const string SourceID = "2";
+        private const string SourceId = "2";
         private const string SelfBillingIndicator = "0";
         private const string CashVatSchemeIndicator = "0";
         private const string ThirdPartiesBillingIndicator = "0";
         private const string UnitOfMeasure = "UN";
-        private const string DefaultFiscalID = "999999990";
+        private const string DefaultFiscalId = "999999990";
 
         public AuditFile Transform(AuditContext context, AuditCriteria criteria, StandardAuditFileTaxation.Audit audit)
         {
             // TODO(kevin): see if it is nicer to pass the typed configuration as a parameter or part of the context instead of doing this
             var config = context.Account.GetConfiguration<Configuration>();
 
-            var productID = context.SoftwareVersion + "/" + context.CertificateName;
+            var productId = context.SoftwareVersion + "/" + context.CertificateName;
             var softwareCertificateNumber = context.CertificateNumber;
 
             var taxCountryRegion = audit.Header.Company.StreetAddress.Country;
@@ -66,7 +66,7 @@ namespace Vera.Portugal
                     TaxEntity = TaxEntity,
                     ProductCompanyTaxID = config.ProductCompanyTaxId,
                     SoftwareCertificateNumber = softwareCertificateNumber,
-                    ProductID = productID,
+                    ProductID = productId,
                     ProductVersion = context.SoftwareVersion,
                     Telephone = audit.Header.Company.Contact.Telephone,
                     Email = audit.Header.Company.Contact.Email
@@ -90,7 +90,7 @@ namespace Vera.Portugal
             var anonymous = new Models.Customer
             {
                 CustomerID = "0",
-                CustomerTaxID = DefaultFiscalID,
+                CustomerTaxID = DefaultFiscalId,
                 AccountID = UnknownLabel,
                 CompanyName = "Consumidor final",
                 SelfBillingIndicator = SelfBillingIndicator,
@@ -101,7 +101,7 @@ namespace Vera.Portugal
             auditFile.MasterFiles.Customer = audit.MasterFiles.Customers.Select(c => new Models.Customer
             {
                 CustomerID = ComputeCustomerID(c.SystemID, c.RegistrationNumber),
-                CustomerTaxID = string.IsNullOrEmpty(c.RegistrationNumber) ? DefaultFiscalID : c.RegistrationNumber,
+                CustomerTaxID = string.IsNullOrEmpty(c.RegistrationNumber) ? DefaultFiscalId : c.RegistrationNumber,
                 AccountID = c.BankAccount?.AccountNumber ?? UnknownLabel,
                 CompanyName = string.IsNullOrEmpty(c.Name) ? "Consumidor final" : c.Name,
                 Email = c.Contact.Email,
@@ -153,7 +153,7 @@ namespace Vera.Portugal
                 {
                     InvoiceStatus = InvoiceStatus.N,
                     InvoiceStatusDate = GetDateTime(invoice.Date),
-                    SourceID = SourceID,
+                    SourceID = SourceId,
                     SourceBilling = invoice.IsManual ? SAFTPTSourceBilling.M : SAFTPTSourceBilling.P
                 },
 
@@ -187,7 +187,7 @@ namespace Vera.Portugal
                     ThirdPartiesBillingIndicator = ThirdPartiesBillingIndicator
                 },
 
-                SourceID = SourceID,
+                SourceID = SourceId,
                 SystemEntryDate = GetDateTime(invoice.Date),
                 CustomerID = ComputeCustomerID(invoice.Customer.SystemID, invoice.Customer.RegistrationNumber),
                 Line = invoice.Lines.Select((line, i) => MapInvoiceLine(invoice, taxCountryRegion, line, i)).ToArray()

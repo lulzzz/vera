@@ -17,6 +17,10 @@ namespace Vera
         public string Certification { get; set; }
 
         public IDictionary<string, object> Configuration { get; set; }
+        public string Currency { get; set; }
+        public string Email { get; set; }
+        public string Telephone { get; set; }
+        public string TaxRegistrationNumber { get; set; }
 
         // TODO(kevin): move T to Configuration property?
         public T GetConfiguration<T>() where T : AbstractAuditConfiguration, new()

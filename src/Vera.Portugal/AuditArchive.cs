@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -19,18 +20,20 @@ namespace Vera.Portugal
                 CloseOutput = false
             };
 
-            // TODO(kevin): pass stream as parameter and write to it or perform storing here?
-            // using (var writer = XmlWriter.Create(stream, settings))
-            // {
-            //     var serializer = new XmlSerializer(typeof(AuditFile));
-            //     serializer.Serialize(writer, archive);
-            // }
+            // TODO(kevin): get storage dependency and use it to store the result
+            using (var stream = new MemoryStream())
+            {
+                using var writer = XmlWriter.Create(stream, settings);
+                var serializer = new XmlSerializer(typeof(AuditFile));
+                serializer.Serialize(writer, stream);
+            }
 
             return Task.CompletedTask;
         }
 
         public Task<ICollection<AuditFile>> Get(AuditCriteria criteria)
         {
+            // TODO(kevin): query the storage
             throw new System.NotImplementedException();
         }
     }

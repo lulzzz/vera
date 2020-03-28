@@ -114,9 +114,9 @@ namespace Vera.Portugal
                 yield return new TextThermalNode(invoice.Customer.RegistrationNumber);
                 yield return new TextThermalNode(invoice.Customer.TaxRegistrationNumber);
 
-                yield return new TextThermalNode($"{invoice.Customer.Address.Street} {invoice.Customer.Address.Number}");
-                yield return new TextThermalNode($"{invoice.Customer.Address.PostalCode} {invoice.Customer.Address.City}");
-                yield return new TextThermalNode(invoice.Customer.Address.Country);
+                yield return new TextThermalNode($"{invoice.Customer.BillingAddress.Street} {invoice.Customer.BillingAddress.Number}");
+                yield return new TextThermalNode($"{invoice.Customer.BillingAddress.PostalCode} {invoice.Customer.BillingAddress.City}");
+                yield return new TextThermalNode(invoice.Customer.BillingAddress.Country);
             }
 
             yield return new TextThermalNode($"Data: {invoice.Date:yyyy-MM-dd}");

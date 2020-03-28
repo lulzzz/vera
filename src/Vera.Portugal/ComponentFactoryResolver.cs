@@ -8,15 +8,18 @@ using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
 using Vera.Concurrency;
 using Vera.Dependencies;
+using Vera.Stores;
 
 namespace Vera.Portugal
 {
     public class ComponentFactoryResolver : IComponentFactoryResolver
     {
+        private readonly IInvoiceStore _invoiceStore;
         private readonly ILocker _locker;
 
-        public ComponentFactoryResolver(ILocker locker)
+        public ComponentFactoryResolver(IInvoiceStore invoiceStore, ILocker locker)
         {
+            _invoiceStore = invoiceStore;
             _locker = locker;
         }
 
@@ -37,7 +40,7 @@ namespace Vera.Portugal
                 rsa = RSA.Create(rsaParameters);
             }
 
-            return new ComponentFactory(_locker, rsa);
+            return new ComponentFactory(_invoiceStore, _locker, rsa);
         }
 
         public string Name => "PT";
