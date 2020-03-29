@@ -27,15 +27,15 @@ namespace Vera.Documents
 
             foreach (var line in invoice.Lines)
             {
-                totals.Amount += line.Amount;
-                totals.AmountInTax += line.AmountInTax;
+                totals.Amount += line.Gross;
+                totals.AmountInTax += line.Net;
             }
 
             totals.Taxes = invoice.Lines
-                .GroupBy(l => l.TaxRate)
+                .GroupBy(l => l.Taxes.Rate)
                 .Select(g =>
                 {
-                    var baseAmount = g.Sum(l => l.Amount);
+                    var baseAmount = g.Sum(l => l.Gross);
                     return new TaxTotal
                     {
                         Rate = g.Key,

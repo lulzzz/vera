@@ -51,10 +51,13 @@ namespace Vera.Portugal.Tests
                 {
                     new InvoiceLine
                     {
-                        Amount = 15m,
+                        Gross = 15m,
                         Description = "Shower foam dao",
                         Quantity = 2,
-                        TaxRate = 1.21m
+                        Taxes = new Taxes
+                        {
+                            Rate = 1.21m
+                        }
                     }
                 },
                 Signature = new byte[32],

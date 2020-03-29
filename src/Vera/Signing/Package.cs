@@ -12,8 +12,8 @@ namespace Vera.Signing
         {
             Timestamp = invoice.Date;
             Number = invoice.Number;
-            Net = invoice.Lines.Sum(l => l.Amount);
-            Gross = invoice.Lines.Sum(l => l.AmountInTax);
+            Net = invoice.Lines.Sum(l => l.Net);
+            Gross = invoice.Lines.Sum(l => l.Gross);
             PreviousSignature = previous?.Signature;
         }
 

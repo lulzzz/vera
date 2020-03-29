@@ -4,20 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Vera.Models
 {
-    // Invoice that is saved
-    // Invoice model that is used for printing and auditing
-
     public class Invoice
     {
-        public Invoice()
-        {
-        }
-
-        public Invoice(Invoice other)
-        {
-            // TODO(kevin): map properties
-        }
-
+        public Invoice() { }
+        
         public Guid AccountId { get; set; }
 
         public string SystemId { get; set; }

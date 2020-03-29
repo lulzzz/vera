@@ -159,8 +159,8 @@ namespace Vera.Portugal
                     format, 
                     line.Quantity.ToString().PadRight(5), 
                     line.Description.PadRight(32), 
-                    FormatTaxRate(line.TaxRate).PadLeft(7),
-                    FormatCurrency(line.AmountInTax).PadLeft(10)
+                    FormatTaxRate(line.Taxes.Rate).PadLeft(7),
+                    FormatCurrency(line.Gross).PadLeft(10)
                 );
 
                 yield return new TextThermalNode(sb.ToString());

@@ -5,11 +5,29 @@ namespace Vera.Models
     public class InvoiceLine
     {
         public int Quantity { get; set; }
+
         public string Description { get; set; }
-        public decimal TaxRate { get; set; }
+        
+        /// <summary>
+        /// Price per unit of measure.
+        /// </summary>
         public decimal UnitPrice { get; set; }
-        public decimal Amount { get; set; }
-        public decimal AmountInTax => Amount * TaxRate;
+        
+        /// <summary>
+        /// Unit of measure of the product/service.
+        /// </summary>
+        public string UnitOfMeasure { get; set; }
+        
+        /// <summary>
+        /// Total amount including taxes.
+        /// </summary>
+        public decimal Gross { get; set; }
+        
+        /// <summary>
+        /// Total amount excluding taxes. 
+        /// </summary>
+        public decimal Net { get; set; }
+        
         public ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
         public Taxes Taxes { get; set; }
         public Product Product { get; set; }

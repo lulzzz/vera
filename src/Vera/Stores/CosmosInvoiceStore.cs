@@ -12,72 +12,34 @@ namespace Vera.Stores
 {
     public sealed class CosmosInvoiceStore : IInvoiceStore
     {
-        private readonly Container _container;
+        private readonly CosmosChain<Invoice> _chain;
 
         public CosmosInvoiceStore(Container container)
         {
-            _container = container;
+            _chain = new CosmosChain<Invoice>(container);
         }
 
         public async Task Save(Invoice invoice, string bucket)
         {
-            var chain = new CosmosChain(_container, bucket);
-
-            var partitionKey = GetPartitionKey(invoice);
-
-            var document = new InvoiceDocument(invoice)
-            {
-                Bucket = bucket,
-                PartitionKey = partitionKey
-            };
-
-            try
-            {
-                // Try to insert the invoice first, if that fails then the chain need never be created
-                await _container.CreateItemAsync(document, new PartitionKey(partitionKey));
-
-                await chain.Append(document.Id);
-            }
-            catch (CosmosException)
-            {
-                // TODO(kevin): check what exception happened
-                using var response = await _container.DeleteItemStreamAsync(
-                    document.Id.ToString(),
-                    new PartitionKey(partitionKey)
-                );
-
-                throw;
-            }
+            await _chain.Append(invoice, new PartitionKey(bucket));
         }
 
         public async Task<Invoice> Last(Invoice invoice, string bucket)
         {
-            var chain = new CosmosChain(_container, bucket);
+            var tail = await _chain.Tail(new PartitionKey(bucket));
 
-            var tail = await chain.Tail();
-
-            if (tail == null)
-            {
-                return null;
-            }
-
-            var last = await _container.ReadItemAsync<InvoiceDocument>(
-                tail.Reference.ToString(),
-                new PartitionKey(GetPartitionKey(invoice))
-            );
-
-            return last?.Resource.Invoice;
+            return tail?.Value;
         }
         
         public async IAsyncEnumerable<Invoice> List(AuditCriteria criteria)
         {
             // TODO(kevin): paging
-            var iterator = _container.GetItemLinqQueryable<InvoiceDocument>()
-                .Where(x => x.Invoice.Supplier.SystemID == criteria.SupplierSystemId &&
-                            x.Invoice.FiscalYear >= criteria.StartFiscalYear && 
-                            x.Invoice.FiscalYear <= criteria.EndFiscalYear &&
-                            x.Invoice.FiscalPeriod >= criteria.StartFiscalPeriod && 
-                            x.Invoice.FiscalPeriod <= criteria.EndFiscalPeriod
+            var iterator = _chain.Query()
+                .Where(x => x.Value.Supplier.SystemID == criteria.SupplierSystemId &&
+                            x.Value.FiscalYear >= criteria.StartFiscalYear && 
+                            x.Value.FiscalYear <= criteria.EndFiscalYear &&
+                            x.Value.FiscalPeriod >= criteria.StartFiscalPeriod && 
+                            x.Value.FiscalPeriod <= criteria.EndFiscalPeriod
                 )
                 .ToFeedIterator();
 
@@ -87,32 +49,9 @@ namespace Vera.Stores
 
                 foreach (var result in results)
                 {
-                    yield return result.Invoice;
+                    yield return result.Value;
                 }
             }
-        }
-
-        private static string GetPartitionKey(Invoice invoice) =>
-            $"{invoice.Supplier.SystemID}-{invoice.FiscalYear}-{invoice.FiscalPeriod}";
-
-        private class InvoiceDocument
-        {
-            public InvoiceDocument(Invoice invoice)
-            {
-                Id = Guid.NewGuid();
-                Invoice = new Invoice(invoice);
-            }
-
-            public InvoiceDocument() { }
-
-            [JsonProperty("id")]
-            public Guid Id { get; set; }
-
-            public Invoice Invoice { get; set; }
-
-            public string Bucket { get; set; }
-
-            public string PartitionKey { get; set; }
         }
     }
 }

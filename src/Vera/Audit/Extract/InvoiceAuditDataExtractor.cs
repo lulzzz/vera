@@ -70,7 +70,7 @@ namespace Vera.Audit.Extract
                 Description = l.Description,
                 Quantity = l.Quantity,
                 UnitPrice = l.UnitPrice,
-                Amount = new Amount(l.Amount),
+                Amount = new Amount(l.Gross),
                 Settlements = settlements,
                 Taxes = new []
                 {

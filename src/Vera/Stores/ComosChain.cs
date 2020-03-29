@@ -10,92 +10,54 @@ using Vera.Models;
 
 namespace Vera.Stores
 {
-    public sealed class CosmosChain
+    public sealed class CosmosChain<T> where T : class
     {
         private readonly Container _container;
-        private readonly string _partitionKey;
 
-        public CosmosChain(Container container, string partitionKey)
+        public CosmosChain(Container container)
         {
             _container = container;
-            _partitionKey = partitionKey;
         }
 
-        public async Task<bool> Append(Guid documentId)
+        public async Task<bool> Append(T document, PartitionKey partitionKey)
         {
-            var last = await Tail();
+            var last = await Tail(partitionKey);
+            var tx = _container.CreateTransactionalBatch(partitionKey);
 
-            ChainLink next;
+            var next = new ChainableDocument<T>(document, partitionKey.ToString());
 
-            if (last == null)
-            {
-                next = new ChainLink
-                {
-                    Id = Guid.NewGuid(),
-                    PartitionKey = _partitionKey,
-                    Reference = documentId
-                };
-            }
-            else
-            {
-                next = new ChainLink(last, documentId);
-                last.Next = next.Id;
-            }
-
-            var tx = _container.CreateTransactionalBatch(new PartitionKey(_partitionKey));
             tx.CreateItem(next);
-
+            
             if (last != null)
             {
+                next.Previous = last.Id;
+                last.Next = next.Id;
+                
                 // Next got updated so update the previous item in the chain to point to the new one
                 tx.ReplaceItem(last.Id.ToString(), last);
             }
 
             using var response = await tx.ExecuteAsync();
 
-            // TODO(kevin): log status code
-
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<ChainLink> Tail()
+        public IOrderedQueryable<ChainableDocument<T>> Query()
         {
-            var iterator = _container.GetItemLinqQueryable<ChainLink>(requestOptions: new QueryRequestOptions
+            return _container.GetItemLinqQueryable<ChainableDocument<T>>();
+        }
+        
+        public async Task<ChainableDocument<T>> Tail(PartitionKey partitionKey)
+        {
+            var iterator = _container.GetItemLinqQueryable<ChainableDocument<T>>(requestOptions: new QueryRequestOptions
             {
-                PartitionKey = new PartitionKey(_partitionKey)
+                PartitionKey = partitionKey
             })
                 .Where(x => x.Next.IsNull())
                 .Take(1)
                 .ToFeedIterator();
 
             return (await iterator.ReadNextAsync()).FirstOrDefault();
-        }
-
-        public sealed class ChainLink
-        {
-            public ChainLink(ChainLink previous, Guid reference)
-            {
-                Id = Guid.NewGuid();
-                Previous = previous.Id;
-                PartitionKey = previous.PartitionKey;
-                Reference = reference;
-            }
-
-            public ChainLink() { }
-
-            [JsonProperty("id")]
-            public Guid Id { get; set; }
-
-            // Reference to the previous link
-            public Guid? Previous { get; set; }
-
-            // Reference to the next link
-            public Guid? Next { get; set; }
-
-            // Reference to the document of this link
-            public Guid Reference { get; set; }
-
-            public string PartitionKey { get; set; }
         }
     }
 }
