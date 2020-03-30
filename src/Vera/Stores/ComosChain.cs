@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Cosmos.Linq;
-using Newtonsoft.Json;
 using Vera.Models;
 
 namespace Vera.Stores
@@ -42,7 +38,7 @@ namespace Vera.Stores
             return response.IsSuccessStatusCode;
         }
 
-        public IOrderedQueryable<ChainableDocument<T>> Query()
+        public IQueryable<ChainableDocument<T>> Query()
         {
             return _container.GetItemLinqQueryable<ChainableDocument<T>>();
         }

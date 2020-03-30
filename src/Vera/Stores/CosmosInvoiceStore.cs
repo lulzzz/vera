@@ -1,10 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
-using Newtonsoft.Json;
 using Vera.Audit;
 using Vera.Models;
 
@@ -34,15 +32,21 @@ namespace Vera.Stores
         public async IAsyncEnumerable<Invoice> List(AuditCriteria criteria)
         {
             // TODO(kevin): paging
-            var iterator = _chain.Query()
-                .Where(x => x.Value.Supplier.SystemID == criteria.SupplierSystemId &&
-                            x.Value.FiscalYear >= criteria.StartFiscalYear && 
-                            x.Value.FiscalYear <= criteria.EndFiscalYear &&
-                            x.Value.FiscalPeriod >= criteria.StartFiscalPeriod && 
-                            x.Value.FiscalPeriod <= criteria.EndFiscalPeriod
-                )
-                .ToFeedIterator();
+            var query = _chain.Query().Where(x => x.Value.AccountId == criteria.AccountId);
 
+            if (!string.IsNullOrWhiteSpace(criteria.SupplierSystemId))
+            {
+                query = query.Where(x => x.Value.Supplier.SystemID == criteria.SupplierSystemId);
+            }
+
+            query = query.Where(x =>
+                x.Value.FiscalYear >= criteria.StartFiscalYear &&
+                x.Value.FiscalYear <= criteria.EndFiscalYear &&
+                x.Value.FiscalPeriod >= criteria.StartFiscalPeriod &&
+                x.Value.FiscalPeriod <= criteria.EndFiscalPeriod
+            );
+
+            var iterator = query.ToFeedIterator();
             while (iterator.HasMoreResults)
             {
                 var results = await iterator.ReadNextAsync();
