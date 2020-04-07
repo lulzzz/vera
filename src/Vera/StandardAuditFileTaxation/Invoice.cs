@@ -58,12 +58,6 @@ namespace Vera.StandardAuditFileTaxation
     /// </summary>
     public DateTime Date { get; set; }
 
-    /// <summary>
-    /// Type of the invoice. E.g.: debit invoice, credit invoice, ticket, cash, etc.
-    /// <seealso cref="DataModels.Invoice.BackendTypeID"/>
-    /// </summary>
-    public int? Type { get; set; }
-
     public ShippingPoint ShipFrom { get; set; }
 
     public ShippingPoint ShipTo { get; set; }

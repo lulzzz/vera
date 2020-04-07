@@ -18,7 +18,7 @@ namespace Vera.Audit.Extract
         public void Extract(Invoice invoice)
         {
             // TODO(kevin): map other fields
-            var i = new StandardAuditFileTaxation.Invoice
+            var model = new StandardAuditFileTaxation.Invoice
             {
                 SystemID = invoice.SystemId,
                 Date = invoice.Date,
@@ -39,7 +39,7 @@ namespace Vera.Audit.Extract
                 Lines = invoice.Lines.Select((l, i) => ExtractLine(i, l)).ToList()
             };
 
-            _invoices.Add(i);
+            _invoices.Add(model);
         }
 
         public void Apply(StandardAuditFileTaxation.Audit audit)

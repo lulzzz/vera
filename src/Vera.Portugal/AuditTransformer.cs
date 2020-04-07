@@ -176,9 +176,7 @@ namespace Vera.Portugal
                 HashControl = GetHashControl(invoice.SignatureKeyVersion, invoice),
                 Period = invoice.Date.Month.ToString(),
                 InvoiceDate = GetDateTime(invoice.Date),
-
-                // TODO(kevin): check how this should be mapped based on the information of the pushed invoice
-                InvoiceType = ((InvoiceType?)invoice.Type) ?? InvoiceType.FT,
+                InvoiceType = ComputeInvoiceType(invoice),
 
                 SpecialRegimes = new SpecialRegimes
                 {
@@ -199,6 +197,18 @@ namespace Vera.Portugal
             salesInvoices.TotalCredit = Round(audit.SourceDocuments.SalesInvoices.TotalCreditExTax, 2);
 
             return auditFile;
+        }
+
+        private static InvoiceType ComputeInvoiceType(Invoice invoice)
+        {
+            if (invoice.Lines.Any(l => l.Quantity < 0) && invoice.Totals.Gross < 0)
+            {
+                // Credit note
+                return InvoiceType.NC;
+            }
+
+            // Invoice receipt
+            return InvoiceType.FR;
         }
 
         private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(Invoice invoice, string taxCountryRegion, InvoiceLine line, int index)
@@ -261,7 +271,9 @@ namespace Vera.Portugal
         {
             if (invoice.IsManual)
             {
-                return $"{hashControl}-{invoice.Type ?? 0}M {invoice.Number}";
+                var type = (int)ComputeInvoiceType(invoice);
+
+                return $"{hashControl}-{type}M {invoice.Number}";
             }
 
             return hashControl.ToString();
