@@ -1,3 +1,5 @@
+using Vera.Models;
+
 namespace Vera.Audit
 {
     public class AuditContext

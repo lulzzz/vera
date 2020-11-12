@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Vera.Configuration;
-using Vera.Models;
 
-namespace Vera
+namespace Vera.Models
 {
     // "Rituals Norway"
     public class Account

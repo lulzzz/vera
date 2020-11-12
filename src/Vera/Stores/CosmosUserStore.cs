@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
+using User = Vera.Models.User;
 
-namespace Vera.Security
+namespace Vera.Stores
 {
     public sealed class CosmosUserStore : IUserStore
     {

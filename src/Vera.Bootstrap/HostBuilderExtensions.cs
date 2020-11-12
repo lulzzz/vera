@@ -28,9 +28,13 @@ namespace Vera.Bootstrap
 
         private static void RegisterDefaults(IServiceCollection collection)
         {
-            collection.AddSingleton<ITokenFactory, RandomTokenFactory>();
-            collection.AddSingleton<IPasswordStrategy, Pbkdf2PasswordStrategy>();
-            collection.AddSingleton<IComponentFactoryCollection, ComponentFactoryCollection>();
+            // Components
+            collection.AddTransient<ITokenFactory, RandomTokenFactory>();
+            collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
+            collection.AddTransient<IComponentFactoryCollection, ComponentFactoryCollection>();
+
+            // Facades
+            collection.AddTransient<IUserRegisterFacade, UserRegisterFacade>();
         }
 
         private static void UseCosmosStores(HostBuilderContext context, IServiceCollection collection)

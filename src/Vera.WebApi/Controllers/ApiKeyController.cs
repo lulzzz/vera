@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Vera.Models;
 using Vera.Security;
+using Vera.Stores;
 using Vera.WebApi.Models;
 using Vera.WebApi.Security;
 

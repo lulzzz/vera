@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
+using Vera.Models;
 
-namespace Vera.Security
+namespace Vera.Stores
 {
     public class CosmosCompanyStore : ICompanyStore
     {

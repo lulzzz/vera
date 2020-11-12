@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Security.Cryptography;
+using Vera.Models;
 
 namespace Vera.Security
 {

@@ -8,6 +8,7 @@ using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
 using Vera.Concurrency;
 using Vera.Dependencies;
+using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.Portugal

@@ -1,4 +1,5 @@
 using System;
+using Vera.Models;
 
 namespace Vera.Security
 {

@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using Vera.Audit.Extract;
-using Vera.Models;
 using Vera.StandardAuditFileTaxation;
 using Vera.Stores;
 using Address = Vera.StandardAuditFileTaxation.Address;
+using Company = Vera.StandardAuditFileTaxation.Company;
 
 namespace Vera.Audit
 {

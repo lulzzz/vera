@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 
-namespace Vera.Security
+namespace Vera.Models
 {
     // "Kevin"
     // "web-service-user-1"

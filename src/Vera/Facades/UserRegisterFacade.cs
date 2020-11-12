@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Vera.Models;
 using Vera.Security;
+using Vera.Stores;
 
 namespace Vera
 {
@@ -12,7 +14,12 @@ namespace Vera
         public UserType Type { get; set; }
     }
 
-    public class UserRegisterFacade
+    public interface IUserRegisterFacade
+    {
+        Task<Error> Register(string companyName, UserToCreate userToCreate);
+    }
+
+    public class UserRegisterFacade : IUserRegisterFacade
     {
         private readonly ICompanyStore _companyStore;
         private readonly IUserStore _userStore;
@@ -29,7 +36,7 @@ namespace Vera
             _passwordStrategy = passwordStrategy;
         }
 
-        public async Task Register(string companyName, UserToCreate userToCreate)
+        public async Task<Error> Register(string companyName, UserToCreate userToCreate)
         {
             Guid companyId;
 
@@ -43,8 +50,7 @@ namespace Vera
 
                 if (existingUser != null)
                 {
-                    // TODO(kevin): return error because username is already in use
-                    return;
+                    return new Error(ErrorCode.Exists, $"User {userToCreate.Username} already exists");
                 }
 
                 companyId = existingCompany.Id;
@@ -68,6 +74,8 @@ namespace Vera
                 Type = userToCreate.Type,
                 CompanyId = companyId
             });
+
+            return null;
         }
     }
 }

@@ -1,6 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Vera.Models;
 using Vera.Security;
+using Vera.Stores;
 using Vera.WebApi.Models;
 
 namespace Vera.WebApi.Controllers
@@ -9,23 +11,16 @@ namespace Vera.WebApi.Controllers
     [Route("register")]
     public class RegisterController : ControllerBase
     {
-        private readonly ICompanyStore _companyStore;
-        private readonly IUserStore _userStore;
-        private readonly IPasswordStrategy _passwordStrategy;
-
-        public RegisterController(ICompanyStore companyStore, IUserStore userStore, IPasswordStrategy passwordStrategy)
+        private readonly IUserRegisterFacade _userRegisterFacade;
+        public RegisterController(IUserRegisterFacade userRegisterFacade)
         {
-            _companyStore = companyStore;
-            _userStore = userStore;
-            _passwordStrategy = passwordStrategy;
+            _userRegisterFacade = userRegisterFacade;
         }
 
         [HttpPost]
         public async Task<IActionResult> Index(Register model)
         {
-            var facade = new UserRegisterFacade(_companyStore, _userStore, _passwordStrategy);
-
-            await facade.Register(
+            var result = await _userRegisterFacade.Register(
                 model.CompanyName,
                 new UserToCreate
                 {
@@ -34,6 +29,11 @@ namespace Vera.WebApi.Controllers
                     Type = UserType.Admin
                 }
             );
+
+            if (result != null)
+            {
+                return BadRequest(new ErrorResponse(result));
+            }
 
             return Ok();
         }

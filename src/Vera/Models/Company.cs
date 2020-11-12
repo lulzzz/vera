@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Vera.Security
+namespace Vera.Models
 {
     // "Rituals BV"
     public class Company

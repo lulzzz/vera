@@ -1,7 +1,8 @@
 using System;
 using System.Threading.Tasks;
+using Vera.Models;
 
-namespace Vera.Security
+namespace Vera.Stores
 {
     public interface IUserStore
     {

@@ -1,7 +1,8 @@
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Vera.Models;
 
-namespace Vera.Security
+namespace Vera.Stores
 {
     public interface IAccountStore
     {
