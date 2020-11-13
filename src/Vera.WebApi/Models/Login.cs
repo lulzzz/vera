@@ -19,4 +19,17 @@ namespace Vera.WebApi.Models
         [Required]
         public string Password { get; set; }
     }
+
+    public class LoginResponse
+    {
+        /// <summary>
+        /// Token that is used for subsequent requests to identify and authorize the user.
+        /// </summary>
+        public string Token { get; set; }
+
+        /// <summary>
+        /// Token that is used to refresh the duration of the token.
+        /// </summary>
+        public string RefreshToken { get; set; }
+    }
 }

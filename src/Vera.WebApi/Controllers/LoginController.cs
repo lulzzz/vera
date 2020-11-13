@@ -13,7 +13,6 @@ namespace Vera.WebApi.Controllers
 {
     [ApiController]
     [Route("login")]
-    [Authorize]
     public class LoginController : ControllerBase
     {
         private readonly ICompanyStore _companyStore;
@@ -37,8 +36,7 @@ namespace Vera.WebApi.Controllers
             _securityTokenGenerator = securityTokenGenerator;
         }
 
-        [HttpPost]
-        [AllowAnonymous]
+        [HttpPost, AllowAnonymous]
         public async Task<IActionResult> Index(Login model)
         {
             var company = await _companyStore.GetByName(model.CompanyName);
@@ -63,8 +61,7 @@ namespace Vera.WebApi.Controllers
             return await Authorize(user, company);
         }
 
-        [HttpPost]
-        [Route("refresh")]
+        [HttpPost, Authorize, Route("refresh")]
         public async Task<IActionResult> Refresh(Refresh model)
         {
             var username = User.FindFirstValue(Security.ClaimTypes.Username);
@@ -91,10 +88,10 @@ namespace Vera.WebApi.Controllers
 
             await _userStore.Update(user);
 
-            return Ok(new
+            return Ok(new LoginResponse
             {
-                token = _securityTokenGenerator.Generate(user, company),
-                refreshToken
+                Token = _securityTokenGenerator.Generate(user, company),
+                RefreshToken = refreshToken
             });            
         }
     }

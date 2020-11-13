@@ -19,6 +19,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\src\Vera.WebApi\Vera.WebApi.csproj" />
+      <ProjectReference Include="..\Vera.WebApi\Vera.WebApi.csproj" />
+      <ProjectReference Include="..\Vera\Vera.csproj" />
     </ItemGroup>
 
 </Project>

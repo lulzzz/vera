@@ -22,12 +22,7 @@ namespace Vera.WebApi
             {
                 Log.Information("Starting web host..");
 
-                Host.CreateDefaultBuilder(args)
-                    .ConfigureWebHostDefaults(wb => wb.UseStartup<Startup>())
-                    .UseSerilog()
-                    .UseVera()
-                    .Build()
-                    .Run();
+                CreateHostBuilder(args).Build().Run();
 
                 return 0;
             }
@@ -41,6 +36,14 @@ namespace Vera.WebApi
             {
                 Log.CloseAndFlush();
             }
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(wb => wb.UseStartup<Startup>())
+                .UseSerilog()
+                .UseVera();
         }
     }
 }
