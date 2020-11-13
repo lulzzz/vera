@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vera.Models;
 using Vera.Security;
 using Vera.Stores;
 
-namespace Vera
+namespace Vera.Services
 {
     public class UserToCreate
     {
@@ -14,18 +13,18 @@ namespace Vera
         public UserType Type { get; set; }
     }
 
-    public interface IUserRegisterFacade
+    public interface IUserRegisterService
     {
         Task<Error> Register(string companyName, UserToCreate userToCreate);
     }
 
-    public class UserRegisterFacade : IUserRegisterFacade
+    public class UserRegisterService : IUserRegisterService
     {
         private readonly ICompanyStore _companyStore;
         private readonly IUserStore _userStore;
         private readonly IPasswordStrategy _passwordStrategy;
 
-        public UserRegisterFacade(
+        public UserRegisterService(
             ICompanyStore companyStore,
             IUserStore userStore,
             IPasswordStrategy passwordStrategy

@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Vera.Services;
 using Vera.WebApi.Controllers;
 using Vera.WebApi.Models;
 using Xunit;
@@ -12,7 +13,7 @@ namespace Vera.WebApi.Tests
         [Fact]
         public async Task Should_return_bad_request()
         {
-            var mockUserRegisterFacade = new Mock<IUserRegisterFacade>();
+            var mockUserRegisterFacade = new Mock<IUserRegisterService>();
 
             mockUserRegisterFacade
                 .Setup(f => f.Register(It.IsAny<string>(), It.IsAny<UserToCreate>()))
@@ -37,7 +38,7 @@ namespace Vera.WebApi.Tests
         [Fact]
         public async Task Should_return_ok()
         {
-            var mockUserRegisterFacade = new Mock<IUserRegisterFacade>();
+            var mockUserRegisterFacade = new Mock<IUserRegisterService>();
 
             mockUserRegisterFacade
                 .Setup(f => f.Register(It.IsAny<string>(), It.IsAny<UserToCreate>()))

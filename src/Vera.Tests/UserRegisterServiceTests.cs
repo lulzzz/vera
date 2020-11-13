@@ -3,12 +3,13 @@ using System.Threading.Tasks;
 using Moq;
 using Vera.Models;
 using Vera.Security;
+using Vera.Services;
 using Vera.Stores;
 using Xunit;
 
 namespace Vera.Tests
 {
-    public class UserRegisterFacadeTests
+    public class UserRegisterServiceTests
     {
         [Fact]
         public async Task Should_return_error_when_user_exists()
@@ -36,13 +37,13 @@ namespace Vera.Tests
 
             var mockPasswordStrategy = new Mock<IPasswordStrategy>();
 
-            var facade = new UserRegisterFacade(
+            var service = new UserRegisterService(
                 mockCompanyStore.Object,
                 mockUserStore.Object,
                 mockPasswordStrategy.Object
             );
 
-            var result = await facade.Register(company.Name, userToCreate);
+            var result = await service.Register(company.Name, userToCreate);
 
             Assert.NotNull(result);
             Assert.Equal(ErrorCode.Exists, result.Code);
@@ -78,13 +79,13 @@ namespace Vera.Tests
 
             var mockPasswordStrategy = new Mock<IPasswordStrategy>();
 
-            var facade = new UserRegisterFacade(
+            var service = new UserRegisterService(
                 mockCompanyStore.Object,
                 mockUserStore.Object,
                 mockPasswordStrategy.Object
             );
 
-            await facade.Register(company.Name, userToCreate);
+            await service.Register(company.Name, userToCreate);
 
             mockUserStore.Verify(x => x.Store(It.Is<User>(u => u.Username == userToCreate.Username)));
             mockUserStore.VerifyNoOtherCalls();

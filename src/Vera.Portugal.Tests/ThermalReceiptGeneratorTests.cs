@@ -52,6 +52,7 @@ namespace Vera.Portugal.Tests
                     new InvoiceLine
                     {
                         Gross = 15m,
+                        Net = 12.39m,
                         Description = "Shower foam dao",
                         Quantity = 2,
                         Taxes = new Taxes

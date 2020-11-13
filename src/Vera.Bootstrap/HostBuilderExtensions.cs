@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
 using Vera.Portugal;
 using Vera.Security;
+using Vera.Services;
 using Vera.Stores;
 
 namespace Vera.Bootstrap
@@ -34,7 +35,7 @@ namespace Vera.Bootstrap
             collection.AddTransient<IComponentFactoryCollection, ComponentFactoryCollection>();
 
             // Facades
-            collection.AddTransient<IUserRegisterFacade, UserRegisterFacade>();
+            collection.AddTransient<IUserRegisterService, UserRegisterService>();
         }
 
         private static void UseCosmosStores(HostBuilderContext context, IServiceCollection collection)
