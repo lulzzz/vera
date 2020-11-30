@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <AssemblyTitle>$(ProjectName)</AssemblyTitle>
@@ -9,13 +9,13 @@
     <Company>New Black</Company>
   </PropertyGroup>
   <PropertyGroup>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>9.0</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
   <PropertyGroup>
-    <NoWarn>NU1701</NoWarn>
+    <NoWarn>NU1701,CS8632</NoWarn>
 	<WarningsAsErrors>NU1605;CS0108;CS4014</WarningsAsErrors>
   </PropertyGroup>
 </Project>
