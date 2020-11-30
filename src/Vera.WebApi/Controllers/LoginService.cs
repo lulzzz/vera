@@ -1,19 +1,17 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Vera.Grpc;
 using Vera.Models;
 using Vera.Security;
 using Vera.Stores;
-using Vera.WebApi.Models;
 using Vera.WebApi.Security;
 
 namespace Vera.WebApi.Controllers
 {
-    [ApiController]
-    [Route("login")]
-    public class LoginController : ControllerBase
+    public class LoginService : Grpc.LoginService.LoginServiceBase
     {
         private readonly ICompanyStore _companyStore;
         private readonly IUserStore _userStore;
@@ -21,7 +19,7 @@ namespace Vera.WebApi.Controllers
         private readonly IPasswordStrategy _passwordStrategy;
         private readonly ISecurityTokenGenerator _securityTokenGenerator;
 
-        public LoginController(
+        public LoginService(
             ICompanyStore companyStore,
             IUserStore userStore,
             ITokenFactory tokenFactory,
@@ -36,51 +34,53 @@ namespace Vera.WebApi.Controllers
             _securityTokenGenerator = securityTokenGenerator;
         }
 
-        [HttpPost, AllowAnonymous]
-        public async Task<IActionResult> Index(Login model)
+        [AllowAnonymous]
+        public override async Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
         {
-            var company = await _companyStore.GetByName(model.CompanyName);
+            var company = await _companyStore.GetByName(request.CompanyName);
 
             if (company == null)
             {
-                return Unauthorized();
+                throw new RpcException(new Status(StatusCode.Unauthenticated, string.Empty));
             }
 
-            var user = await _userStore.GetByCompany(company.Id, model.Username);
+            var user = await _userStore.GetByCompany(company.Id, request.Username);
 
             if (user == null)
             {
-                return Unauthorized();
+                throw new RpcException(new Status(StatusCode.Unauthenticated, string.Empty));
             }
 
-            if (!_passwordStrategy.Verify(model.Password, user.Authentication))
+            if (!_passwordStrategy.Verify(request.Password, user.Authentication))
             {
-                return Unauthorized();
+                throw new RpcException(new Status(StatusCode.Unauthenticated, string.Empty));
             }
 
             return await Authorize(user, company);
         }
 
-        [HttpPost, Authorize, Route("refresh")]
-        public async Task<IActionResult> Refresh(Refresh model)
+        [Authorize]
+        public override async Task<LoginReply> Refresh(RefreshRequest request, ServerCallContext context)
         {
-            var username = User.FindFirstValue(Security.ClaimTypes.Username);
-            var companyId = Guid.Parse(User.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var principal = context.GetHttpContext().User;
+
+            var username = principal.FindFirstValue(Security.ClaimTypes.Username);
+            var companyId = Guid.Parse(principal.FindFirstValue(Security.ClaimTypes.CompanyId));
 
             var user = await _userStore.GetByCompany(companyId, username);
 
-            if (!string.Equals(user.RefreshToken, model.Token))
+            if (!string.Equals(user.RefreshToken, request.Token))
             {
                 // TODO(kevin): what to return here? (token is invalid)
-                return BadRequest();
+                throw new RpcException(new Status(StatusCode.Unauthenticated, string.Empty));
             }
 
-            var company = await _companyStore.GetByName(User.FindFirstValue(Security.ClaimTypes.CompanyName));
+            var company = await _companyStore.GetByName(principal.FindFirstValue(Security.ClaimTypes.CompanyName));
 
             return await Authorize(user, company);
         }
 
-        private async Task<IActionResult> Authorize(User user, Company company)
+        private async Task<LoginReply> Authorize(User user, Company company)
         {
             var refreshToken = _tokenFactory.Create();
 
@@ -88,11 +88,11 @@ namespace Vera.WebApi.Controllers
 
             await _userStore.Update(user);
 
-            return Ok(new LoginResponse
+            return new LoginReply
             {
                 Token = _securityTokenGenerator.Generate(user, company),
                 RefreshToken = refreshToken
-            });            
+            };
         }
     }
 }

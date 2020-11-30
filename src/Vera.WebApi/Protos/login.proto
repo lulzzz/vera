@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package vera.grpc;
+
+service LoginService {
+    rpc Login (LoginRequest) returns (LoginReply);
+    rpc Refresh (RefreshRequest) returns (LoginReply);
+}
+
+message LoginRequest {
+    string companyName = 1;
+    string username = 2;
+    string password = 3;
+}
+
+message RefreshRequest {
+    string token = 1;
+}
+
+message LoginReply {
+    string token = 1;
+    string refreshToken = 2;
+}

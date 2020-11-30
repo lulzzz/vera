@@ -17,7 +17,6 @@ namespace Vera.Models
         public string RefreshToken { get; set; }
 
         public Guid CompanyId { get; set; }
-        public Guid? AccountId { get; set; }
     }
 
     public class Authentication

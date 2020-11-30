@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+import "Protos/shared.proto";
+
+package vera.grpc;
+
+service RegisterService {
+    rpc Register (RegisterRequest) returns (vera.grpc.Empty);
+}
+
+message RegisterRequest {
+    string companyName = 1;
+    string username = 2;
+    string password = 3;
+}

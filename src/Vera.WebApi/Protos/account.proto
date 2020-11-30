@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "Protos/shared.proto";
+
+package vera.grpc;
+
+service AccountService {
+    rpc Create (CreateAccountRequest) returns (Empty);
+    rpc List (Empty) returns (ListAccountReply);
+}
+
+message CreateAccountRequest {
+    string name = 1;
+    string certification = 2;
+}
+
+message ListAccountReply {
+    repeated Account accounts = 1;
+}
+
+message Account {
+    string name = 1;
+    string certification = 2;
+}

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Vera.WebApi.Controllers;
 using Vera.WebApi.Security;
 
 namespace Vera.WebApi
@@ -39,6 +40,7 @@ namespace Vera.WebApi
                 });
 
             services.AddControllers();
+            services.AddGrpc();
 
             services.AddTransient<ISecurityTokenGenerator>(p => new JwtSecurityTokenGenerator(Configuration));
         }
@@ -60,7 +62,14 @@ namespace Vera.WebApi
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+
+                endpoints.MapGrpcService<RegisterService>();
+                endpoints.MapGrpcService<LoginService>();
+                endpoints.MapGrpcService<AccountService>();
+            });
         }
     }
 }

@@ -60,8 +60,7 @@ namespace Vera.Stores
         {
             // TODO(kevin): this does a cross partition query
             var document = await _container.ReadItemAsync<CompanyDocument>(
-                companyId.ToString(),
-                PartitionKey.None
+                companyId.ToString(), PartitionKey.None
             );
 
             return document.Resource.Company;

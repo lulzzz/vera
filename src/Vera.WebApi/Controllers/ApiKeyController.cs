@@ -59,7 +59,6 @@ namespace Vera.WebApi.Controllers
                 CompanyId = companyId,
                 Type = UserType.Robot,
                 Username = model.Username,
-                AccountId = model.AccountId,
                 Authentication = auth,
                 RefreshToken = _tokenFactory.Create()
             };

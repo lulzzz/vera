@@ -1,19 +1,26 @@
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Bogus;
-using Vera.WebApi.Models;
+using Grpc.Net.Client;
+using Vera.Grpc;
+using Vera.WebApi.Controllers;
 using Xunit;
+using LoginService = Vera.Grpc.LoginService;
+using RegisterService = Vera.Grpc.RegisterService;
 
 namespace Vera.Integration.Tests
 {
     public class RegistrationTests : IClassFixture<ApiWebApplicationFactory>
     {
-        private readonly HttpClient _client;
+        private readonly GrpcChannel _channel;
 
         public RegistrationTests(ApiWebApplicationFactory fixture)
         {
-            _client = fixture.CreateClient();
+            var client = fixture.CreateClient();
+
+            _channel = GrpcChannel.ForAddress(client.BaseAddress, new GrpcChannelOptions
+            {
+                HttpClient = client
+            });
         }
 
         [Fact]
@@ -21,32 +28,30 @@ namespace Vera.Integration.Tests
         {
             var faker = new Faker();
 
-            var registerRequest = new Register
+            var registerRequest = new Grpc.RegisterRequest
             {
                 Username = faker.Internet.UserName(),
                 Password = faker.Internet.Password(),
                 CompanyName = faker.Company.CompanyName()
             };
 
-            using var registerResponse = await _client.PostAsJsonAsync("/register", registerRequest);
+            var registerClient = new RegisterService.RegisterServiceClient(_channel);
+            using var registerCall = registerClient.RegisterAsync(registerRequest);
 
-            Assert.Equal(HttpStatusCode.OK, registerResponse.StatusCode);
+            var registerResult = await registerCall.ResponseAsync;
 
-            var loginRequest = new Login
+            var loginClient = new LoginService.LoginServiceClient(_channel);
+            using var loginCall = loginClient.LoginAsync(new LoginRequest
             {
                 Username = registerRequest.Username,
                 Password = registerRequest.Password,
                 CompanyName = registerRequest.CompanyName
-            };
+            });
 
-            using var loginResponse = await _client.PostAsJsonAsync("/login", loginRequest);
+            var loginResult = await loginCall.ResponseAsync;
 
-            Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
-
-            var loginObject = await loginResponse.Content.ReadAsAsync<LoginResponse>();
-
-            Assert.NotNull(loginObject.Token);
-            Assert.NotNull(loginObject.RefreshToken);
+            Assert.NotNull(loginResult.Token);
+            Assert.NotNull(loginResult.RefreshToken);
         }
     }
 }
