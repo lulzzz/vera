@@ -30,6 +30,7 @@ namespace Vera.Invoices
         public byte[] Signature { get; set; }
     }
 
+    // TODO: rename to invoice service
     public interface IInvoiceFacade
     {
         Task<InvoiceResult> Process(Invoice invoice);

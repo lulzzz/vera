@@ -1,0 +1,181 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package vera.grpc;
+
+service InvoiceService {
+    rpc Create(CreateInvoiceRequest) returns (CreateInvoiceReply);
+}
+
+message CreateInvoiceRequest {
+    Invoice invoice = 1;
+}
+
+message CreateInvoiceReply {
+    // Invoice number that has been assigned to the invoice
+    string number = 1;
+
+    // Sequence number of the invoice
+    int32 sequence = 2;
+
+    Signature signature = 3;
+}
+
+// Signature captures the in-/output of the signing of the invoice
+message Signature {
+    // Input is the data that was used to create the resulting signature, which
+    // can be found in the output
+    bytes input = 1;
+
+    // Output is the actual signed data
+    bytes output = 2;
+}
+
+message Invoice {
+    // TODO: may not be needed (extract from token of user)
+    string account = 1;
+    
+    // Identifier of the invoice in the external system
+    string systemId = 2;
+    
+    // Identifier of the "cash register" that performed the transaction
+    string terminalId = 3;
+    
+    // Indicates if this invoice was created manually
+    bool manual = 4;
+    
+    // Fiscal period that this invoice was generated
+    int32 period = 5;
+
+    // Fiscal year that this invoice was generated
+    int32 periodYear = 6;
+    
+    // Timestamp that the invoice was invoiced
+    google.protobuf.Timestamp timestamp = 7;
+
+    repeated InvoiceLine lines = 8;
+    repeated Payment payments = 9;
+    repeated Settlement settlements = 10;    
+}
+
+message InvoiceLine {
+    enum Type {
+        GOODS = 0;
+        SERVICES = 1;
+    }
+
+    Product product = 1;
+    string description = 2;
+    
+    int32 quantity = 3;
+    string unit = 4;
+    
+    Type type = 5;
+    
+    // Total excluding taxes and any discounts
+    double gross = 6;
+
+    // Total including taxes and discounts
+    double net = 7;
+}
+
+message Settlement {
+    string systemId = 1;
+    string description = 2;
+    double amount = 3;
+}
+
+message Payment {
+    enum Category {
+        OTHER = 0;
+        DEBIT = 1;
+        CREDIT = 2;
+        CASH = 3;
+        VOUCHER = 4;
+        ONLINE = 5;
+    }
+
+    string reference = 1;
+
+    // Code to identify this payment
+    string code = 2;
+    
+    // Timestamp of the transaction
+    google.protobuf.Timestamp timestamp = 3;
+    
+    // Description of the payment, e.g "Mastercard"
+    string description = 4;
+    
+    // Amount that was paid
+    double amount = 5;
+    
+    Category category = 6;
+}
+
+message Store {
+    string systemId = 1;
+
+    // Name of the store
+    string name = 2;
+
+    // Number of the store
+    string number = 3;
+    
+    // Address is the location of the store
+    Address address = 4;
+}
+
+message Customer {
+    string systemId = 1;
+    
+    string firstName = 2;
+    string lastName = 3;
+    
+    string email = 4;
+    
+    string companyName = 5;
+    string registrationNumber = 6;
+    string taxRegistrationNumber = 7;
+    
+    Address billingAddress = 8;
+    Address shippingAddress = 9;
+}
+
+message Employee {
+    string systemId = 1;
+    
+    string firstName = 2;
+    string lastName = 3;
+}
+
+message Address {
+    string street = 1;
+    
+    string number = 2;
+    
+    string city = 3;
+
+    string postalCode = 4;
+
+    // Country in the ISO 3166-1 format
+    string country = 5;
+
+    // Region in the ISO 3166-2 format
+    string region = 6;
+}
+
+message Product {
+    enum Group {
+        OTHER = 0;
+    }
+
+    // Article code of the product as used by the merchant
+    string code = 1;
+
+    // Description of the product
+    string description = 2;
+
+    // Indicates in what kind of group the product belongs
+    Group group = 3;
+}

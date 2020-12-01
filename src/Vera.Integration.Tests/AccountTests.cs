@@ -16,7 +16,7 @@ namespace Vera.Integration.Tests
         {
             var client = fixture.CreateClient();
 
-            _channel = GrpcChannel.ForAddress(client.BaseAddress, new GrpcChannelOptions
+            _channel = GrpcChannel.ForAddress(client.BaseAddress!, new GrpcChannelOptions
             {
                 HttpClient = client
             });
@@ -58,7 +58,7 @@ namespace Vera.Integration.Tests
 
         private async Task<LoginReply> GetToken(Faker faker)
         {
-            var registerRequest = new Grpc.RegisterRequest
+            var registerRequest = new RegisterRequest
             {
                 Username = faker.Internet.UserName(),
                 Password = faker.Internet.Password(),

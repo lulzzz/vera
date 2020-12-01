@@ -1,5 +1,0 @@
-syntax = "proto3";
-
-option csharp_namespace = "Vera.Grpc";
-
-package Accounts;

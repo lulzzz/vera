@@ -18,7 +18,7 @@ namespace Vera.Portugal
 
         public Task<PackageSignResult> Sign(Package package)
         {
-            const string separator = ";";
+            const char separator = ';';
 
             var invoiceDate = package.Timestamp.ToString("yyyy-MM-dd");
             var systemEntryDate = package.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss");
