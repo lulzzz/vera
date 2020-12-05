@@ -1,5 +1,6 @@
 syntax = "proto3";
 
+import "Protos/shared.proto";
 import "google/protobuf/timestamp.proto";
 
 package vera.grpc;
@@ -54,9 +55,17 @@ message Invoice {
     // Timestamp that the invoice was invoiced
     google.protobuf.Timestamp timestamp = 7;
 
-    repeated InvoiceLine lines = 8;
-    repeated Payment payments = 9;
-    repeated Settlement settlements = 10;    
+    string remark = 8;
+
+    Supplier supplier = 9;
+    Customer customer = 10;
+    Employee employee = 11;
+
+    Address billingAddress = 12;
+    Address shippingAddress = 13;
+
+    repeated InvoiceLine lines = 14;
+    repeated Payment payments = 15;
 }
 
 message InvoiceLine {
@@ -65,25 +74,42 @@ message InvoiceLine {
         SERVICES = 1;
     }
 
+    // Associated product that was sold
     Product product = 1;
+
+    // Description of the line, e.g what was sold or what service was performed
     string description = 2;
-    
+
+    // Quantity that was invoiced
     int32 quantity = 3;
+
+    // Unit of measure
     string unit = 4;
     
     Type type = 5;
+
+    // Gross price per unit
+    vera.grpc.shared.DecimalValue unitPrice = 6;
     
     // Total excluding taxes and any discounts
-    double gross = 6;
+    vera.grpc.shared.DecimalValue gross = 7;
 
     // Total including taxes and discounts
-    double net = 7;
+    vera.grpc.shared.DecimalValue net = 8;
+
+    TaxValue tax = 9;
+
+    repeated Settlement settlements = 10;
 }
 
 message Settlement {
     string systemId = 1;
+
+    // Description of the given discount
     string description = 2;
-    double amount = 3;
+
+    // Amount of discount that was given
+    vera.grpc.shared.DecimalValue amount = 3;
 }
 
 message Payment {
@@ -108,22 +134,24 @@ message Payment {
     string description = 4;
     
     // Amount that was paid
-    double amount = 5;
+    vera.grpc.shared.DecimalValue amount = 5;
     
     Category category = 6;
 }
 
-message Store {
+message Supplier {
     string systemId = 1;
 
-    // Name of the store
     string name = 2;
 
-    // Number of the store
-    string number = 3;
-    
-    // Address is the location of the store
-    Address address = 4;
+    // Registration number of the business
+    string registrationNumber = 3;
+
+    // Registration number when reporting taxes
+    string taxRegistrationNumber = 4;
+
+    // Address is the physical location of the supplier
+    Address address = 5;
 }
 
 message Customer {
@@ -178,4 +206,9 @@ message Product {
 
     // Indicates in what kind of group the product belongs
     Group group = 3;
+}
+
+message TaxValue {
+    vera.grpc.shared.DecimalValue rate = 1;
+    string code = 2;
 }

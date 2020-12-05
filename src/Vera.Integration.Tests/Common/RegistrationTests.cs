@@ -2,12 +2,11 @@ using System.Threading.Tasks;
 using Bogus;
 using Grpc.Net.Client;
 using Vera.Grpc;
-using Vera.WebApi.Controllers;
 using Xunit;
 using LoginService = Vera.Grpc.LoginService;
 using RegisterService = Vera.Grpc.RegisterService;
 
-namespace Vera.Integration.Tests
+namespace Vera.Integration.Tests.Common
 {
     public class RegistrationTests : IClassFixture<ApiWebApplicationFactory>
     {

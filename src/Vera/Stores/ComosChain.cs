@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
@@ -15,12 +16,13 @@ namespace Vera.Stores
             _container = container;
         }
 
-        public async Task<bool> Append(T document, PartitionKey partitionKey)
+        public async Task Append(T document, string partitionKeyValue)
         {
+            var partitionKey = new PartitionKey(partitionKeyValue);
             var last = await Tail(partitionKey);
             var tx = _container.CreateTransactionalBatch(partitionKey);
 
-            var next = new ChainableDocument<T>(document, partitionKey.ToString());
+            var next = new ChainableDocument<T>(document, partitionKeyValue);
 
             tx.CreateItem(next);
             
@@ -35,7 +37,11 @@ namespace Vera.Stores
 
             using var response = await tx.ExecuteAsync();
 
-            return response.IsSuccessStatusCode;
+            if (!response.IsSuccessStatusCode)
+            {
+                // TODO: create specific exception
+                throw new Exception(response.ErrorMessage);
+            }
         }
 
         public IQueryable<ChainableDocument<T>> Query()

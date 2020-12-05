@@ -19,7 +19,7 @@ namespace Vera.Stores
 
         public async Task Save(Invoice invoice, string bucket)
         {
-            await _chain.Append(invoice, new PartitionKey(bucket));
+            await _chain.Append(invoice, bucket);
         }
 
         public async Task<Invoice> Last(Invoice invoice, string bucket)

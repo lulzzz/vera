@@ -4,9 +4,10 @@ using Bogus;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Vera.Grpc;
+using Vera.Grpc.Shared;
 using Xunit;
 
-namespace Vera.Integration.Tests
+namespace Vera.Integration.Tests.Common
 {
     public class AccountTests : IClassFixture<ApiWebApplicationFactory>
     {

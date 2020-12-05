@@ -5,13 +5,23 @@ import "Protos/shared.proto";
 package vera.grpc;
 
 service AccountService {
-    rpc Create (CreateAccountRequest) returns (Empty);
-    rpc List (Empty) returns (ListAccountReply);
+    rpc Create (CreateAccountRequest) returns (CreateAccountReply);
+    rpc CreateOrUpdateConfiguration (AccountConfigurationRequest) returns (vera.grpc.shared.Empty);
+    rpc List (vera.grpc.shared.Empty) returns (ListAccountReply);
 }
 
 message CreateAccountRequest {
     string name = 1;
     string certification = 2;
+}
+
+message CreateAccountReply {
+    string id = 1;
+}
+
+message AccountConfigurationRequest {
+    string id = 1;
+    map<string, string> fields = 2;
 }
 
 message ListAccountReply {

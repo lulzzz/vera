@@ -4,34 +4,40 @@ using System.Security.Cryptography;
 using System.Text;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.OpenSsl;
 using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Utilities.IO.Pem;
 using Vera.Concurrency;
+using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Models;
 using Vera.Stores;
+using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
+using PemWriter = Org.BouncyCastle.OpenSsl.PemWriter;
 
 namespace Vera.Portugal
 {
-    public class ComponentFactoryResolver : IComponentFactoryResolver
+    public class ComponentFactoryResolver : AbstractComponentFactoryResolver<Configuration>
     {
         private readonly IInvoiceStore _invoiceStore;
         private readonly ILocker _locker;
 
-        public ComponentFactoryResolver(IInvoiceStore invoiceStore, ILocker locker)
+        public ComponentFactoryResolver(
+            IInvoiceStore invoiceStore,
+            ILocker locker,
+            IAccountConfigurationProvider accountConfigurationProvider
+        ) : base(accountConfigurationProvider)
         {
             _invoiceStore = invoiceStore;
             _locker = locker;
         }
 
-        public IComponentFactory Resolve(Account account)
+        protected override IComponentFactory Build(Account account, Configuration config)
         {
             RSA rsa;
 
-            var config = account.GetConfiguration<Configuration>();
             var privateKey = config.PrivateKey;
 
-            using (var sr = new StringReader(Encoding.ASCII.GetString(privateKey)))
+            using (var sr = new StringReader(privateKey))
             {
                 var reader = new PemReader(sr);
                 var keyPair = (AsymmetricCipherKeyPair) reader.ReadObject();
@@ -41,9 +47,9 @@ namespace Vera.Portugal
                 rsa = RSA.Create(rsaParameters);
             }
 
-            return new ComponentFactory(_invoiceStore, _locker, rsa);
+            return new ComponentFactory(_invoiceStore, _locker, rsa, config);
         }
 
-        public string Name => "PT";
+        public override string Name => "PT";
     }
 }

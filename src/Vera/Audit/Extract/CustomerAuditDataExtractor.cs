@@ -73,7 +73,7 @@ namespace Vera.Audit.Extract
         // TODO(kevin): extract to helper method
         private Address ExtractAddress(Models.Address address, AddressType type)
         {
-            return new Address
+            return new()
             {
                 City = address.City,
                 Country = address.Country,

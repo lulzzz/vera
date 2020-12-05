@@ -104,14 +104,13 @@ namespace Vera.Portugal.Tests
                 }
             };
 
-            account.SetConfiguration(new Configuration
+            var context = new ThermalReceiptContextFactory().Create(account, invoice);
+            
+            var generator = new ThermalReceiptGenerator(new Configuration
             {
                 SocialCapital = 258501m
             });
 
-            var context = new ThermalReceiptContextFactory().Create(account, invoice);
-            
-            var generator = new ThermalReceiptGenerator();
             var node = generator.Generate(context);
 
             var sb = new StringBuilder();

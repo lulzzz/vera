@@ -33,8 +33,8 @@ namespace Vera.StandardAuditFileTaxation
 
   public sealed class AuditSources
   {
-    public SourceDocuments<Invoice> SalesInvoices { get; } = new SourceDocuments<Invoice>();
-    public SourceDocuments<Payment> Payments { get; } = new SourceDocuments<Payment>();
+    public SourceDocuments<Invoice> SalesInvoices { get; } = new();
+    public SourceDocuments<Payment> Payments { get; } = new();
   }
 
   public sealed class Audit
@@ -45,7 +45,7 @@ namespace Vera.StandardAuditFileTaxation
     }
 
     public Header Header { get; }
-    public MasterFile MasterFiles { get; } = new MasterFile();
-    public AuditSources SourceDocuments { get; } = new AuditSources();
+    public MasterFile MasterFiles { get; } = new();
+    public AuditSources SourceDocuments { get; } = new();
   }
 }

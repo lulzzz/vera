@@ -8,7 +8,7 @@ namespace Vera.Configuration
     public abstract class AbstractAuditConfiguration
     {
         // TODO(kevin): add generic T to IAuditConfiguration, let this method return validation result?
-        public abstract void Initialize(IDictionary<string, object> config);
+        public abstract void Initialize(IDictionary<string, string> config);
 
         public IDictionary<string, object> ToDictionary()
         {

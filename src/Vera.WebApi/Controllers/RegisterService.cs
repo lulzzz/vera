@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Grpc.Core;
 using Vera.Grpc;
+using Vera.Grpc.Shared;
 using Vera.Models;
 using Vera.Services;
 

@@ -39,42 +39,36 @@ namespace Vera.Invoices
     public sealed class InvoiceFacade : IInvoiceFacade
     {
         private readonly IInvoiceStore _store;
-        private readonly ILocker _locker;
-        private readonly IInvoiceBucketGenerator _invoiceBucketGenerator;
-        private readonly IInvoiceNumberGenerator _invoiceNumberGenerator;
-        private readonly IPackageSigner _packageSigner;
+        private readonly IComponentFactory _factory;
 
-        public InvoiceFacade(
-            IInvoiceStore store,
-            ILocker locker,
-            IInvoiceBucketGenerator invoiceBucketGenerator,
-            IInvoiceNumberGenerator invoiceNumberGenerator,
-            IPackageSigner packageSigner
-        )
+        public InvoiceFacade(IInvoiceStore store, IComponentFactory factory)
         {
             _store = store;
-            _locker = locker;
-            _invoiceBucketGenerator = invoiceBucketGenerator;
-            _invoiceNumberGenerator = invoiceNumberGenerator;
-            _packageSigner = packageSigner;
+            _factory = factory;
         }
 
         public async Task<InvoiceResult> Process(Invoice invoice)
         {
-            var bucket = _invoiceBucketGenerator.Generate(invoice);
+            var invoiceBucketGenerator = _factory.CreateInvoiceBucketGenerator();
+            var locker = _factory.CreateLocker();
+
+            var bucket = invoiceBucketGenerator.Generate(invoice);
 
             // Lock on the unique sequence of the invoice
-            await using (await _locker.Lock(bucket, TimeSpan.FromMinutes(1)))
+            await using (await locker.Lock(bucket, TimeSpan.FromMinutes(1)))
             {
+                var invoiceNumberGenerator = _factory.CreateInvoiceNumberGenerator();
+                var packageSigner = _factory.CreatePackageSigner();
+
                 // Get last stored invoice based on the bucket for the invoice
                 var last = await _store.Last(invoice, bucket);
 
                 invoice.Sequence = last?.Sequence + 1 ?? 1;
 
                 // Generate number for this invoice
-                var number = await _invoiceNumberGenerator.Generate(invoice, last);
+                var number = await invoiceNumberGenerator.Generate(invoice, last);
 
-                var result = await _packageSigner.Sign(new Package(invoice, last)
+                var result = await packageSigner.Sign(new Package(invoice, last)
                 {
                     Number = number
                 });

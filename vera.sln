@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Bootstrap", "src\Vera.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Integration.Tests", "src\Vera.Integration.Tests\Vera.Integration.Tests.csproj", "{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,5 +106,10 @@ Global
 		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5}.Release|x64.Build.0 = Release|Any CPU
 		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5}.Release|x86.ActiveCfg = Release|Any CPU
 		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
+		{23013BB1-B5BB-4E43-B2CC-2D128877903E} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
+		{E91DF8F4-FD6A-43FB-ABA9-D0783BBA2A0E} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
 	EndGlobalSection
 EndGlobal

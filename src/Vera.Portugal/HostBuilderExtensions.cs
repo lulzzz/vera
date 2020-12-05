@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
+using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Stores;
 
@@ -15,7 +16,8 @@ namespace Vera.Portugal
                     collection.AddSingleton<IComponentFactoryResolver>(provider =>
                         new ComponentFactoryResolver(
                             provider.GetService<IInvoiceStore>(),
-                            provider.GetService<ILocker>()
+                            provider.GetService<ILocker>(),
+                            provider.GetService<IAccountConfigurationProvider>()
                         )
                     );
                 });

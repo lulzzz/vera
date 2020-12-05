@@ -13,12 +13,14 @@ namespace Vera.Portugal
         private readonly IInvoiceStore _invoiceStore;
         private readonly ILocker _locker;
         private readonly RSA _rsa;
+        private readonly Configuration _configuration;
 
-        public ComponentFactory(IInvoiceStore invoiceStore, ILocker locker, RSA rsa)
+        public ComponentFactory(IInvoiceStore invoiceStore, ILocker locker, RSA rsa, Configuration configuration)
         {
             _invoiceStore = invoiceStore;
             _locker = locker;
             _rsa = rsa;
+            _configuration = configuration;
         }
 
         public ILocker CreateLocker()
@@ -44,7 +46,7 @@ namespace Vera.Portugal
         public IAuditFacade CreateFacade()
         {
             return new AuditFacade<AuditFile>(
-                new AuditTransformer(), 
+                new AuditTransformer(_configuration),
                 new AuditArchive(), 
                 _invoiceStore
             );

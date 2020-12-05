@@ -20,11 +20,15 @@ namespace Vera.Portugal
         private const string UnitOfMeasure = "UN";
         private const string DefaultFiscalId = "999999990";
 
+        private readonly Configuration _configuration;
+
+        public AuditTransformer(Configuration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public AuditFile Transform(AuditContext context, AuditCriteria criteria, StandardAuditFileTaxation.Audit audit)
         {
-            // TODO(kevin): see if it is nicer to pass the typed configuration as a parameter or part of the context instead of doing this
-            var config = context.Account.GetConfiguration<Configuration>();
-
             var productId = context.SoftwareVersion + "/" + context.CertificateName;
             var softwareCertificateNumber = context.CertificateNumber;
 
@@ -64,7 +68,7 @@ namespace Vera.Portugal
                     CurrencyCode = audit.Header.DefaultCurrencyCode,
                     DateCreated = DateTime.Today,
                     TaxEntity = TaxEntity,
-                    ProductCompanyTaxID = config.ProductCompanyTaxId,
+                    ProductCompanyTaxID = _configuration.ProductCompanyTaxId,
                     SoftwareCertificateNumber = softwareCertificateNumber,
                     ProductID = productId,
                     ProductVersion = context.SoftwareVersion,

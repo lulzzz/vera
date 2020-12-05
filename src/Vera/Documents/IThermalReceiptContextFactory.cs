@@ -12,12 +12,11 @@ namespace Vera.Documents
     {
         public ThermalReceiptContext Create(Account account, Invoice invoice)
         {
-            return new ThermalReceiptContext
+            return new()
             {
                 Account = account,
                 Invoice = invoice,
-                Totals = CalculateInvoiceTotals(invoice),
-                // TODO(kevin): get other properties from the account config
+                Totals = CalculateInvoiceTotals(invoice)
             };
         }
 

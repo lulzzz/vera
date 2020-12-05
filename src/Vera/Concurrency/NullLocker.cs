@@ -5,10 +5,6 @@ namespace Vera.Concurrency
 {
     public sealed class NullLocker : ILocker
     {
-        public static readonly ILocker Instance = new NullLocker();
-
-        private NullLocker() { }
-
         public Task<IAsyncDisposable> Lock(string resource, TimeSpan timeout)
         {
             return Task.FromResult<IAsyncDisposable>(new NullDisposable());
@@ -16,10 +12,7 @@ namespace Vera.Concurrency
 
         private class NullDisposable : IAsyncDisposable
         {
-            public ValueTask DisposeAsync()
-            {
-                return new ValueTask(Task.CompletedTask);
-            }
+            public ValueTask DisposeAsync() => new(Task.CompletedTask);
         }
     }
 }

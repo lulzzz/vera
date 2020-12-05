@@ -96,7 +96,7 @@ namespace Vera.Concurrency
 
             public ValueTask DisposeAsync()
             {
-                return new ValueTask(_lease.ReleaseAsync());
+                return new(_lease.ReleaseAsync());
             }
         }
     }

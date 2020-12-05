@@ -8,24 +8,24 @@ namespace Vera.Portugal
     // TODO(kevin): extract magic strings for the keys of the fields
     public class Configuration : AbstractAuditConfiguration
     {
-        public override void Initialize(IDictionary<string, object> config)
+        public override void Initialize(IDictionary<string, string> config)
         {
-            object o;
+            // object o;
 
-            if (config.TryGetValue("PrivateKey", out o))
+            if (config.TryGetValue("PrivateKey", out var pk))
             {
-                PrivateKey = o as byte[];
+                PrivateKey = pk;
             }
 
-            if (config.TryGetValue("ProductCompanyTaxId", out o))
-            {
-                ProductCompanyTaxId = Convert.ToString(o);
-            }
+            // if (config.TryGetValue("ProductCompanyTaxId", out o))
+            // {
+            //     ProductCompanyTaxId = Convert.ToString(o);
+            // }
 
-            if (config.TryGetValue("SocialCapital", out o))
-            {
-                SocialCapital = Convert.ToDecimal(o);
-            }
+            // if (config.TryGetValue("SocialCapital", out o))
+            // {
+            //     SocialCapital = Convert.ToDecimal(o);
+            // }
         }
 
         [Required]
@@ -34,7 +34,7 @@ namespace Vera.Portugal
             GroupName = "Security",
             Description = "RSA private key to use for signing the invoices"
         )]
-        public byte[] PrivateKey { get; set; }
+        public string PrivateKey { get; set; }
 
         [Required]
         [Display(

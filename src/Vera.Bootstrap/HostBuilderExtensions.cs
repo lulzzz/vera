@@ -3,6 +3,7 @@ using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
+using Vera.Configuration;
 using Vera.Portugal;
 using Vera.Security;
 using Vera.Services;
@@ -33,8 +34,9 @@ namespace Vera.Bootstrap
             collection.AddTransient<ITokenFactory, RandomTokenFactory>();
             collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
             collection.AddTransient<IComponentFactoryCollection, ComponentFactoryCollection>();
+            collection.AddTransient<IAccountConfigurationProvider, AccountConfigurationProvider>();
 
-            // Facades
+            // Services
             collection.AddTransient<IUserRegisterService, UserRegisterService>();
         }
 

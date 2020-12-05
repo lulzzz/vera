@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Vera.Dependencies;
 using Vera.Models;
@@ -21,7 +22,15 @@ namespace Vera.Bootstrap
 
         public IComponentFactory Get(Account account)
         {
-            return _resolvers.Single(x => x.Name == account.Certification).Resolve(account);
+            var factory = _resolvers.FirstOrDefault(x => x.Name == account.Certification);
+
+            if (factory == null)
+            {
+                throw new InvalidOperationException(
+                    $"No component factory available for certification {account.Certification}");
+            }
+
+            return factory.Resolve(account);
         }
     }
 }

@@ -5,7 +5,7 @@ import "Protos/shared.proto";
 package vera.grpc;
 
 service RegisterService {
-    rpc Register (RegisterRequest) returns (vera.grpc.Empty);
+    rpc Register (RegisterRequest) returns (vera.grpc.shared.Empty);
 }
 
 message RegisterRequest {

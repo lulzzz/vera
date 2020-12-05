@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Grpc;
+using Vera.Grpc.Shared;
 using Vera.Stores;
 
 namespace Vera.WebApi.Controllers
@@ -20,7 +21,7 @@ namespace Vera.WebApi.Controllers
             _companyStore = companyStore;
         }
 
-        public override async Task<Empty> Create(CreateAccountRequest request, ServerCallContext context)
+        public override async Task<CreateAccountReply> Create(CreateAccountRequest request, ServerCallContext context)
         {
             var companyName = context.GetHttpContext().User.FindFirstValue(Security.ClaimTypes.CompanyName);
             var company = await _companyStore.GetByName(companyName);
@@ -40,14 +41,39 @@ namespace Vera.WebApi.Controllers
 
             // TODO: limit the certification values to existing ones
 
+            var accountId = Guid.NewGuid();
+
             accounts.Add(new Vera.Models.Account
             {
-                Id = Guid.NewGuid(),
+                Id = accountId,
                 Certification = request.Certification,
                 Name = request.Name
             });
 
             company.Accounts = accounts;
+
+            await _companyStore.Update(company);
+
+            return new CreateAccountReply
+            {
+                Id = accountId.ToString()
+            };
+        }
+
+        public override async Task<Empty> CreateOrUpdateConfiguration(AccountConfigurationRequest request, ServerCallContext context)
+        {
+            var principal = context.GetHttpContext().User;
+            var company = await _companyStore.GetByName(principal.FindFirstValue(Security.ClaimTypes.CompanyName));
+            var account = company.Accounts.FirstOrDefault(a => a.Id.ToString() == request.Id);
+
+            if (account == null)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Account {request.Id} does not exist"));
+            }
+
+            // TODO: validate the configuration
+
+            account.Configuration = request.Fields;
 
             await _companyStore.Update(company);
 
