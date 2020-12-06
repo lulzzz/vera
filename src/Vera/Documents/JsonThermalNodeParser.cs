@@ -35,6 +35,8 @@ namespace Vera.Documents
                 "text" => ParseText(o),
                 "image" => ParseImage(o),
                 "qr" => ParseQR(o),
+                "spacing" => ParseSpacing(o),
+                "line" => ParseLine(o),
                 _ => new UnknownNode(nodeType)
             };
         }
@@ -65,6 +67,16 @@ namespace Vera.Documents
         private IThermalNode ParseQR(JToken o)
         {
             return new QRCodeThermalNode(o.Value<string>("value"));
+        }
+
+        private IThermalNode ParseSpacing(JToken o)
+        {
+            return new SpacingThermalNode(o.Value<int>("value"));
+        }
+
+        private IThermalNode ParseLine(JToken o)
+        {
+            return new LineThermalNode();
         }
 
         private IEnumerable<IThermalNode> ParseChildren(JToken o)

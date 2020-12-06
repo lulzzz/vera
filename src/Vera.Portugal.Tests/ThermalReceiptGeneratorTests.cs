@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Vera.Documents;
+using Vera.Documents.Visitors;
 using Vera.Models;
+using Vera.Thermal;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -38,7 +41,7 @@ namespace Vera.Portugal.Tests
                 },
                 Employee = new Billable
                 {
-                    SystemID = "007",
+                    SystemId = "007",
                     Name = "Kevin"
                 },
                 TerminalId = "ST01.44",
@@ -52,7 +55,6 @@ namespace Vera.Portugal.Tests
                     new InvoiceLine
                     {
                         Gross = 15m,
-                        Net = 12.39m,
                         Description = "Shower foam dao",
                         Quantity = 2,
                         Taxes = new Taxes
@@ -104,24 +106,31 @@ namespace Vera.Portugal.Tests
                 }
             };
 
-            var context = new ThermalReceiptContextFactory().Create(account, invoice);
-            
-            var generator = new ThermalReceiptGenerator(new Configuration
+            var config = new Configuration
             {
                 SocialCapital = 258501m
-            });
+            };
 
+            var context = new ThermalReceiptContextFactory().Create(account, invoice);
+
+            var generator = new ThermalReceiptGenerator(config, "PELICAN THEORY", "9999");
             var node = generator.Generate(context);
 
             var sb = new StringBuilder();
-            
+
             var visitor = new StringThermalVisitor(sb);
             node.Accept(visitor);
 
             var result = sb.ToString();
 
-            Assert.Contains("FATURA SIMPLIFICADA", result);
-            Assert.DoesNotContain("NOTA DE CRÉDITO", result);
+            var lines = result.Split(Environment.NewLine);
+            foreach (var line in lines)
+            {
+                Assert.True(line.Length <= 48, $"{line} - exceeds length by {line.Length - 48} chars");
+            }
+
+            // Assert.Contains("FATURA SIMPLIFICADA", result);
+            // Assert.DoesNotContain("NOTA DE CRÉDITO", result);
 
             _testOutputHelper.WriteLine(result);
         }

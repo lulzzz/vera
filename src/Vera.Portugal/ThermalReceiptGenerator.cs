@@ -14,10 +14,14 @@ namespace Vera.Portugal
         private static readonly CultureInfo Culture = CultureInfo.CreateSpecificCulture("pt-PT");
 
         private readonly Configuration _configuration;
+        private readonly string _certificateName;
+        private readonly string _certificateNumber;
 
-        public ThermalReceiptGenerator(Configuration configuration)
+        public ThermalReceiptGenerator(Configuration configuration, string certificateName, string certificateNumber)
         {
             _configuration = configuration;
+            _certificateName = certificateName;
+            _certificateNumber = certificateNumber;
         }
 
         public IThermalNode Generate(ThermalReceiptContext context)
@@ -144,15 +148,15 @@ namespace Vera.Portugal
 
         private IEnumerable<IThermalNode> GenerateInvoiceLines(ThermalReceiptContext context)
         {
-            const string format = "{0,5}{1,32}{2,7}{3,10}";
+            const string format = "{0,-5}{1,-29}{2,6}{3,8}";
 
             var sb = new StringBuilder();
             sb.AppendFormat(
                 format, 
-                "Qt".PadRight(5), 
-                "Artigo".PadRight(32), 
-                "IVA".PadLeft(7), 
-                "VALOR".PadLeft(10)
+                "Qt",
+                "Artigo",
+                "IVA",
+                "VALOR"
             );
 
             yield return new TextThermalNode(sb.ToString());
@@ -163,10 +167,10 @@ namespace Vera.Portugal
 
                 sb.AppendFormat(
                     format, 
-                    line.Quantity.ToString().PadRight(5), 
-                    line.Description.PadRight(32), 
-                    FormatTaxRate(line.Taxes.Rate).PadLeft(7),
-                    FormatCurrency(line.Gross).PadLeft(10)
+                    line.Quantity.ToString(),
+                    line.Description,
+                    FormatTaxRate(line.Taxes.Rate),
+                    FormatCurrency(line.Gross)
                 );
 
                 yield return new TextThermalNode(sb.ToString());
@@ -184,17 +188,17 @@ namespace Vera.Portugal
 
         private IEnumerable<IThermalNode> GenerateTaxLines(ThermalReceiptContext context)
         {
-            const string format = "{0,19}{1,20}{2,6}{3,8}";
+            const string format = "{0,-12}{1,-12}{2,12}{3,12}";
 
             var totals = context.Totals;
 
             var sb = new StringBuilder();
             sb.AppendFormat(
                 format,
-                "Taxa".PadRight(19),
-                "Base".PadRight(20),
-                "Q.IVA".PadLeft(6),
-                "Total".PadLeft(9)
+                "Taxa",
+                "Base",
+                "Q.IVA",
+                "Total"
             );
 
             yield return new TextThermalNode(sb.ToString());
@@ -205,10 +209,10 @@ namespace Vera.Portugal
 
                 sb.AppendFormat(
                     format,
-                    FormatTaxRate(tax.Rate).PadRight(19),
-                    FormatCurrency(tax.Base).PadRight(20),
-                    FormatCurrency(tax.Amount).PadLeft(6),
-                    FormatCurrency(tax.Amount + tax.Base).PadLeft(9)
+                    FormatTaxRate(tax.Rate),
+                    FormatCurrency(tax.Base),
+                    FormatCurrency(tax.Amount),
+                    FormatCurrency(tax.Amount + tax.Base)
                 );
 
                 yield return new TextThermalNode(sb.ToString());
@@ -217,10 +221,10 @@ namespace Vera.Portugal
             sb.Clear()
               .AppendFormat(
                   format,
-                    "SUBTOTAL".PadRight(19),
-                    FormatCurrency(totals.Amount).PadRight(20),
-                    FormatCurrency(totals.AmountInTax - totals.Amount).PadLeft(6),
-                    FormatCurrency(totals.AmountInTax).PadLeft(9)
+                    "SUBTOTAL",
+                    FormatCurrency(totals.Amount),
+                    FormatCurrency(totals.AmountInTax - totals.Amount),
+                    FormatCurrency(totals.AmountInTax)
             );
 
             yield return new TextThermalNode(sb.ToString());
@@ -246,7 +250,7 @@ namespace Vera.Portugal
 
         private IEnumerable<IThermalNode> GeneratePayments(ThermalReceiptContext context)
         {
-            const string format = "{0,45}{1,9}";
+            const string format = "{0,-39}{1,9}";
 
             yield return new TextThermalNode("MODO DE PAGAMENTO");
 
@@ -258,7 +262,7 @@ namespace Vera.Portugal
                 if (payment.Category == PaymentCategory.Credit || payment.Category == PaymentCategory.Debit)
                 {
                     // TOOD(kevin): not always Adyen, what to do?
-                    sb.AppendFormat(format, "PROCESSADO POR ADYEN", FormatCurrency(payment.Amount).PadLeft(10));
+                    sb.AppendFormat(format, "PROCESSADO POR ADYEN", FormatCurrency(payment.Amount));
 
                     yield return new TextThermalNode("COPIA CLIENTE");
                 }
@@ -266,8 +270,8 @@ namespace Vera.Portugal
                 {
                     sb.AppendFormat(
                         format, 
-                        payment.Description.PadRight(45), 
-                        FormatCurrency(payment.Amount).PadLeft(9)
+                        payment.Description,
+                        FormatCurrency(payment.Amount)
                     );
                 }
 
@@ -283,7 +287,7 @@ namespace Vera.Portugal
                 sb.AppendFormat(
                     format,
                     "Troco",
-                    FormatCurrency(change.Amount).PadLeft(10)
+                    FormatCurrency(change.Amount)
                 );
 
                 yield return new TextThermalNode(sb.ToString());
