@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Vera.Documents;
-using Vera.Documents.Visitors;
 using Vera.Models;
-using Vera.Thermal;
 using Xunit;
 using Xunit.Abstractions;
 

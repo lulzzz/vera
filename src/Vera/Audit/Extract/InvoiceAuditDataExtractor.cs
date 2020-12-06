@@ -25,7 +25,7 @@ namespace Vera.Audit.Extract
                 Number = invoice.Number,
                 IsManual = invoice.Manual,
                 TerminalID = invoice.TerminalId,
-                SourceID = invoice.Employee.SystemID,
+                SourceID = invoice.Employee.SystemId,
 
                 Signature = invoice.Signature,
                 RawSignature = invoice.RawSignature,

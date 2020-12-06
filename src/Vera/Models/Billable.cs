@@ -2,7 +2,7 @@ namespace Vera.Models
 {
     public class Billable
     {
-        public string SystemID { get; set; }
+        public string SystemId { get; set; }
 
         public string Name { get; set; }
 

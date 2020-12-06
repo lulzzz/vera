@@ -36,7 +36,7 @@ namespace Vera.Stores
 
             if (!string.IsNullOrWhiteSpace(criteria.SupplierSystemId))
             {
-                query = query.Where(x => x.Value.Supplier.SystemID == criteria.SupplierSystemId);
+                query = query.Where(x => x.Value.Supplier.SystemId == criteria.SupplierSystemId);
             }
 
             query = query.Where(x =>

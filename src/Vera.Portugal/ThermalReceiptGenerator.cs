@@ -323,7 +323,7 @@ namespace Vera.Portugal
                 yield return new TextThermalNode($"COMENTARIO: {context.Invoice.Remark}");
             }
 
-            yield return new TextThermalNode($"Atendido por: {context.Invoice.Employee.SystemID}");
+            yield return new TextThermalNode($"Atendido por: {context.Invoice.Employee.SystemId}");
             yield return new TextThermalNode($"Loja: {context.Invoice.TerminalId}");
 
             yield return new TextThermalNode(context.SoftwareVersion);

@@ -85,7 +85,7 @@ namespace Vera.WebApi.Controllers
 
             result.Supplier = new Billable
             {
-                SystemID = invoice.Supplier.SystemId,
+                SystemId = invoice.Supplier.SystemId,
                 Name = invoice.Supplier.Name,
                 RegistrationNumber = invoice.Supplier.RegistrationNumber,
                 TaxRegistrationNumber = invoice.Supplier.TaxRegistrationNumber
@@ -112,7 +112,7 @@ namespace Vera.WebApi.Controllers
                 // TODO: map some more fields and billable may not be the optimal type here
                 result.Employee = new Billable
                 {
-                    SystemID = invoice.Employee.SystemId,
+                    SystemId = invoice.Employee.SystemId,
                 };
             }
 
