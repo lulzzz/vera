@@ -35,7 +35,7 @@ namespace Vera.WebApi.Controllers
         }
 
         [AllowAnonymous]
-        public override async Task<LoginReply> Login(LoginRequest request, ServerCallContext context)
+        public override async Task<TokenReply> Login(LoginRequest request, ServerCallContext context)
         {
             var company = await _companyStore.GetByName(request.CompanyName);
 
@@ -60,7 +60,7 @@ namespace Vera.WebApi.Controllers
         }
 
         [Authorize]
-        public override async Task<LoginReply> Refresh(RefreshRequest request, ServerCallContext context)
+        public override async Task<TokenReply> Refresh(RefreshRequest request, ServerCallContext context)
         {
             var principal = context.GetHttpContext().User;
 
@@ -80,7 +80,7 @@ namespace Vera.WebApi.Controllers
             return await Authorize(user, company);
         }
 
-        private async Task<LoginReply> Authorize(User user, Company company)
+        private async Task<TokenReply> Authorize(User user, Company company)
         {
             var refreshToken = _tokenFactory.Create();
 
@@ -88,7 +88,7 @@ namespace Vera.WebApi.Controllers
 
             await _userStore.Update(user);
 
-            return new LoginReply
+            return new TokenReply
             {
                 Token = _securityTokenGenerator.Generate(user, company),
                 RefreshToken = refreshToken

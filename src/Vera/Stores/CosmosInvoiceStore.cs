@@ -22,7 +22,7 @@ namespace Vera.Stores
             await _chain.Append(invoice, bucket);
         }
 
-        public async Task<Invoice> Last(Invoice invoice, string bucket)
+        public async Task<Invoice> Last(string bucket)
         {
             var tail = await _chain.Tail(new PartitionKey(bucket));
 

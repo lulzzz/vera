@@ -19,10 +19,9 @@ namespace Vera.Stores
         /// Returns the last invoice (if any) based on the given invoice. E.g. invoices may have there own
         /// sequence based their properties.
         /// </summary>
-        /// <param name="invoice"></param>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        Task<Invoice> Last(Invoice invoice, string bucket);
+        Task<Invoice> Last(string bucket);
 
         IAsyncEnumerable<Invoice> List(AuditCriteria criteria);
     }

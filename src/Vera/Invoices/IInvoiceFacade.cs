@@ -61,7 +61,7 @@ namespace Vera.Invoices
                 var packageSigner = _factory.CreatePackageSigner();
 
                 // Get last stored invoice based on the bucket for the invoice
-                var last = await _store.Last(invoice, bucket);
+                var last = await _store.Last(bucket);
 
                 invoice.Sequence = last?.Sequence + 1 ?? 1;
 

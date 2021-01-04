@@ -3,8 +3,12 @@ syntax = "proto3";
 package vera.grpc;
 
 service LoginService {
-    rpc Login (LoginRequest) returns (LoginReply);
-    rpc Refresh (RefreshRequest) returns (LoginReply);
+    rpc Login (LoginRequest) returns (TokenReply);
+    rpc Refresh (RefreshRequest) returns (TokenReply);
+}
+
+service TokenService {
+    rpc Generate (TokenRequest) returns (TokenReply);
 }
 
 message LoginRequest {
@@ -17,7 +21,11 @@ message RefreshRequest {
     string token = 1;
 }
 
-message LoginReply {
+message TokenReply {
     string token = 1;
     string refreshToken = 2;
+}
+
+message TokenRequest {
+    string username = 1;
 }

@@ -1,20 +1,16 @@
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using Grpc.Core;
+using Vera.Grpc;
 using Vera.Models;
 using Vera.Security;
 using Vera.Stores;
-using Vera.WebApi.Models;
 using Vera.WebApi.Security;
 
 namespace Vera.WebApi.Controllers
 {
-    [ApiController]
-    [Route("token")]
-    [Authorize]
-    public class ApiKeyController : ControllerBase
+    public class TokenService : Grpc.TokenService.TokenServiceBase
     {
         private readonly IUserStore _userStore;
         private readonly ICompanyStore _companyStore;
@@ -22,10 +18,10 @@ namespace Vera.WebApi.Controllers
         private readonly IPasswordStrategy _passwordStrategy;
         private readonly ISecurityTokenGenerator _securityTokenGenerator;
 
-        public ApiKeyController(
+        public TokenService(
             IUserStore userStore,
             ICompanyStore companyStore,
-            ITokenFactory tokenFactory, 
+            ITokenFactory tokenFactory,
             IPasswordStrategy passwordStrategy,
             ISecurityTokenGenerator securityTokenGenerator
         )
@@ -37,19 +33,20 @@ namespace Vera.WebApi.Controllers
             _securityTokenGenerator = securityTokenGenerator;
         }
 
-        public async Task<IActionResult> Index(RobotUser model)
+        public override async Task<TokenReply> Generate(TokenRequest request, ServerCallContext context)
         {
-            var companyId = Guid.Parse(User.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var principal = context.GetHttpContext().User;
 
-            var existingUser = await _userStore.GetByCompany(companyId, model.Username);
+            var companyId = Guid.Parse(principal.FindFirstValue(Security.ClaimTypes.CompanyId));
+
+            var existingUser = await _userStore.GetByCompany(companyId, request.Username);
 
             if (existingUser != null)
             {
-                // TODO(kevin): detailed error that user already exists
-                return BadRequest();
+                throw new RpcException(new Status(StatusCode.AlreadyExists, $"User with username {request.Username} already exists"));
             }
 
-            var company = await _companyStore.GetByName(User.FindFirstValue(Security.ClaimTypes.CompanyName));
+            var company = await _companyStore.GetByName(principal.FindFirstValue(Security.ClaimTypes.CompanyName));
 
             var auth = _passwordStrategy.Encrypt(_tokenFactory.Create());
 
@@ -58,7 +55,7 @@ namespace Vera.WebApi.Controllers
                 Id = Guid.NewGuid(),
                 CompanyId = companyId,
                 Type = UserType.Robot,
-                Username = model.Username,
+                Username = request.Username,
                 Authentication = auth,
                 RefreshToken = _tokenFactory.Create()
             };
@@ -67,11 +64,11 @@ namespace Vera.WebApi.Controllers
 
             var token = _securityTokenGenerator.Generate(user, company);
 
-            return Ok(new
+            return new TokenReply
             {
-                token,
-                refreshToken = user.RefreshToken
-            });
-        }       
+                Token = token,
+                RefreshToken = user.RefreshToken
+            };
+        }
     }
 }

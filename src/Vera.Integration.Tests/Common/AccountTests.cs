@@ -57,7 +57,7 @@ namespace Vera.Integration.Tests.Common
             Assert.Equal(accountToCreate.Certification, account.Certification);
         }
 
-        private async Task<LoginReply> GetToken(Faker faker)
+        private async Task<TokenReply> GetToken(Faker faker)
         {
             var registerRequest = new RegisterRequest
             {
