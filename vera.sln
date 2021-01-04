@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Integration.Tests", "s
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Documents", "Vera.Documents\Vera.Documents.csproj", "{C0855236-76AE-4D00-9B5F-6E476D929B69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -106,6 +108,18 @@ Global
 		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5}.Release|x64.Build.0 = Release|Any CPU
 		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5}.Release|x86.ActiveCfg = Release|Any CPU
 		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5}.Release|x86.Build.0 = Release|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Debug|x64.Build.0 = Debug|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Debug|x86.Build.0 = Debug|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Release|x64.ActiveCfg = Release|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Release|x64.Build.0 = Release|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Release|x86.ActiveCfg = Release|Any CPU
+		{C0855236-76AE-4D00-9B5F-6E476D929B69}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B785A6BD-759E-46D2-8BFD-A2C0DA8A71A5} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}

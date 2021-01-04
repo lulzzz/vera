@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using Vera.Documents;
 using Vera.Documents.Nodes;
 using Vera.Models;
+using Vera.Thermal;
 
 namespace Vera.Portugal
 {

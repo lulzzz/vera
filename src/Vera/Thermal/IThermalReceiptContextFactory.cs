@@ -1,7 +1,7 @@
 using System.Linq;
 using Vera.Models;
 
-namespace Vera.Documents
+namespace Vera.Thermal
 {
     public interface IThermalReceiptContextFactory
     {

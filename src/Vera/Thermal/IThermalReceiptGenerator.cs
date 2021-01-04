@@ -3,7 +3,7 @@ using Vera.Audit;
 using Vera.Documents.Nodes;
 using Vera.Models;
 
-namespace Vera.Documents
+namespace Vera.Thermal
 {
     public class ThermalReceiptContext : AuditContext
     {
