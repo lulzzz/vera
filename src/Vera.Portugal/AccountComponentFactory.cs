@@ -1,37 +1,30 @@
-using System;
 using System.IO;
 using System.Security.Cryptography;
-using System.Text;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Utilities.IO.Pem;
 using Vera.Concurrency;
-using Vera.Configuration;
 using Vera.Dependencies;
-using Vera.Models;
 using Vera.Stores;
 using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
-using PemWriter = Org.BouncyCastle.OpenSsl.PemWriter;
 
 namespace Vera.Portugal
 {
-    public class ComponentFactoryResolver : AbstractComponentFactoryResolver<Configuration>
+    public class AccountComponentFactory : AbstractAccountComponentFactory<Configuration>
     {
         private readonly IInvoiceStore _invoiceStore;
         private readonly ILocker _locker;
 
-        public ComponentFactoryResolver(
+        public AccountComponentFactory(
             IInvoiceStore invoiceStore,
-            ILocker locker,
-            IAccountConfigurationProvider accountConfigurationProvider
-        ) : base(accountConfigurationProvider)
+            ILocker locker
+        )
         {
             _invoiceStore = invoiceStore;
             _locker = locker;
         }
 
-        protected override IComponentFactory Build(Account account, Configuration config)
+        protected override IComponentFactory Create(Configuration config)
         {
             RSA rsa;
 

@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Vera.Configuration
 {
-    public abstract class AbstractAuditConfiguration
+    public abstract class AbstractAccountConfiguration
     {
         // TODO(kevin): add generic T to IAuditConfiguration, let this method return validation result?
         public abstract void Initialize(IDictionary<string, string> config);

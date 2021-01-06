@@ -33,8 +33,7 @@ namespace Vera.Bootstrap
             // Components
             collection.AddTransient<ITokenFactory, RandomTokenFactory>();
             collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
-            collection.AddTransient<IComponentFactoryCollection, ComponentFactoryCollection>();
-            collection.AddTransient<IAccountConfigurationProvider, AccountConfigurationProvider>();
+            collection.AddTransient<IAccountComponentFactoryCollection, AccountComponentFactoryCollection>();
 
             // Services
             collection.AddTransient<IUserRegisterService, UserRegisterService>();

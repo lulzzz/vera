@@ -13,13 +13,13 @@ namespace Vera.Portugal
     {
         private static readonly CultureInfo Culture = CultureInfo.CreateSpecificCulture("pt-PT");
 
-        private readonly Configuration _configuration;
+        private readonly decimal _socialCapital;
         private readonly string _certificateName;
         private readonly string _certificateNumber;
 
-        public ThermalReceiptGenerator(Configuration configuration, string certificateName, string certificateNumber)
+        public ThermalReceiptGenerator(decimal socialCapital, string certificateName, string certificateNumber)
         {
-            _configuration = configuration;
+            _socialCapital = socialCapital;
             _certificateName = certificateName;
             _certificateNumber = certificateNumber;
         }
@@ -61,7 +61,7 @@ namespace Vera.Portugal
             yield return new TextThermalNode(account.Name);
             yield return new TextThermalNode($"{account.Address.Street} {account.Address.Number}");
             yield return new TextThermalNode($"{account.Address.PostalCode} {account.Address.City}");
-            yield return new TextThermalNode($"Capital Social: {_configuration.SocialCapital:N}");
+            yield return new TextThermalNode($"Capital Social: {_socialCapital:N}");
             yield return new TextThermalNode($"Contribuinte: {account.RegistrationNumber}");
 
             yield return new SpacingThermalNode(1);

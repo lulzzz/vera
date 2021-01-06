@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
+using Newtonsoft.Json;
 using Vera.Documents;
 using Vera.Models;
+using Vera.Thermal;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -104,14 +107,9 @@ namespace Vera.Portugal.Tests
                 }
             };
 
-            var config = new Configuration
-            {
-                SocialCapital = 258501m
-            };
-
             var context = new ThermalReceiptContextFactory().Create(account, invoice);
 
-            var generator = new ThermalReceiptGenerator(config, "PELICAN THEORY", "9999");
+            var generator = new ThermalReceiptGenerator(258501m, "PELICAN THEORY", "9999");
             var node = generator.Generate(context);
 
             var sb = new StringBuilder();

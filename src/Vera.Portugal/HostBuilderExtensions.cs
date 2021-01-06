@@ -13,11 +13,10 @@ namespace Vera.Portugal
         {
             builder.ConfigureServices((context, collection) =>
                 {
-                    collection.AddSingleton<IComponentFactoryResolver>(provider =>
-                        new ComponentFactoryResolver(
+                    collection.AddSingleton<IAccountComponentFactory>(provider =>
+                        new AccountComponentFactory(
                             provider.GetService<IInvoiceStore>(),
-                            provider.GetService<ILocker>(),
-                            provider.GetService<IAccountConfigurationProvider>()
+                            provider.GetService<ILocker>()
                         )
                     );
                 });

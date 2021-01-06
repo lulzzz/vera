@@ -6,7 +6,7 @@ using Vera.Configuration;
 namespace Vera.Portugal
 {
     // TODO(kevin): extract magic strings for the keys of the fields
-    public class Configuration : AbstractAuditConfiguration
+    public class Configuration : AbstractAccountConfiguration
     {
         public override void Initialize(IDictionary<string, string> config)
         {

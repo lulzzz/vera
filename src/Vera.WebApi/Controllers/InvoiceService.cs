@@ -24,17 +24,17 @@ namespace Vera.WebApi.Controllers
     {
         private readonly ICompanyStore _companyStore;
         private readonly IInvoiceStore _invoiceStore;
-        private readonly IComponentFactoryCollection _componentFactoryCollection;
+        private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
         public InvoiceService(
             ICompanyStore companyStore,
             IInvoiceStore invoiceStore,
-            IComponentFactoryCollection componentFactoryCollection
+            IAccountComponentFactoryCollection accountComponentFactoryCollection
         )
         {
             _companyStore = companyStore;
             _invoiceStore = invoiceStore;
-            _componentFactoryCollection = componentFactoryCollection;
+            _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
         [Authorize]
@@ -55,7 +55,7 @@ namespace Vera.WebApi.Controllers
 
             // TODO: validate invoice, very, very, very strict
 
-            var factory = _componentFactoryCollection.Get(account);
+            var factory = _accountComponentFactoryCollection.GetOrThrow(account);
 
             var facade = new InvoiceFacade(_invoiceStore, factory);
 
