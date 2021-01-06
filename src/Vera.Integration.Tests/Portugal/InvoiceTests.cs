@@ -33,7 +33,7 @@ namespace Vera.Integration.Tests.Portugal
         {
             var setup = new Setup(_channel, _faker);
             var token = await setup.CreateLogin();
-            var account = await setup.CreateAccount(token);
+            var account = await setup.CreateAccount();
 
             await ConfigureAccount(setup, account);
 

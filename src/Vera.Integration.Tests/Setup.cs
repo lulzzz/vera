@@ -47,7 +47,7 @@ namespace Vera.Integration.Tests
             return loginResponse.Token;
         }
 
-        public async Task<string> CreateAccount(string token)
+        public async Task<string> CreateAccount()
         {
             var accountToCreate = new CreateAccountRequest
             {

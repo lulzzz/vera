@@ -2,6 +2,7 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 using Vera.Grpc;
 using Vera.Models;
 using Vera.Security;
@@ -33,12 +34,12 @@ namespace Vera.WebApi.Controllers
             _securityTokenGenerator = securityTokenGenerator;
         }
 
+        [Authorize]
         public override async Task<TokenReply> Generate(TokenRequest request, ServerCallContext context)
         {
             var principal = context.GetHttpContext().User;
 
             var companyId = Guid.Parse(principal.FindFirstValue(Security.ClaimTypes.CompanyId));
-
             var existingUser = await _userStore.GetByCompany(companyId, request.Username);
 
             if (existingUser != null)

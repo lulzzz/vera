@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Invoices;
@@ -36,6 +37,7 @@ namespace Vera.WebApi.Controllers
             _componentFactoryCollection = componentFactoryCollection;
         }
 
+        [Authorize]
         public override async Task<CreateInvoiceReply> Create(CreateInvoiceRequest request, ServerCallContext context)
         {
             var accountId = Guid.Parse(request.Invoice.Account);
