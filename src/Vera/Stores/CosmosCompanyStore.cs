@@ -10,6 +10,8 @@ namespace Vera.Stores
 {
     public class CosmosCompanyStore : ICompanyStore
     {
+        private const string DocumentType = "company";
+
         private readonly Container _container;
 
         public CosmosCompanyStore(Container container)
@@ -44,26 +46,17 @@ namespace Vera.Stores
 
         public async Task<Company> GetByName(string name)
         {
-            var iterator = _container.GetItemLinqQueryable<CompanyDocument>(requestOptions: new QueryRequestOptions
-                {
-                    PartitionKey = new PartitionKey(name.ToLower())
-                })
-                .Take(1)
-                .ToFeedIterator();
+            var definition = new QueryDefinition("select * from c where c.Type = @documentType")
+                .WithParameter("@documentType", DocumentType);
+
+            using var iterator = _container.GetItemQueryIterator<CompanyDocument>(definition, requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(name.ToLower())
+            });
 
             var response = await iterator.ReadNextAsync();
 
             return response.FirstOrDefault()?.Company;
-        }
-
-        public async Task<Company> Get(Guid companyId)
-        {
-            // TODO(kevin): this does a cross partition query
-            var document = await _container.ReadItemAsync<CompanyDocument>(
-                companyId.ToString(), PartitionKey.None
-            );
-
-            return document.Resource.Company;
         }
 
         private class CompanyDocument
@@ -78,12 +71,14 @@ namespace Vera.Stores
                 // TODO(kevin): better to use the Id as the partition key instead?
                 // have that available on the user and feels like a more logical option
                 PartitionKey = company.Name.ToLower();
+                Type = DocumentType;
             }
 
             [JsonProperty("id")]
             public Guid Id { get; set; }
             public Company Company { get; set; }
             public string PartitionKey { get; set; }
+            public string Type { get; set; }
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Vera.Audit;
 using Vera.Concurrency;
+using Vera.Configuration;
 using Vera.Invoices;
 using Vera.Portugal.Models;
 using Vera.Signing;
@@ -41,6 +42,11 @@ namespace Vera.Portugal
         public IPackageSigner CreatePackageSigner()
         {
             return new PackageSigner(_rsa);
+        }
+
+        public AbstractAccountConfiguration CreateConfiguration()
+        {
+            return new Configuration();
         }
 
         public IAuditFacade CreateFacade()

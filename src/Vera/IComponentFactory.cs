@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Vera.Concurrency;
+using Vera.Configuration;
 using Vera.Invoices;
 using Vera.Signing;
 

@@ -14,7 +14,7 @@ namespace Vera.Bootstrap
         /// </summary>
         /// <param name="account">account to resolve the factory for</param>
         /// <returns>factory based on the given account</returns>
-        IComponentFactory GetOrThrow(Account account);
+        IAccountComponentFactory GetOrThrow(Account account);
     }
 
     public sealed class AccountComponentFactoryCollection : IAccountComponentFactoryCollection
@@ -26,11 +26,11 @@ namespace Vera.Bootstrap
             _factories = factories.ToImmutableDictionary(x => x.Name);
         }
 
-        public IComponentFactory GetOrThrow(Account account)
+        public IAccountComponentFactory GetOrThrow(Account account)
         {
             if (_factories.TryGetValue(account.Certification, out var factory))
             {
-                return factory.Create(account);
+                return factory;
             }
 
             throw new InvalidOperationException($"No component factory available for certification {account.Certification}");

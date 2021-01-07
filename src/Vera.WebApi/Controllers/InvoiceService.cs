@@ -23,16 +23,19 @@ namespace Vera.WebApi.Controllers
     public class InvoiceService : Grpc.InvoiceService.InvoiceServiceBase
     {
         private readonly ICompanyStore _companyStore;
+        private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
         public InvoiceService(
             ICompanyStore companyStore,
+            IAccountStore accountStore,
             IInvoiceStore invoiceStore,
             IAccountComponentFactoryCollection accountComponentFactoryCollection
         )
         {
             _companyStore = companyStore;
+            _accountStore = accountStore;
             _invoiceStore = invoiceStore;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
@@ -40,11 +43,12 @@ namespace Vera.WebApi.Controllers
         [Authorize]
         public override async Task<CreateInvoiceReply> Create(CreateInvoiceRequest request, ServerCallContext context)
         {
+            var principal = context.GetHttpContext().User;
+
+            var companyId = Guid.Parse(principal.FindFirstValue(Security.ClaimTypes.CompanyId));
             var accountId = Guid.Parse(request.Invoice.Account);
 
-            var principal = context.GetHttpContext().User;
-            var company = await _companyStore.GetByName(principal.FindFirstValue(Security.ClaimTypes.CompanyName));
-            var account = company.Accounts.FirstOrDefault(a => a.Id == accountId);
+            var account = await _accountStore.Get(companyId, accountId);
 
             if (account == null)
             {
@@ -55,7 +59,7 @@ namespace Vera.WebApi.Controllers
 
             // TODO: validate invoice, very, very, very strict
 
-            var factory = _accountComponentFactoryCollection.GetOrThrow(account);
+            var factory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
 
             var facade = new InvoiceFacade(_invoiceStore, factory);
 

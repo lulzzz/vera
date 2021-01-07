@@ -8,6 +8,7 @@ namespace Vera.Models
     public class Account
     {
         public Guid Id { get; set; }
+        public Guid CompanyId { get; set; }
 
         public string Name { get; set; }
         public string RegistrationNumber { get; set; }

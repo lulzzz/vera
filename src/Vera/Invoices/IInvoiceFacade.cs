@@ -66,7 +66,7 @@ namespace Vera.Invoices
                 invoice.Sequence = last?.Sequence + 1 ?? 1;
 
                 // Generate number for this invoice
-                var number = await invoiceNumberGenerator.Generate(invoice, last);
+                var number = await invoiceNumberGenerator.Generate(invoice);
 
                 var result = await packageSigner.Sign(new Package(invoice, last)
                 {

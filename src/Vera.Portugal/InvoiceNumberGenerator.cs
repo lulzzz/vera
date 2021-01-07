@@ -6,7 +6,7 @@ namespace Vera.Portugal
 {
     public sealed class InvoiceNumberGenerator : IInvoiceNumberGenerator
     {
-        public Task<string> Generate(Invoice invoice, Invoice last)
+        public Task<string> Generate(Invoice invoice)
         {
             var type = InvoiceTypeHelper.DetermineType(invoice);
 

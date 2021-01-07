@@ -74,7 +74,9 @@ tq4HEcmINDkh3fy0/V5XRqzAmGlH6dgxPMgEdddzdRrl
                 Id = account,
                 Fields =
                 {
-                    {"PrivateKey", pk}
+                    {"PrivateKey", pk},
+                    {"ProductCompanyTaxId", "123 123 123"},
+                    {"SocialCapital", "1234"}
                 }
             }, setup.CreateAuthorizedMetadata());
         }

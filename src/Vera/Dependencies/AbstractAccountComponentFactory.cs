@@ -5,7 +5,7 @@ namespace Vera.Dependencies
 {
     public abstract class AbstractAccountComponentFactory<T> : IAccountComponentFactory where T : AbstractAccountConfiguration, new()
     {
-        public IComponentFactory Create(Account account)
+        public IComponentFactory CreateComponentFactory(Account account)
         {
             var config = new T();
 
@@ -16,6 +16,8 @@ namespace Vera.Dependencies
 
             return Create(config);
         }
+
+        public AbstractAccountConfiguration CreateConfiguration() => new T();
 
         protected abstract IComponentFactory Create(T configuration);
 

@@ -10,22 +10,20 @@ namespace Vera.Portugal
     {
         public override void Initialize(IDictionary<string, string> config)
         {
-            // object o;
-
             if (config.TryGetValue("PrivateKey", out var pk))
             {
                 PrivateKey = pk;
             }
 
-            // if (config.TryGetValue("ProductCompanyTaxId", out o))
-            // {
-            //     ProductCompanyTaxId = Convert.ToString(o);
-            // }
+            if (config.TryGetValue("ProductCompanyTaxId", out var taxId))
+            {
+                ProductCompanyTaxId = taxId;
+            }
 
-            // if (config.TryGetValue("SocialCapital", out o))
-            // {
-            //     SocialCapital = Convert.ToDecimal(o);
-            // }
+            if (config.TryGetValue("SocialCapital", out var sc))
+            {
+                SocialCapital = Convert.ToDecimal(sc);
+            }
         }
 
         [Required]
