@@ -10,8 +10,9 @@ using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Grpc.Shared;
 using Vera.Stores;
+using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Controllers
+namespace Vera.WebApi.Services
 {
     [Authorize]
     public class AccountService : Grpc.AccountService.AccountServiceBase
@@ -30,7 +31,7 @@ namespace Vera.WebApi.Controllers
 
         public override async Task<CreateAccountReply> Create(CreateAccountRequest request, ServerCallContext context)
         {
-            var companyId = Guid.Parse(context.GetHttpContext().User.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var companyId = context.GetCompanyId();
             var accounts = await _accountStore.GetByCompany(companyId);
 
             var existing =

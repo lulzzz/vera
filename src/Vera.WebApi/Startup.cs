@@ -6,8 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Vera.WebApi.Controllers;
 using Vera.WebApi.Security;
+using Vera.WebApi.Services;
 
 namespace Vera.WebApi
 {

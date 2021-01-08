@@ -1,5 +1,3 @@
-using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +7,7 @@ using Vera.Security;
 using Vera.Stores;
 using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Controllers
+namespace Vera.WebApi.Services
 {
     public class LoginService : Grpc.LoginService.LoginServiceBase
     {
@@ -62,10 +60,8 @@ namespace Vera.WebApi.Controllers
         [Authorize]
         public override async Task<TokenReply> Refresh(RefreshRequest request, ServerCallContext context)
         {
-            var principal = context.GetHttpContext().User;
-
-            var username = principal.FindFirstValue(Security.ClaimTypes.Username);
-            var companyId = Guid.Parse(principal.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var username = context.GetUsername();
+            var companyId = context.GetCompanyId();
 
             var user = await _userStore.GetByCompany(companyId, username);
 
@@ -75,7 +71,7 @@ namespace Vera.WebApi.Controllers
                 throw new RpcException(new Status(StatusCode.Unauthenticated, string.Empty));
             }
 
-            var company = await _companyStore.GetByName(principal.FindFirstValue(Security.ClaimTypes.CompanyName));
+            var company = await _companyStore.GetByName(context.GetCompanyName());
 
             return await Authorize(user, company);
         }

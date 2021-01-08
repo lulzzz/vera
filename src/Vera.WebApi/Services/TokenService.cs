@@ -1,5 +1,4 @@
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
@@ -9,7 +8,7 @@ using Vera.Security;
 using Vera.Stores;
 using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Controllers
+namespace Vera.WebApi.Services
 {
     public class TokenService : Grpc.TokenService.TokenServiceBase
     {
@@ -37,9 +36,7 @@ namespace Vera.WebApi.Controllers
         [Authorize]
         public override async Task<TokenReply> Generate(TokenRequest request, ServerCallContext context)
         {
-            var principal = context.GetHttpContext().User;
-
-            var companyId = Guid.Parse(principal.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var companyId = context.GetCompanyId();
             var existingUser = await _userStore.GetByCompany(companyId, request.Username);
 
             if (existingUser != null)
@@ -47,7 +44,7 @@ namespace Vera.WebApi.Controllers
                 throw new RpcException(new Status(StatusCode.AlreadyExists, $"User with username {request.Username} already exists"));
             }
 
-            var company = await _companyStore.GetByName(principal.FindFirstValue(Security.ClaimTypes.CompanyName));
+            var company = await _companyStore.GetByName(context.GetCompanyName());
 
             var auth = _passwordStrategy.Encrypt(_tokenFactory.Create());
 

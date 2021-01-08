@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
@@ -11,6 +9,7 @@ using Vera.Grpc;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Stores;
+using Vera.WebApi.Security;
 using Address = Vera.Models.Address;
 using Invoice = Vera.Grpc.Invoice;
 using InvoiceLine = Vera.Models.InvoiceLine;
@@ -18,7 +17,7 @@ using Payment = Vera.Models.Payment;
 using Product = Vera.Grpc.Product;
 using Settlement = Vera.Models.Settlement;
 
-namespace Vera.WebApi.Controllers
+namespace Vera.WebApi.Services
 {
     public class InvoiceService : Grpc.InvoiceService.InvoiceServiceBase
     {
@@ -43,9 +42,7 @@ namespace Vera.WebApi.Controllers
         [Authorize]
         public override async Task<CreateInvoiceReply> Create(CreateInvoiceRequest request, ServerCallContext context)
         {
-            var principal = context.GetHttpContext().User;
-
-            var companyId = Guid.Parse(principal.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var companyId = context.GetCompanyId();
             var accountId = Guid.Parse(request.Invoice.Account);
 
             var account = await _accountStore.Get(companyId, accountId);
