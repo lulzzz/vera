@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
-using Grpc.Core;
 using Grpc.Net.Client;
 using Vera.Grpc;
 using Vera.Grpc.Shared;
@@ -12,6 +11,8 @@ namespace Vera.Integration.Tests.Common
     public class AccountTests : IClassFixture<ApiWebApplicationFactory>
     {
         private readonly GrpcChannel _channel;
+        private readonly Faker _faker;
+        private readonly Setup _setup;
 
         public AccountTests(ApiWebApplicationFactory fixture)
         {
@@ -21,30 +22,27 @@ namespace Vera.Integration.Tests.Common
             {
                 HttpClient = client
             });
+
+            _faker = new Faker();
+            _setup = new Setup(_channel, _faker);
         }
 
         [Fact]
         public async Task Should_be_able_to_create_accounts()
         {
-            var faker = new Faker();
+            await _setup.CreateLogin();
 
-            var loginObject = await GetToken(faker);
-
-            var metadata = new Metadata
-            {
-                {"authorization", $"bearer {loginObject.Token}"}
-            };
+            var metadata = _setup.CreateAuthorizedMetadata();
 
             var accountToCreate = new CreateAccountRequest
             {
-                Name = faker.Company.CompanyName(),
+                Name = _faker.Company.CompanyName(),
                 Certification = "LALA"
             };
 
-            var accountClient = new AccountService.AccountServiceClient(_channel);
-            await accountClient.CreateAsync(accountToCreate, metadata);
+            await _setup.AccountClient.CreateAsync(accountToCreate, metadata);
 
-            using var listCall = accountClient.ListAsync(new Empty(), metadata);
+            using var listCall = _setup.AccountClient.ListAsync(new Empty(), metadata);
             var result = await listCall.ResponseAsync;
             var accounts = result.Accounts;
 
@@ -54,32 +52,37 @@ namespace Vera.Integration.Tests.Common
             var account = accounts.First();
 
             Assert.Equal(accountToCreate.Name, account.Name);
-            Assert.Equal(accountToCreate.Certification, account.Certification);
         }
 
-        private async Task<TokenReply> GetToken(Faker faker)
+        [Fact]
+        public async Task Should_be_able_to_update_account()
         {
-            var registerRequest = new RegisterRequest
+            await _setup.CreateLogin();
+
+            var metadata = _setup.CreateAuthorizedMetadata();
+
+            var accountToCreate = new CreateAccountRequest
             {
-                Username = faker.Internet.UserName(),
-                Password = faker.Internet.Password(),
-                CompanyName = faker.Company.CompanyName()
+                Name = _faker.Company.CompanyName(),
+                Certification = "LALA"
             };
 
-            var registerClient = new RegisterService.RegisterServiceClient(_channel);
-            using var registerCall = registerClient.RegisterAsync(registerRequest);
+            var createAccountReply = await _setup.AccountClient.CreateAsync(accountToCreate, metadata);
 
-            var registerResult = await registerCall.ResponseAsync;
+            var newName = _faker.Company.CompanyName();
 
-            var loginClient = new LoginService.LoginServiceClient(_channel);
-            using var loginCall = loginClient.LoginAsync(new LoginRequest
+            await _setup.AccountClient.UpdateAsync(new UpdateAccountRequest
             {
-                Username = registerRequest.Username,
-                Password = registerRequest.Password,
-                CompanyName = registerRequest.CompanyName
-            });
+                Id = createAccountReply.Id,
+                Name =  newName
+            }, metadata);
 
-            return await loginCall.ResponseAsync;
+            var getAccountReply = await _setup.AccountClient.GetAsync(new GetAccountRequest
+            {
+                Id = createAccountReply.Id
+            }, metadata);
+
+            Assert.Equal(newName, getAccountReply.Name);
         }
     }
 }

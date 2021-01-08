@@ -6,6 +6,8 @@ package vera.grpc;
 
 service AccountService {
     rpc Create (CreateAccountRequest) returns (CreateAccountReply);
+    rpc Get (GetAccountRequest) returns (GetAccountReply);
+    rpc Update (UpdateAccountRequest) returns (vera.grpc.shared.Empty);
     rpc CreateOrUpdateConfiguration (AccountConfigurationRequest) returns (vera.grpc.shared.Empty);
     rpc List (vera.grpc.shared.Empty) returns (ListAccountReply);
 }
@@ -19,16 +21,69 @@ message CreateAccountReply {
     string id = 1;
 }
 
+message GetAccountRequest {
+    string id = 1;
+}
+
+message GetAccountReply {
+    string id = 1;
+
+    string name = 2;
+
+    // Registration number of the company
+    string registrationNumber = 3;
+
+    // Tax registration number of the company
+    string taxRegistrationNumber = 4;
+
+    // Location of the company
+    vera.grpc.shared.Address address = 5;
+
+    // ISO 4217 of the currency that's used by the company
+    string currency = 6;
+
+    // Contact email address
+    string email = 7;
+
+    // Contact phone number
+    string telephone = 8;
+}
+
+message UpdateAccountRequest {
+    string id = 1;
+
+    string name = 2;
+
+    // Registration number of the company
+    string registrationNumber = 3;
+
+    // Tax registration number of the company
+    string taxRegistrationNumber = 4;
+
+    // Location of the company
+    vera.grpc.shared.Address address = 5;
+
+    // ISO 4217 of the currency that's used by the company
+    string currency = 6;
+
+    // Contact email address
+    string email = 7;
+
+    // Contact phone number
+    string telephone = 8;
+}
+
 message AccountConfigurationRequest {
     string id = 1;
     map<string, string> fields = 2;
 }
 
 message ListAccountReply {
+    message Account {
+        string name = 1;
+    }
+
     repeated Account accounts = 1;
 }
 
-message Account {
-    string name = 1;
-    string certification = 2;
-}
+

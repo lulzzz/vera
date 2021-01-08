@@ -9,6 +9,7 @@ using Vera.Grpc;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Stores;
+using Vera.WebApi.Models;
 using Vera.WebApi.Security;
 using Address = Vera.Models.Address;
 using Invoice = Vera.Grpc.Invoice;
@@ -21,19 +22,16 @@ namespace Vera.WebApi.Services
 {
     public class InvoiceService : Grpc.InvoiceService.InvoiceServiceBase
     {
-        private readonly ICompanyStore _companyStore;
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
         public InvoiceService(
-            ICompanyStore companyStore,
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
             IAccountComponentFactoryCollection accountComponentFactoryCollection
         )
         {
-            _companyStore = companyStore;
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
@@ -105,8 +103,8 @@ namespace Vera.WebApi.Services
                     CompanyName = invoice.Customer.CompanyName,
                     RegistrationNumber = invoice.Customer.RegistrationNumber,
                     TaxRegistrationNumber = invoice.Customer.TaxRegistrationNumber,
-                    ShippingAddress = Map(invoice.Customer.ShippingAddress),
-                    BillingAddress = Map(invoice.Customer.BillingAddress)
+                    ShippingAddress = invoice.Customer.ShippingAddress.Unpack(),
+                    BillingAddress = invoice.Customer.BillingAddress.Unpack()
                 };
             }
 
@@ -124,21 +122,6 @@ namespace Vera.WebApi.Services
             result.Lines = invoice.Lines.Select(Map).ToList();
 
             return result;
-        }
-
-        private static Address Map(Vera.Grpc.Address a)
-        {
-            if (a == null) return null;
-
-            return new()
-            {
-                City = a.City,
-                Country = a.Country,
-                Number = a.Number,
-                Region = a.Region,
-                Street = a.Street,
-                PostalCode = a.PostalCode
-            };
         }
 
         private static Payment Map(Vera.Grpc.Payment p)

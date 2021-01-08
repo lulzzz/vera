@@ -4,7 +4,6 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using Vera.Concurrency;
-using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Stores;
 using PemReader = Org.BouncyCastle.OpenSsl.PemReader;

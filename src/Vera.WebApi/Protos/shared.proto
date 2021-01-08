@@ -15,3 +15,19 @@ message DecimalValue {
     // Must be same sign as units
     sfixed32 nanos = 2;
 }
+
+message Address {
+    string street = 1;
+
+    string number = 2;
+
+    string city = 3;
+
+    string postalCode = 4;
+
+    // Country in the ISO 3166-1 format
+    string country = 5;
+
+    // Region in the ISO 3166-2 format
+    string region = 6;
+}

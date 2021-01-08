@@ -10,6 +10,7 @@ using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Grpc.Shared;
 using Vera.Stores;
+using Vera.WebApi.Models;
 using Vera.WebApi.Security;
 
 namespace Vera.WebApi.Services
@@ -66,10 +67,59 @@ namespace Vera.WebApi.Services
             };
         }
 
-        // TODO(kevin): can merge with update all of account
+        public override async Task<GetAccountReply> Get(GetAccountRequest request, ServerCallContext context)
+        {
+            var companyId = context.GetCompanyId();
+            var account = await _accountStore.Get(companyId, Guid.Parse(request.Id));
+
+            return new GetAccountReply
+            {
+                Id = account.Id.ToString(),
+                Name = account.Name,
+                Currency = account.Currency,
+                Email = account.Email,
+                Telephone = account.Telephone,
+                RegistrationNumber = account.RegistrationNumber,
+                TaxRegistrationNumber = account.TaxRegistrationNumber,
+                Address = account.Address.Pack()
+            };
+        }
+
+        public override async Task<Empty> Update(UpdateAccountRequest request, ServerCallContext context)
+        {
+            var companyId = context.GetCompanyId();
+            var account = await _accountStore.Get(companyId, Guid.Parse(request.Id));
+
+            if (account == null)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Account does not exist"));
+            }
+
+            // TODO(kevin): more validation on the new state of the account (attributes?)
+
+            if (request.Name != null) account.Name = request.Name;
+
+            // TODO(kevin): check if this is allowed, if so, what should happen when it does?
+            if (request.RegistrationNumber != null) account.RegistrationNumber = request.RegistrationNumber;
+            if (request.TaxRegistrationNumber != null) account.TaxRegistrationNumber = request.TaxRegistrationNumber;
+
+            if (request.Currency != null) account.Currency = request.Currency;
+            if (request.Email != null) account.Email = request.Email;
+            if (request.Telephone != null) account.Telephone = request.Telephone;
+
+            if (request.Address != null)
+            {
+                account.Address = request.Address.Unpack();
+            }
+
+            await _accountStore.Update(account);
+
+            return new Empty();
+        }
+
         public override async Task<Empty> CreateOrUpdateConfiguration(AccountConfigurationRequest request, ServerCallContext context)
         {
-            var companyId = Guid.Parse(context.GetHttpContext().User.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var companyId = context.GetCompanyId();
             var accounts = await _accountStore.GetByCompany(companyId);
             var account = accounts.FirstOrDefault(a => a.Id.ToString() == request.Id);
 
@@ -106,15 +156,14 @@ namespace Vera.WebApi.Services
 
         public override async Task<ListAccountReply> List(Empty request, ServerCallContext context)
         {
-            var companyId = Guid.Parse(context.GetHttpContext().User.FindFirstValue(Security.ClaimTypes.CompanyId));
+            var companyId = context.GetCompanyId();
             var accounts = await _accountStore.GetByCompany(companyId);
 
             var reply = new ListAccountReply();
 
-            reply.Accounts.AddRange(accounts.Select(x => new Account
+            reply.Accounts.AddRange(accounts.Select(x => new ListAccountReply.Types.Account
             {
-                Name = x.Name,
-                Certification = x.Certification
+                Name = x.Name
             }));
 
             return reply;

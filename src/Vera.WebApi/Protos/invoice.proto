@@ -63,8 +63,8 @@ message Invoice {
     Customer customer = 10;
     Employee employee = 11;
 
-    Address billingAddress = 12;
-    Address shippingAddress = 13;
+    vera.grpc.shared.Address billingAddress = 12;
+    vera.grpc.shared.Address shippingAddress = 13;
 
     repeated InvoiceLine lines = 14;
     repeated Payment payments = 15;
@@ -153,7 +153,7 @@ message Supplier {
     string taxRegistrationNumber = 4;
 
     // Address is the physical location of the supplier
-    Address address = 5;
+    vera.grpc.shared.Address address = 5;
 }
 
 message Customer {
@@ -168,8 +168,8 @@ message Customer {
     string registrationNumber = 6;
     string taxRegistrationNumber = 7;
     
-    Address billingAddress = 8;
-    Address shippingAddress = 9;
+    vera.grpc.shared.Address billingAddress = 8;
+    vera.grpc.shared.Address shippingAddress = 9;
 }
 
 message Employee {
@@ -177,22 +177,6 @@ message Employee {
     
     string firstName = 2;
     string lastName = 3;
-}
-
-message Address {
-    string street = 1;
-    
-    string number = 2;
-    
-    string city = 3;
-
-    string postalCode = 4;
-
-    // Country in the ISO 3166-1 format
-    string country = 5;
-
-    // Region in the ISO 3166-2 format
-    string region = 6;
 }
 
 message Product {

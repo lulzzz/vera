@@ -152,7 +152,7 @@ tq4HEcmINDkh3fy0/V5XRqzAmGlH6dgxPMgEdddzdRrl
             };
         }
 
-        private Address CreateAddress()
+        private Grpc.Shared.Address CreateAddress()
         {
             return new()
             {
