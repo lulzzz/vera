@@ -3,6 +3,7 @@ using Vera.Concurrency;
 using Vera.Configuration;
 using Vera.Invoices;
 using Vera.Signing;
+using Vera.Thermal;
 
 namespace Vera
 {
@@ -12,5 +13,6 @@ namespace Vera
         IInvoiceBucketGenerator CreateInvoiceBucketGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
         IPackageSigner CreatePackageSigner();
+        IThermalReceiptGenerator CreateThermalReceiptGenerator();
     }
 }

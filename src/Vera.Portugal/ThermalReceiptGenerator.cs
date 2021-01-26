@@ -328,7 +328,7 @@ namespace Vera.Portugal
 
             yield return new TextThermalNode(context.SoftwareVersion);
 
-            yield return new TextThermalNode($"certificado no {context.CertificateNumber}/AT");
+            yield return new TextThermalNode($"certificado no {_certificateNumber}/AT");
             yield return new TextThermalNode("preços unitários com iva incluido");
 
             yield return new QRCodeThermalNode(Convert.ToBase64String(context.Invoice.Signature));
@@ -349,7 +349,7 @@ namespace Vera.Portugal
 
             yield return new LineThermalNode();
 
-            yield return new TextThermalNode($"LICENCIADO A: {context.CertificateName}");
+            yield return new TextThermalNode($"LICENCIADO A: {_certificateName}");
         }
 
         private static string FormatCurrency(decimal d) => Math.Abs(d).ToString("C", Culture);

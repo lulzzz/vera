@@ -1,5 +1,7 @@
 using System;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
@@ -19,6 +21,7 @@ namespace Vera.Bootstrap
             {
                 RegisterDefaults(collection);
 
+                // TODO(kevin): extract so other methods can be used
                 UseCosmosStores(context, collection);
                 UseBlobLocker(context, collection);
             });
@@ -41,46 +44,43 @@ namespace Vera.Bootstrap
 
         private static void UseCosmosStores(HostBuilderContext context, IServiceCollection collection)
         {
-            var cosmosConnectionString = context.Configuration["VERA:COSMOS:CONNECTIONSTRING"];
-            var cosmosDatabase = context.Configuration["VERA:COSMOS:DATABASE"];
+            var cosmosOptions = context.Configuration
+                .GetSection(CosmosOptions.Section)
+                .Get<CosmosOptions>();
 
-            if (string.IsNullOrEmpty(cosmosConnectionString) || string.IsNullOrEmpty(cosmosDatabase))
+            var cosmosContainerOptions = context.Configuration
+                .GetSection(CosmosContainerOptions.Section)
+                .Get<CosmosContainerOptions>();
+
+            if (string.IsNullOrEmpty(cosmosOptions.ConnectionString) || string.IsNullOrEmpty(cosmosOptions.Database))
             {
                 return;
             }
 
-            var cosmosContainerInvoices = context.Configuration["VERA:COSMOS:CONTAINER:INVOICES"];
-            var cosmosContainerCompanies = context.Configuration["VERA:COSMOS:CONTAINER:COMPANIES"];
-            var cosmosContainerUsers = context.Configuration["VERA:COSMOS:CONTAINER:USERS"];
-
-            var cosmosClient = new CosmosClientBuilder(cosmosConnectionString)
+            var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
                 .WithRequestTimeout(TimeSpan.FromSeconds(5))
                 .WithConnectionModeDirect()
                 .WithApplicationName("vera")
                 .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
                 .Build();
 
-            if (!string.IsNullOrEmpty(cosmosContainerInvoices))
-            {
-                collection.AddSingleton<IInvoiceStore>(provider => new CosmosInvoiceStore(
-                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerInvoices)
-                ));
-            }
+            collection.AddSingleton(cosmosClient);
 
-            if (!string.IsNullOrEmpty(cosmosContainerCompanies))
-            {
-                collection.AddTransient<ICompanyStore>(provider => new CosmosCompanyStore(
-                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerCompanies)
-                ));
+            collection.AddSingleton<IInvoiceStore>(_ => new CosmosInvoiceStore(
+                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Invoices)
+            ));
 
-                collection.AddTransient<IAccountStore>(provider => new CosmosAccountStore(
-                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerCompanies)
-                ));
+            collection.AddTransient<ICompanyStore>(_ => new CosmosCompanyStore(
+                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
+            ));
 
-                collection.AddTransient<IUserStore>(provider => new CosmosUserStore(
-                    cosmosClient.GetContainer(cosmosDatabase, cosmosContainerUsers)
-                ));
-            }
+            collection.AddTransient<IAccountStore>(_ => new CosmosAccountStore(
+                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
+            ));
+
+            collection.AddTransient<IUserStore>(_ => new CosmosUserStore(
+                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Users)
+            ));
         }
 
         private static void UseBlobLocker(HostBuilderContext context, IServiceCollection collection)

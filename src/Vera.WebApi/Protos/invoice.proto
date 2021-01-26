@@ -11,8 +11,6 @@ service InvoiceService {
 
 message CreateInvoiceRequest {
     Invoice invoice = 1;
-    string firstName = 2;
-    string lastName = 3;
 }
 
 message CreateInvoiceReply {

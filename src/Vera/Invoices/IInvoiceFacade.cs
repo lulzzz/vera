@@ -52,7 +52,8 @@ namespace Vera.Invoices
             var invoiceBucketGenerator = _factory.CreateInvoiceBucketGenerator();
             var locker = _factory.CreateLocker();
 
-            var bucket = invoiceBucketGenerator.Generate(invoice);
+            // Prefix with accountId to make sure the bucket is unique per account
+            var bucket = invoice.AccountId + invoiceBucketGenerator.Generate(invoice);
 
             // Lock on the unique sequence of the invoice
             await using (await locker.Lock(bucket, TimeSpan.FromMinutes(1)))
@@ -67,6 +68,8 @@ namespace Vera.Invoices
 
                 // Generate number for this invoice
                 var number = await invoiceNumberGenerator.Generate(invoice);
+
+                invoice.Number = number;
 
                 var result = await packageSigner.Sign(new Package(invoice, last)
                 {

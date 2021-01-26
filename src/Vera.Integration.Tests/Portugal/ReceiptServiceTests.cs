@@ -1,7 +1,5 @@
-using System;
 using System.Threading.Tasks;
 using Bogus;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Vera.Grpc;
 using Vera.Integration.Tests.Common;
@@ -9,12 +7,12 @@ using Xunit;
 
 namespace Vera.Integration.Tests.Portugal
 {
-    public class InvoiceTests : IClassFixture<ApiWebApplicationFactory>
+    public class ReceiptServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
         private readonly GrpcChannel _channel;
         private readonly Faker _faker;
 
-        public InvoiceTests(ApiWebApplicationFactory fixture)
+        public ReceiptServiceTests(ApiWebApplicationFactory fixture)
         {
             var client = fixture.CreateClient();
 
@@ -27,7 +25,7 @@ namespace Vera.Integration.Tests.Portugal
         }
 
         [Fact]
-        public async Task Should_be_able_to_create_an_invoice()
+        public async Task Should_be_able_to_generate_a_receipt()
         {
             var setup = new Setup(_channel, _faker);
             var token = await setup.CreateLogin();
@@ -49,12 +47,18 @@ namespace Vera.Integration.Tests.Portugal
 
             var createInvoiceReply = await createInvoiceCall.ResponseAsync;
 
-            Assert.NotNull(createInvoiceReply.Number);
-            Assert.NotNull(createInvoiceReply.Signature);
+            var receiptService = new ReceiptService.ReceiptServiceClient(_channel);
+            using var renderReceiptCall = receiptService.RenderThermalAsync(new RenderThermalRequest
+            {
+                Account = account,
+                Number = createInvoiceReply.Number,
+                Type = ReceiptOutputType.Json
+            }, setup.CreateAuthorizedMetadata());
 
-            await Task.Delay(TimeSpan.FromSeconds(30));
+            var renderReceiptReply = await renderReceiptCall.ResponseAsync;
+
+            Assert.Equal(ReceiptOutputType.Json, renderReceiptReply.Type);
+            Assert.NotNull(renderReceiptReply.Content);
         }
-
-        // TODO(kevin): write tests that generate different invoices and verify that the number matches the expected format
     }
 }

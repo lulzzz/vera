@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vera.Audit;
@@ -22,6 +23,13 @@ namespace Vera.Stores
         /// <param name="bucket"></param>
         /// <returns></returns>
         Task<Invoice> Last(string bucket);
+
+        /// <summary>
+        /// Returns the invoice for the given account by its invoice number.
+        /// </summary>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        Task<Invoice> GetByNumber(Guid accountId, string number);
 
         IAsyncEnumerable<Invoice> List(AuditCriteria criteria);
     }

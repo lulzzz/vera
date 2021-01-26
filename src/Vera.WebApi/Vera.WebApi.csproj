@@ -17,6 +17,7 @@
         <Protobuf Include="Protos\login.proto" GrpcServices="Both" />
         <Protobuf Include="Protos\account.proto" GrpcServices="Both" />
         <Protobuf Include="Protos\invoice.proto" GrpcServices="Both" />
+        <Protobuf Include="Protos\receipt.proto" GrpcServices="Both" />
     </ItemGroup>
 
 </Project>

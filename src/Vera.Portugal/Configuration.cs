@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.ConstrainedExecution;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow.Layouts;
 using Vera.Configuration;
 
 namespace Vera.Portugal
@@ -24,6 +26,16 @@ namespace Vera.Portugal
             {
                 SocialCapital = Convert.ToDecimal(sc);
             }
+
+            if (config.TryGetValue("CertificateNumber", out var certNumber))
+            {
+                CertificateNumber = certNumber;
+            }
+
+            if (config.TryGetValue("CertificateName", out var certName))
+            {
+                CertificateName = certName;
+            }
         }
 
         [Required]
@@ -36,7 +48,6 @@ namespace Vera.Portugal
 
         [Required]
         [Display(
-            Name = "ProductCompanyTaxId",
             GroupName = "General",
             Description = "???"
         )]
@@ -44,10 +55,23 @@ namespace Vera.Portugal
 
         [Required]
         [Display(
-            Name = "SocialCapital",
             GroupName = "General",
             Description = "Required to be printed on all the receipts. Social capital of the company."
         )]
         public decimal SocialCapital { get; set; }
+
+        [Required]
+        [Display(
+            GroupName = "Certificate",
+            Description = "Required to be printed on all the receipts. Certificate name given by the authorities."
+        )]
+        public string CertificateName { get; set; }
+
+        [Required]
+        [Display(
+            GroupName = "Certificate",
+            Description = "Required to be printed on all the receipts. Certificate number given by the authorities."
+        )]
+        public string CertificateNumber { get; set; }
     }
 }
