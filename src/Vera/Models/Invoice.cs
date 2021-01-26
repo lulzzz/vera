@@ -29,6 +29,8 @@ namespace Vera.Models
         public Billable Employee { get; set; }
         public Customer Customer { get; set; }
 
+        public Address ShipTo { get; set; }
+
         /// <summary>
         /// Identifier of the cash register that created the invoice.
         /// </summary>

@@ -195,6 +195,24 @@ message Product {
 }
 
 message TaxValue {
+    enum Category {
+        // Also called the standard tax rate.
+        HIGH = 0;
+
+        // Also called the reduced tax rate.
+        LOW = 1;
+
+        // 0% rate
+        ZERO = 2;
+
+        // 0% rate because of an exemption.
+        EXEMPT = 3;
+
+        // Intermediate rate that some countries use like Portugal. It's in between HIGH and LOW.
+        INTERMEDIATE = 4;
+    }
+
     vera.grpc.shared.DecimalValue rate = 1;
     string code = 2;
+    Category category = 3;
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf;
@@ -53,6 +54,7 @@ namespace Vera.WebApi.Services
             }
 
             // TODO: validate invoice, very, very, very strict
+            // TODO(kevin): for example, in Portugal orders > 1000 euros require a customer
 
             var factory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
 
@@ -103,6 +105,8 @@ namespace Vera.WebApi.Services
                     CompanyName = invoice.Customer.CompanyName,
                     RegistrationNumber = invoice.Customer.RegistrationNumber,
                     TaxRegistrationNumber = invoice.Customer.TaxRegistrationNumber,
+
+                    // TODO(kevin): remove these fields? it doesn't make much sense
                     ShippingAddress = invoice.Customer.ShippingAddress.Unpack(),
                     BillingAddress = invoice.Customer.BillingAddress.Unpack()
                 };
@@ -116,6 +120,8 @@ namespace Vera.WebApi.Services
                     SystemId = invoice.Employee.SystemId,
                 };
             }
+
+            result.ShipTo = invoice.ShippingAddress.Unpack();
 
             result.Payments = invoice.Payments.Select(Map).ToList();
 
@@ -147,6 +153,9 @@ namespace Vera.WebApi.Services
 
         private static InvoiceLine Map(Vera.Grpc.InvoiceLine line)
         {
+            // TODO(kevin): validate that when exempt is given that a reason and/or code is also available
+            // TODO(kevin): check if this is a requirement or optional (may depend on certifications?)
+
             var result = new InvoiceLine
             {
                 Description = line.Description,
@@ -158,7 +167,16 @@ namespace Vera.WebApi.Services
                 Taxes = new Taxes
                 {
                     Code = line.Tax.Code,
-                    Rate = line.Tax.Rate
+                    Rate = line.Tax.Rate,
+                    Category = line.Tax.Category switch
+                    {
+                        TaxValue.Types.Category.High => TaxesCategory.High,
+                        TaxValue.Types.Category.Low => TaxesCategory.Low,
+                        TaxValue.Types.Category.Zero => TaxesCategory.Zero,
+                        TaxValue.Types.Category.Exempt => TaxesCategory.Exempt,
+                        TaxValue.Types.Category.Intermediate => TaxesCategory.Intermediate,
+                        _ => throw new ArgumentOutOfRangeException()
+                    }
                 }
             };
 

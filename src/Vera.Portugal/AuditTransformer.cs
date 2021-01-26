@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 using Vera.Audit;
 using Vera.Portugal.Models;
 using Vera.StandardAuditFileTaxation;
@@ -9,22 +8,19 @@ namespace Vera.Portugal
 {
     public class AuditTransformer : IAuditTransformer<AuditFile>
     {
-        private const string UnknownLabel = "Desconhecido";
         private const string AuditFileVersion = "1.04_01";
         private const string TaxEntity = "Global";
-        private const string Atcud = "0";
         private const string SourceId = "2";
         private const string SelfBillingIndicator = "0";
         private const string CashVatSchemeIndicator = "0";
         private const string ThirdPartiesBillingIndicator = "0";
         private const string UnitOfMeasure = "UN";
-        private const string DefaultFiscalId = "999999990";
 
-        private readonly Configuration _configuration;
+        private readonly string _productCompanyTaxId;
 
-        public AuditTransformer(Configuration configuration)
+        public AuditTransformer(string productCompanyTaxId)
         {
-            _configuration = configuration;
+            _productCompanyTaxId = productCompanyTaxId;
         }
 
         public AuditFile Transform(AuditContext context, AuditCriteria criteria, StandardAuditFileTaxation.Audit audit)
@@ -68,7 +64,7 @@ namespace Vera.Portugal
                     CurrencyCode = audit.Header.DefaultCurrencyCode,
                     DateCreated = DateTime.Today,
                     TaxEntity = TaxEntity,
-                    ProductCompanyTaxID = _configuration.ProductCompanyTaxId,
+                    ProductCompanyTaxID = _productCompanyTaxId,
                     SoftwareCertificateNumber = softwareCertificateNumber,
                     ProductID = productId,
                     ProductVersion = context.SoftwareVersion,
@@ -84,18 +80,18 @@ namespace Vera.Portugal
 
             var anonymousAddress = new AddressStructure
             {
-                AddressDetail = UnknownLabel,
-                City = UnknownLabel,
-                PostalCode = UnknownLabel,
-                Region = UnknownLabel,
-                Country = UnknownLabel
+                AddressDetail = Constants.UnknownLabel,
+                City = Constants.UnknownLabel,
+                PostalCode = Constants.UnknownLabel,
+                Region = Constants.UnknownLabel,
+                Country = Constants.UnknownLabel
             };
 
             var anonymous = new Models.Customer
             {
                 CustomerID = "0",
-                CustomerTaxID = DefaultFiscalId,
-                AccountID = UnknownLabel,
+                CustomerTaxID = Constants.DefaultCustomerTaxId,
+                AccountID = Constants.UnknownLabel,
                 CompanyName = "Consumidor final",
                 SelfBillingIndicator = SelfBillingIndicator,
                 BillingAddress = anonymousAddress,
@@ -105,28 +101,28 @@ namespace Vera.Portugal
             auditFile.MasterFiles.Customer = audit.MasterFiles.Customers.Select(c => new Models.Customer
             {
                 CustomerID = ComputeCustomerID(c.SystemID, c.RegistrationNumber),
-                CustomerTaxID = string.IsNullOrEmpty(c.RegistrationNumber) ? DefaultFiscalId : c.RegistrationNumber,
-                AccountID = c.BankAccount?.AccountNumber ?? UnknownLabel,
+                CustomerTaxID = string.IsNullOrEmpty(c.RegistrationNumber) ? Constants.DefaultCustomerTaxId : c.RegistrationNumber,
+                AccountID = c.BankAccount?.AccountNumber ?? Constants.UnknownLabel,
                 CompanyName = string.IsNullOrEmpty(c.Name) ? "Consumidor final" : c.Name,
                 Email = c.Contact.Email,
                 SelfBillingIndicator = SelfBillingIndicator,
                 BillingAddress = new AddressStructure
                 {
-                    AddressDetail = c.BillingAddress?.Street ?? UnknownLabel,
-                    City = c.BillingAddress?.City ?? UnknownLabel,
-                    PostalCode = c.BillingAddress?.PostalCode ?? UnknownLabel,
-                    Region = c.BillingAddress?.Region ?? UnknownLabel,
-                    Country = c.BillingAddress?.Country ?? UnknownLabel
+                    AddressDetail = c.BillingAddress?.Street ?? Constants.UnknownLabel,
+                    City = c.BillingAddress?.City ?? Constants.UnknownLabel,
+                    PostalCode = c.BillingAddress?.PostalCode ?? Constants.UnknownLabel,
+                    Region = c.BillingAddress?.Region ?? Constants.UnknownLabel,
+                    Country = c.BillingAddress?.Country ?? Constants.UnknownLabel
                 },
                 ShipToAddress = new[]
               {
                 new AddressStructure
                 {
-                    AddressDetail = c.ShipToAddress?.Street ?? UnknownLabel,
-                    City = c.ShipToAddress?.City ?? UnknownLabel,
-                    PostalCode = c.ShipToAddress?.PostalCode ?? UnknownLabel,
-                    Region = c.ShipToAddress?.Region ?? UnknownLabel,
-                    Country = c.ShipToAddress?.Country ?? UnknownLabel
+                    AddressDetail = c.ShipToAddress?.Street ?? Constants.UnknownLabel,
+                    City = c.ShipToAddress?.City ?? Constants.UnknownLabel,
+                    PostalCode = c.ShipToAddress?.PostalCode ?? Constants.UnknownLabel,
+                    Region = c.ShipToAddress?.Region ?? Constants.UnknownLabel,
+                    Country = c.ShipToAddress?.Country ?? Constants.UnknownLabel
                 }
                 }
             }).Concat(new[] { anonymous }).ToArray();
@@ -152,7 +148,7 @@ namespace Vera.Portugal
             salesInvoices.Invoice = audit.SourceDocuments.SalesInvoices.Sources.Select(invoice => new SourceDocumentsSalesInvoicesInvoice
             {
                 InvoiceNo = invoice.Number,
-                ATCUD = Atcud,
+                ATCUD = Constants.ATCUD,
                 DocumentStatus = new SourceDocumentsSalesInvoicesInvoiceDocumentStatus
                 {
                     InvoiceStatus = InvoiceStatus.N,
@@ -205,14 +201,7 @@ namespace Vera.Portugal
 
         private static InvoiceType ComputeInvoiceType(Invoice invoice)
         {
-            if (invoice.Lines.Any(l => l.Quantity < 0) && invoice.Totals.Gross < 0)
-            {
-                // Credit note
-                return InvoiceType.NC;
-            }
-
-            // Invoice receipt
-            return InvoiceType.FR;
+            return Enum.Parse<InvoiceType>(invoice.Type);
         }
 
         private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(Invoice invoice, string taxCountryRegion, InvoiceLine line, int index)
@@ -283,7 +272,7 @@ namespace Vera.Portugal
             return hashControl.ToString();
         }
 
-        private static DateTime GetDateTime(DateTime dt) => new DateTime(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
+        private static DateTime GetDateTime(DateTime dt) => new(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
         private static decimal Round(decimal d, int decimals) => Math.Round(Math.Abs(d), decimals);
     }
 }

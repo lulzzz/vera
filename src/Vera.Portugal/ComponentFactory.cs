@@ -52,7 +52,7 @@ namespace Vera.Portugal
         public IAuditFacade CreateFacade()
         {
             return new AuditFacade<AuditFile>(
-                new AuditTransformer(_configuration),
+                new AuditTransformer(_configuration.ProductCompanyTaxId),
                 new AuditArchive(), 
                 _invoiceStore
             );

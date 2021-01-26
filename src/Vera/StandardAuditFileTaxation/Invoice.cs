@@ -12,7 +12,6 @@ namespace Vera.StandardAuditFileTaxation
       Number = other.Number;
       Customer = other.Customer;
       Supplier = other.Supplier;
-      BranchStoreNumber = other.BranchStoreNumber;
       Date = other.Date;
       ShipFrom = other.ShipFrom;
       ShipTo = other.ShipTo;
@@ -32,10 +31,14 @@ namespace Vera.StandardAuditFileTaxation
     }
 
     /// <summary>
-    /// <seealso cref="DataModels.Invoice.InvoiceNumber"/>
-    /// <seealso cref="InvoiceManualData.Number"/>
+    /// Number of the invoice, complaint with the active certification.
     /// </summary>
     public string Number { get; set; }
+
+    /// <summary>
+    /// Type of the invoice. This is defined by the certification implementation.
+    /// </summary>
+    public string Type { get; set; }
 
     /// <summary>
     /// Optional entity that is attached to the invoice. Usually the customer that purchased the goods.
@@ -46,12 +49,6 @@ namespace Vera.StandardAuditFileTaxation
     /// Entity that sold/created the invoice. (store)
     /// </summary>
     public Billable Supplier { get; set; }
-
-    /// <summary>
-    /// Branch or store number. additional segregation of customer/supplier.
-    /// <seealso cref="OrganizationUnit.BranchNumber"/>
-    /// </summary>
-    public string BranchStoreNumber { get; set; }
 
     /// <summary>
     /// Timestamp of the invoicing.
@@ -77,7 +74,6 @@ namespace Vera.StandardAuditFileTaxation
     /// <summary>
     /// Unique reference to the POS/terminal that handled the invoice. Definition of this field is the combination of the user and the organization
     /// that created the invoice/transaction.
-    /// Note: this is not a SAF-T field.
     /// </summary>
     public string TerminalID { get; set; }
 
@@ -92,7 +88,6 @@ namespace Vera.StandardAuditFileTaxation
     /// <summary>
     /// Signature of the invoice. Required for, for example SAF-T 1.0 and NF525 to function correctly because the signature
     /// of an invoice is required on the ticket/invoice.
-    /// Note: this is not a SAF-T field.
     /// </summary>
     public byte[] Signature { get; set; }
 

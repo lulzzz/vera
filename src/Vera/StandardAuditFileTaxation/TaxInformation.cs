@@ -3,11 +3,6 @@ namespace Vera.StandardAuditFileTaxation
   public sealed class TaxInformation
   {
     /// <summary>
-    /// Tax type for look up in tables.
-    /// </summary>
-    public string Type { get; set; }
-
-    /// <summary>
     /// Tax code for look up in tables.
     /// </summary>
     public string Code { get; set; }
@@ -23,11 +18,6 @@ namespace Vera.StandardAuditFileTaxation
     public decimal Base { get; set; }
 
     /// <summary>
-    /// Description of the value in <see cref="Base"/> E.g. litres for excises on alcoholic beverages.
-    /// </summary>
-    public string BaseDescription { get; set; }
-
-    /// <summary>
     /// Amount of the tax.
     /// </summary>
     public Amount Amount { get; set; }
@@ -39,11 +29,18 @@ namespace Vera.StandardAuditFileTaxation
 
     /// <summary>
     /// Tax code for the exemption.
-    /// Note: this is not a SAF-T field.
     /// </summary>
     public string ExemptionCode { get; set; }
 
-    // TODO(kevin): what is this? page 118
-    public string DeclarationPeriod { get; set; }
+    public TaxInformationCategory Category { get; set; }
+  }
+
+  public enum TaxInformationCategory
+  {
+    High,
+    Low,
+    Zero,
+    Exempt,
+    Intermediate
   }
 }
