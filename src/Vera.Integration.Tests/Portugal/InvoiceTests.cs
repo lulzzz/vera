@@ -52,7 +52,15 @@ namespace Vera.Integration.Tests.Portugal
             Assert.NotNull(createInvoiceReply.Number);
             Assert.NotNull(createInvoiceReply.Signature);
 
-            await Task.Delay(TimeSpan.FromSeconds(30));
+            using var getInvoiceCall = invoiceService.GetByNumberAsync(new GetInvoiceByNumberRequest
+            {
+                AccountId = account,
+                Number = createInvoiceReply.Number
+            }, setup.CreateAuthorizedMetadata());
+
+            var getInvoiceCallReply = await getInvoiceCall.ResponseAsync;
+
+            Assert.Equal(createInvoiceReply.Number, getInvoiceCallReply.Number);
         }
 
         // TODO(kevin): write tests that generate different invoices and verify that the number matches the expected format

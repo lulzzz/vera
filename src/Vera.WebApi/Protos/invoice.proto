@@ -7,6 +7,7 @@ package vera.grpc;
 
 service InvoiceService {
     rpc Create(CreateInvoiceRequest) returns (CreateInvoiceReply);
+    rpc GetByNumber(GetInvoiceByNumberRequest) returns (GetInvoiceReply);
 }
 
 message CreateInvoiceRequest {
@@ -23,6 +24,16 @@ message CreateInvoiceReply {
     Signature signature = 3;
 }
 
+message GetInvoiceByNumberRequest {
+    string accountId = 1;
+    string number = 2;
+}
+
+message GetInvoiceReply {
+    // TODO(kevin): extend this to return the full invoice
+    string number = 1;
+}
+
 // Signature captures the in-/output of the signing of the invoice
 message Signature {
     // Input is the data that was used to create the resulting signature, which
@@ -34,7 +45,7 @@ message Signature {
 }
 
 message Invoice {
-    // TODO: may not be needed (extract from token of user)
+    // TODO(kevin): may not be needed (extract from token of user)
     string account = 1;
     
     // Identifier of the invoice in the external system

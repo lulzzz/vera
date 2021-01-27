@@ -53,7 +53,7 @@ namespace Vera.Invoices
             var locker = _factory.CreateLocker();
 
             // Prefix with accountId to make sure the bucket is unique per account
-            var bucket = invoice.AccountId + invoiceBucketGenerator.Generate(invoice);
+            var bucket = invoiceBucketGenerator.Generate(invoice);
 
             // Lock on the unique sequence of the invoice
             await using (await locker.Lock(bucket, TimeSpan.FromMinutes(1)))
@@ -62,7 +62,7 @@ namespace Vera.Invoices
                 var packageSigner = _factory.CreatePackageSigner();
 
                 // Get last stored invoice based on the bucket for the invoice
-                var last = await _store.Last(bucket);
+                var last = await _store.Last(invoice.AccountId, bucket);
 
                 invoice.Sequence = last?.Sequence + 1 ?? 1;
 

@@ -20,13 +20,15 @@ namespace Vera.Stores
         /// Returns the last invoice (if any) based on the given invoice. E.g. invoices may have there own
         /// sequence based their properties.
         /// </summary>
+        /// <param name="accountId"></param>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        Task<Invoice> Last(string bucket);
+        Task<Invoice> Last(Guid accountId, string bucket);
 
         /// <summary>
         /// Returns the invoice for the given account by its invoice number.
         /// </summary>
+        /// <param name="accountId"></param>
         /// <param name="number"></param>
         /// <returns></returns>
         Task<Invoice> GetByNumber(Guid accountId, string number);

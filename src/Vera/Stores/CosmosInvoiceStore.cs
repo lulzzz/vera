@@ -23,12 +23,28 @@ namespace Vera.Stores
 
         public async Task Save(Invoice invoice, string bucket)
         {
-            await _chain.Append(invoice, bucket);
+            await _chain.Append(invoice, PartitionKeyByBucket(invoice.AccountId, bucket));
+
+            // Also create document to look up by number efficiently
+            var invoiceByNumberDocument = new InvoiceDocument
+            {
+                Id = Guid.NewGuid().ToString(),
+                Invoice = invoice,
+                PartitionKey = PartitionKeyByNumber(invoice.AccountId, invoice.Number)
+            };
+
+            // TODO(kevin): can store reference with id/partitionKey as well
+            // but that would require 2 reads, not sure what's better here
+            // also need to keep these documents in sync now
+            await _container.CreateItemAsync(
+                invoiceByNumberDocument,
+                new PartitionKey(invoiceByNumberDocument.PartitionKey)
+            );
         }
 
-        public async Task<Invoice> Last(string bucket)
+        public async Task<Invoice> Last(Guid accountId, string bucket)
         {
-            var tail = await _chain.Tail(new PartitionKey(bucket));
+            var tail = await _chain.Tail(new PartitionKey(PartitionKeyByBucket(accountId, bucket)));
 
             return tail?.Value;
         }
@@ -39,8 +55,7 @@ namespace Vera.Stores
 
             using var iterator = _container.GetItemQueryIterator<InvoiceDocument>(definition, requestOptions: new QueryRequestOptions
             {
-                // TODO(kevin): partition key creation is duplicated in change feed processor
-                PartitionKey = new PartitionKey(accountId + "-" + number)
+                PartitionKey = new PartitionKey(PartitionKeyByNumber(accountId, number))
             });
 
             var response = await iterator.ReadNextAsync();
@@ -76,6 +91,9 @@ namespace Vera.Stores
                 }
             }
         }
+
+        private static string PartitionKeyByBucket(Guid accountId, string bucket) => $"{accountId}#B#{bucket}";
+        private static string PartitionKeyByNumber(Guid accountId, string invoiceNumber) => $"{accountId}#N#{invoiceNumber}";
 
         public class InvoiceDocument
         {

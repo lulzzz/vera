@@ -2,13 +2,10 @@ using System;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Vera.Bootstrap;
-using Vera.WebApi.Background;
 using Vera.WebApi.Security;
 using Vera.WebApi.Services;
 
@@ -26,27 +23,6 @@ namespace Vera.WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddHostedService(provider =>
-            {
-                // TODO(kevin): might move this in to the hosted service if it's still testable
-                var config = provider.GetRequiredService<IConfiguration>();
-
-                var databaseName = config
-                    .GetSection(CosmosOptions.Section)
-                    .Get<CosmosOptions>()
-                    .Database;
-
-                var invoicesContainerName = config
-                    .GetSection(CosmosContainerOptions.Section)
-                    .Get<CosmosContainerOptions>()
-                    .Invoices;
-
-                var invoicesContainer = provider.GetRequiredService<CosmosClient>()
-                    .GetContainer(databaseName, invoicesContainerName);
-
-                return new InvoiceViewHostedService(invoicesContainer);
-            });
-
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {

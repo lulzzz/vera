@@ -21,6 +21,7 @@ using Settlement = Vera.Models.Settlement;
 
 namespace Vera.WebApi.Services
 {
+    [Authorize]
     public class InvoiceService : Grpc.InvoiceService.InvoiceServiceBase
     {
         private readonly IAccountStore _accountStore;
@@ -38,7 +39,6 @@ namespace Vera.WebApi.Services
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
-        [Authorize]
         public override async Task<CreateInvoiceReply> Create(CreateInvoiceRequest request, ServerCallContext context)
         {
             var companyId = context.GetCompanyId();
@@ -71,6 +71,28 @@ namespace Vera.WebApi.Services
                     Input = ByteString.CopyFromUtf8(result.RawSignature),
                     Output = ByteString.CopyFrom(result.Signature)
                 }
+            };
+        }
+
+        public override async Task<GetInvoiceReply> GetByNumber(GetInvoiceByNumberRequest request, ServerCallContext context)
+        {
+            var companyId = context.GetCompanyId();
+            var accountId = Guid.Parse(request.AccountId);
+
+            var account = await _accountStore.Get(companyId, accountId);
+
+            if (account == null)
+            {
+                // Not allowed to create an invoice for this account because it does not belong to the company
+                // to which the user has rights
+                throw new RpcException(new Status(StatusCode.Unauthenticated, "Unauthorized"));
+            }
+
+            var invoice = await _invoiceStore.GetByNumber(accountId, request.Number);
+
+            return new GetInvoiceReply
+            {
+                Number = invoice.Number
             };
         }
 
