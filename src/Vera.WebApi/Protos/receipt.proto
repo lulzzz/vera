@@ -28,4 +28,5 @@ message RenderThermalReply {
 enum ReceiptOutputType {
     // Output the receipt as a tree of commands that can be converted to the actual representation of the receipt
     JSON = 0;
+    TEXT = 1;
 }

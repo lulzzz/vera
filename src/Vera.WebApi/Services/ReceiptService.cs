@@ -60,9 +60,10 @@ namespace Vera.WebApi.Services
             await using var ms = new MemoryStream(8192);
             await using var sw = new StreamWriter(ms, Encoding.UTF8);
 
-            var visitor = request.Type switch
+            IThermalVisitor visitor = request.Type switch
             {
                 ReceiptOutputType.Json => new JsonThermalVisitor(new JsonTextWriter(sw)),
+                ReceiptOutputType.Text => new StringThermalVisitor(sw),
                 _ => throw new ArgumentOutOfRangeException(nameof(request.Type), "unknown requested output type")
             };
 

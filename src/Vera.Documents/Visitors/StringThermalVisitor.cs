@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Text;
 using Vera.Documents.Nodes;
 
@@ -6,11 +7,11 @@ namespace Vera.Documents.Visitors
 {
     public class StringThermalVisitor : IThermalVisitor
     {
-        private readonly StringBuilder _builder;
+        private readonly TextWriter _tw;
 
-        public StringThermalVisitor(StringBuilder builder)
+        public StringThermalVisitor(TextWriter tw)
         {
-            _builder = builder;
+            _tw = tw;
         }
 
         public void Visit(DocumentThermalNode node)
@@ -53,7 +54,7 @@ namespace Vera.Documents.Visitors
         {
             for (var i = 0; i < node.Value; i++)
             {
-                _builder.AppendLine();
+                _tw.WriteLine();
             }
         }
 
@@ -64,10 +65,9 @@ namespace Vera.Documents.Visitors
 
         private void Append(string tag, string value)
         {
-            _builder
-                .Append($"#{tag} ")
-                .Append(value)
-                .AppendLine();
+            _tw.WriteLine($"#{tag} ");
+            _tw.Write(value);
+            _tw.WriteLine();
         }
     }
 }

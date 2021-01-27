@@ -60,6 +60,7 @@ namespace Vera.Integration.Tests.Portugal
             Assert.Equal(ReceiptOutputType.Json, renderReceiptReply.Type);
             Assert.NotNull(renderReceiptReply.Content);
 
+            // TODO(kevin): verify receipt content - important stuff that needs to be on there
             var receiptContent = renderReceiptReply.Content.ToStringUtf8();
         }
     }

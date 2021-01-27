@@ -115,7 +115,7 @@ namespace Vera.Portugal.Tests
 
             var sb = new StringBuilder();
 
-            var visitor = new StringThermalVisitor(sb);
+            var visitor = new StringThermalVisitor(new StringWriter(sb));
             node.Accept(visitor);
 
             var result = sb.ToString();
