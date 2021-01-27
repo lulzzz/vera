@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Newtonsoft.Json;
 using Vera.Documents;
+using Vera.Documents.Visitors;
 using Vera.Models;
 using Vera.Thermal;
 using Xunit;

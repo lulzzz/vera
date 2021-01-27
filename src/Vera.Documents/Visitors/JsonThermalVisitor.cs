@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Vera.Documents.Nodes;
 
-namespace Vera.Documents
+namespace Vera.Documents.Visitors
 {
     public class JsonThermalVisitor : IThermalVisitor
     {

@@ -50,13 +50,17 @@ namespace Vera.WebApi.Services
 
             var accountId = Guid.NewGuid();
 
-            // TODO(kevin): address details etc.
             var account = new Vera.Models.Account
             {
                 Id = accountId,
                 CompanyId = companyId,
                 Certification = request.Certification,
-                Name = request.Name
+                Name = request.Name,
+                Address = request.Address.Unpack(),
+                Email = request.Email,
+                Telephone = request.Telephone,
+                RegistrationNumber = request.RegistrationNumber,
+                TaxRegistrationNumber = request.TaxRegistrationNumber
             };
 
             await _accountStore.Store(account);

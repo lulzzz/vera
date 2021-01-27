@@ -3,6 +3,8 @@ using System.Text;
 using Newtonsoft.Json;
 using Vera.Documents;
 using Vera.Documents.Nodes;
+using Vera.Documents.Parsers;
+using Vera.Documents.Visitors;
 using Xunit;
 
 namespace Vera.Tests

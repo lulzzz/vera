@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,9 @@ using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using Vera.Bootstrap;
 using Vera.Documents;
+using Vera.Documents.Visitors;
 using Vera.Grpc;
+using Vera.Models;
 using Vera.Stores;
 using Vera.Thermal;
 using Vera.WebApi.Security;
@@ -44,7 +47,14 @@ namespace Vera.WebApi.Services
             {
                 // Not allowed to create an invoice for this account because it does not belong to the company
                 // to which the user has rights
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Unauthorized"));
+                throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthorized"));
+            }
+
+            var invoice = await _invoiceStore.GetByNumber(accountId, request.Number);
+
+            if (invoice == null)
+            {
+                throw new RpcException(new Status(StatusCode.NotFound, "invoice not found"));
             }
 
             await using var ms = new MemoryStream(8192);
@@ -58,7 +68,21 @@ namespace Vera.WebApi.Services
 
             var factory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
             var generator = factory.CreateThermalReceiptGenerator();
-            var node = generator.Generate(new ThermalReceiptContext());
+            var node = generator.Generate(new ThermalReceiptContext
+            {
+                Account = account,
+                Invoice = invoice,
+
+                // TODO(kevin): fill this correctly
+                Totals = new Totals
+                {
+                    Amount = 0m,
+                    AmountInTax = 0m,
+                    Taxes = new List<TaxTotal>()
+                }
+
+                // TODO(kevin): map other properties
+            });
 
             node.Accept(visitor);
 

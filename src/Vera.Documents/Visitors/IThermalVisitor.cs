@@ -1,6 +1,6 @@
 using Vera.Documents.Nodes;
 
-namespace Vera.Documents
+namespace Vera.Documents.Visitors
 {
     public interface IThermalVisitor
     {

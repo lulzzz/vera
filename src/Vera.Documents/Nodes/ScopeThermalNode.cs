@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Vera.Documents.Visitors;
 
 namespace Vera.Documents.Nodes
 {

@@ -2,7 +2,7 @@ using System;
 using System.Text;
 using Vera.Documents.Nodes;
 
-namespace Vera.Documents
+namespace Vera.Documents.Visitors
 {
     public class StringThermalVisitor : IThermalVisitor
     {
@@ -23,23 +23,17 @@ namespace Vera.Documents
 
         public void Visit(TextThermalNode node)
         {
-            _builder.Append(node.Value).AppendLine();
+            Append("TEXT", node.Value);
         }
 
         public void Visit(QRCodeThermalNode node)
         {
-            _builder
-                .Append(">QR ")
-                .Append(node.Data)
-                .AppendLine();
+            Append("QR", node.Data);
         }
 
         public void Visit(ImageThermalNode node)
         {
-            _builder
-                .Append("> IMG ")
-                .Append(Convert.ToBase64String(node.Data))
-                .AppendLine();
+            Append("IMG", Convert.ToBase64String(node.Data));
         }
 
         public void Visit(ScopeThermalNode node)
@@ -52,12 +46,7 @@ namespace Vera.Documents
 
         public void Visit(BarcodeThermalNode node)
         {
-            _builder
-                .Append(">BARCODE ")
-                .Append(node.BarcodeType)
-                .Append(" ")
-                .Append(node.Value)
-                .AppendLine();
+            Append("BARCODE", $"{node.BarcodeType} {node.Value}");
         }
 
         public void Visit(SpacingThermalNode node)
@@ -70,7 +59,15 @@ namespace Vera.Documents
 
         public void Visit(LineThermalNode node)
         {
-            _builder.Append("--------").AppendLine();
+            Append("LINE", "--------");
+        }
+
+        private void Append(string tag, string value)
+        {
+            _builder
+                .Append($"#{tag} ")
+                .Append(value)
+                .AppendLine();
         }
     }
 }

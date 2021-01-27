@@ -1,3 +1,5 @@
+using Vera.Documents.Visitors;
+
 namespace Vera.Documents.Nodes
 {
     public class LineThermalNode : IThermalNode

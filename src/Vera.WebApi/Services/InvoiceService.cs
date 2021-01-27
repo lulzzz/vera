@@ -113,7 +113,8 @@ namespace Vera.WebApi.Services
                 SystemId = invoice.Supplier.SystemId,
                 Name = invoice.Supplier.Name,
                 RegistrationNumber = invoice.Supplier.RegistrationNumber,
-                TaxRegistrationNumber = invoice.Supplier.TaxRegistrationNumber
+                TaxRegistrationNumber = invoice.Supplier.TaxRegistrationNumber,
+                Address = invoice.Supplier.Address.Unpack(),
             };
 
             if (invoice.Customer != null)

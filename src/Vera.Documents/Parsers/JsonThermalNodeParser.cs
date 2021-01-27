@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Vera.Documents.Nodes;
 
-namespace Vera.Documents
+namespace Vera.Documents.Parsers
 {
     public class JsonThermalNodeParser
     {

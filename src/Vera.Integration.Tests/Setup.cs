@@ -4,6 +4,7 @@ using Bogus;
 using Grpc.Core;
 using Grpc.Net.Client;
 using Vera.Grpc;
+using Vera.Grpc.Shared;
 
 namespace Vera.Integration.Tests
 {
@@ -52,7 +53,16 @@ namespace Vera.Integration.Tests
             var accountToCreate = new CreateAccountRequest
             {
                 Name = _faker.Company.CompanyName(),
-                Certification = "PT"
+                Certification = "PT",
+                Address = new Address
+                {
+                    City = "City",
+                    Country = "PT",
+                    Number = "123",
+                    Region = "Region",
+                    Street = "Street",
+                    PostalCode = "12345"
+                }
             };
 
             using var createAccountCall = AccountClient.CreateAsync(accountToCreate, CreateAuthorizedMetadata());
@@ -63,7 +73,7 @@ namespace Vera.Integration.Tests
 
         public Metadata CreateAuthorizedMetadata()
         {
-            return new Metadata
+            return new()
             {
                 {"authorization", $"bearer {Token}"}
             };

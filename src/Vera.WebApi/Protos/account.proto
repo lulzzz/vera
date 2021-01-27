@@ -15,6 +15,25 @@ service AccountService {
 message CreateAccountRequest {
     string name = 1;
     string certification = 2;
+
+    // Currency code that is used by the account. ISO 4217
+    string currency = 3;
+
+    // Contact email address
+    string email = 4;
+
+    // Contact telephone number
+    string telephone = 5;
+
+    // Registration number of the account. E.g in the Netherlands this would be
+    // the KvK number.
+    string registrationNumber = 6;
+
+    // VAT registration number of the account
+    string taxRegistrationNumber = 7;
+
+    // Address of the account. Where can it be found on the map?
+    vera.grpc.shared.Address address = 8;
 }
 
 message CreateAccountReply {
