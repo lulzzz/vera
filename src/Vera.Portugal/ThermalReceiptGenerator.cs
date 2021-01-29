@@ -344,7 +344,7 @@ namespace Vera.Portugal
 
             foreach (var orderReference in context.Invoice.OrderReferences)
             {
-                yield return new BarcodeThermalNode("code39", orderReference);
+                yield return new BarcodeThermalNode(BarcodeTypes.Code39, orderReference);
             }
 
             yield return new LineThermalNode();

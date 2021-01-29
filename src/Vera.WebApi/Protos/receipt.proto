@@ -28,5 +28,10 @@ message RenderThermalReply {
 enum ReceiptOutputType {
     // Output the receipt as a tree of commands that can be converted to the actual representation of the receipt
     JSON = 0;
+
+    // Output as raw text, useful for debugging
     TEXT = 1;
+
+    // Output as bytes that can directly be send to an Epson thermal printer
+    ESC = 2;
 }

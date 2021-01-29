@@ -64,6 +64,7 @@ namespace Vera.WebApi.Services
             {
                 ReceiptOutputType.Json => new JsonThermalVisitor(new JsonTextWriter(sw)),
                 ReceiptOutputType.Text => new StringThermalVisitor(sw),
+                ReceiptOutputType.Esc => new EscPosVisitor(ms),
                 _ => throw new ArgumentOutOfRangeException(nameof(request.Type), "unknown requested output type")
             };
 
@@ -87,7 +88,18 @@ namespace Vera.WebApi.Services
 
             node.Accept(visitor);
 
-            await sw.FlushAsync();
+            switch (request.Type)
+            {
+                case ReceiptOutputType.Json:
+                case ReceiptOutputType.Text:
+                    await sw.FlushAsync();
+                    break;
+                case ReceiptOutputType.Esc:
+                    await ms.FlushAsync();
+                    break;
+            }
+
+            ms.Position = 0;
 
             // TODO(kevin): mark as "printed" at this point? or separate endpoint to confirm printing?
 

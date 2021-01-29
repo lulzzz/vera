@@ -2,11 +2,16 @@ using Vera.Documents.Visitors;
 
 namespace Vera.Documents.Nodes
 {
+    public enum BarcodeTypes
+    {
+        Code39 = 1
+    }
+
     public class BarcodeThermalNode : IThermalNode
     {
-        public BarcodeThermalNode(string barcodeType, string value)
+        public BarcodeThermalNode(BarcodeTypes type, string value)
         {
-            BarcodeType = barcodeType;
+            BarcodeType = type;
             Value = value;
         }
 
@@ -16,7 +21,7 @@ namespace Vera.Documents.Nodes
         }
 
         public string Type => "barcode";
-        public string BarcodeType { get; }
+        public BarcodeTypes BarcodeType { get; }
         public string Value { get; }
     }
 }
