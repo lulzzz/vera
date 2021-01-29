@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Vera.Invoices;
+using Vera.Models;
 using Vera.StandardAuditFileTaxation;
 
 namespace Vera.Portugal

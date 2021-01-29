@@ -1,18 +1,24 @@
-using System.Collections.Generic;
+using Vera.Invoices;
 
 namespace Vera.Models
 {
     public class Totals
     {
-        public ICollection<TaxTotal> Taxes { get; set; }
-        public decimal Amount { get; set; }
-        public decimal AmountInTax { get; set; }
-    }
+        /// <summary>
+        /// Summary of all the taxes on the invoice.
+        /// </summary>
+        public TaxTable Taxes { get; set; } = new();
 
-    public class TaxTotal
-    {
-        public decimal Base { get; set; }
-        public decimal Rate { get; set; }
-        public decimal Amount { get; set; }
+        /// <summary>
+        /// Sum of the net of the lines on the invoice.
+        /// <see cref="InvoiceLine.Net"/>
+        /// </summary>
+        public decimal Net { get; set; }
+
+        /// <summary>
+        /// Sum of the gross of the lines on the invoice.
+        /// <see cref="InvoiceLine.Gross"/>
+        /// </summary>
+        public decimal Gross { get; set; }
     }
 }

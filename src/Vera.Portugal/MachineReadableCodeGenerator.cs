@@ -19,8 +19,9 @@ namespace Vera.Portugal
 
     public string Generate(Invoice invoice)
     {
-      var calculator = new TaxTableCalculator();
-      var table = calculator.Calculate(invoice);
+      var calculator = new InvoiceTotalsCalculator();
+      var totals = calculator.Calculate(invoice);
+      var table = totals.Taxes;
 
       var builder = new MachineCodeBuilder()
         .Issuer(invoice.Supplier.TaxRegistrationNumber)
@@ -41,7 +42,7 @@ namespace Vera.Portugal
         .TaxNormal(table.High)
         .NonTaxable(table.Zero)
         .TaxTotal(table.Total)
-        .Total(invoice.Lines.Sum(x => x.Gross))
+        .Total(totals.Gross)
         .Hash(_shortSignature)
         .CertificateNumber(_certificateNumber);
 

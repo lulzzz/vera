@@ -1,4 +1,4 @@
-using System.Linq;
+using Vera.Invoices;
 using Vera.Models;
 
 namespace Vera.Thermal
@@ -10,41 +10,23 @@ namespace Vera.Thermal
 
     public class ThermalReceiptContextFactory
     {
+        private readonly InvoiceTotalsCalculator _calculator;
+
+        public ThermalReceiptContextFactory()
+        {
+            _calculator = new InvoiceTotalsCalculator();
+        }
+
         public ThermalReceiptContext Create(Account account, Invoice invoice)
         {
             return new()
             {
                 Account = account,
                 Invoice = invoice,
-                Totals = CalculateInvoiceTotals(invoice)
+                Totals = _calculator.Calculate(invoice)
+
+                // TODO(kevin): set the other properties (header/footer/etc.)
             };
-        }
-
-        private Totals CalculateInvoiceTotals(Invoice invoice)
-        {
-            var totals = new Totals();
-
-            foreach (var line in invoice.Lines)
-            {
-                totals.Amount += line.Gross;
-                totals.AmountInTax += line.Net;
-            }
-
-            totals.Taxes = invoice.Lines
-                .GroupBy(l => l.Taxes.Rate)
-                .Select(g =>
-                {
-                    var baseAmount = g.Sum(l => l.Gross);
-                    return new TaxTotal
-                    {
-                        Rate = g.Key,
-                        Base = baseAmount,
-                        Amount = baseAmount * (g.Key - 1)
-                    };
-                })
-                .ToList();
-
-            return totals;
         }
     }
 }

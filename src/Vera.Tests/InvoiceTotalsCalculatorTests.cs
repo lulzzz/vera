@@ -7,7 +7,7 @@ using Xunit;
 namespace Vera.Tests
 {
     // TODO(kevin): elaborate tests
-    public class TaxTableCalculatorTests
+    public class InvoiceTotalsCalculatorTests
     {
         [Fact]
         public void Should_correctly_calculate_amounts()
@@ -29,13 +29,17 @@ namespace Vera.Tests
                 }
             };
 
-            var calculator = new TaxTableCalculator();
-            var table = calculator.Calculate(input);
+            var calculator = new InvoiceTotalsCalculator();
+            var totals = calculator.Calculate(input);
+            var table = totals.Taxes;
+
+            Assert.Equal(12.99m, totals.Gross);
+            Assert.Equal(12.99m / 1.23m, totals.Net);
 
             Assert.NotNull(table.High);
+            Assert.Equal(1.23m, table.High.Rate);
             Assert.Equal(10.56m, Math.Round(table.High.Base, 2));
             Assert.Equal(2.43m, Math.Round(table.High.Value, 2));
-
             Assert.Equal(2.43m, Math.Round(table.Total, 2));
         }
     }

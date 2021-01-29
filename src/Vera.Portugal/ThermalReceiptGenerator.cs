@@ -73,7 +73,7 @@ namespace Vera.Portugal
 
             yield return new SpacingThermalNode(1);
 
-            if (context.Totals.AmountInTax > 0)
+            if (context.Totals.Gross > 0)
             {
                 yield return new TextThermalNode("FATURA SIMPLIFICADA")
                 {
@@ -203,16 +203,27 @@ namespace Vera.Portugal
 
             yield return new TextThermalNode(sb.ToString());
 
-            foreach (var tax in totals.Taxes)
+            var taxes = new[]
             {
+                totals.Taxes.High,
+                totals.Taxes.Intermediate,
+                totals.Taxes.Low,
+                totals.Taxes.Zero,
+                totals.Taxes.Exempt
+            };
+
+            foreach (var tax in taxes)
+            {
+                if (tax == null) continue;
+
                 sb.Clear();
 
                 sb.AppendFormat(
                     format,
                     FormatTaxRate(tax.Rate),
                     FormatCurrency(tax.Base),
-                    FormatCurrency(tax.Amount),
-                    FormatCurrency(tax.Amount + tax.Base)
+                    FormatCurrency(tax.Value),
+                    FormatCurrency(tax.Value + tax.Base)
                 );
 
                 yield return new TextThermalNode(sb.ToString());
@@ -222,9 +233,9 @@ namespace Vera.Portugal
               .AppendFormat(
                   format,
                     "SUBTOTAL",
-                    FormatCurrency(totals.Amount),
-                    FormatCurrency(totals.AmountInTax - totals.Amount),
-                    FormatCurrency(totals.AmountInTax)
+                    FormatCurrency(totals.Net),
+                    FormatCurrency(totals.Gross - totals.Net),
+                    FormatCurrency(totals.Gross)
             );
 
             yield return new TextThermalNode(sb.ToString());
@@ -233,9 +244,9 @@ namespace Vera.Portugal
         private IEnumerable<IThermalNode> GenerateTotals(ThermalReceiptContext context)
         {
             var totals = context.Totals;
-            var prefix = totals.AmountInTax >= 0 ? "TOTAL FATURA" : "TROCO";
+            var prefix = totals.Gross >= 0 ? "TOTAL FATURA" : "TROCO";
 
-            yield return new TextThermalNode($"{prefix}: {FormatCurrency(totals.AmountInTax)}")
+            yield return new TextThermalNode($"{prefix}: {FormatCurrency(totals.Gross)}")
             {
                 FontSize = FontSize.Large
             };

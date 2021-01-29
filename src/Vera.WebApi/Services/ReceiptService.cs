@@ -68,26 +68,17 @@ namespace Vera.WebApi.Services
                 _ => throw new ArgumentOutOfRangeException(nameof(request.Type), "unknown requested output type")
             };
 
-            var factory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
-            var generator = factory.CreateThermalReceiptGenerator();
-            var node = generator.Generate(new ThermalReceiptContext
-            {
-                Account = account,
-                Invoice = invoice,
+            var componentFactory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
 
-                // TODO(kevin): fill this correctly
-                Totals = new Totals
-                {
-                    Amount = 0m,
-                    AmountInTax = 0m,
-                    Taxes = new List<TaxTotal>()
-                }
+            var receiptContextFactory = new ThermalReceiptContextFactory();
+            var generatorContext = receiptContextFactory.Create(account, invoice);
 
-                // TODO(kevin): map other properties
-            });
+            var generator = componentFactory.CreateThermalReceiptGenerator();
+            var node = generator.Generate(generatorContext);
 
             node.Accept(visitor);
 
+            // TODO(kevin): find a nicer way to flush
             switch (request.Type)
             {
                 case ReceiptOutputType.Json:
