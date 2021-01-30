@@ -19,5 +19,5 @@ jobs:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - name: Package
       run: dotnet pack --configuration Release src/Vera.Documents
-    - name: Publish the package to GPR
-      run: dotnet nuget push src/Vera.Documents/bin/Release/*.nupkg --skip-duplicate
+    # - name: Publish the package to GPR
+    #   run: dotnet nuget push src/Vera.Documents/bin/Release/*.nupkg --skip-duplicate
