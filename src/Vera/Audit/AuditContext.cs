@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Vera.Models;
 
 namespace Vera.Audit
@@ -27,5 +28,7 @@ namespace Vera.Audit
 
         // Number of the certificate that was given by the authority
         public string CertificateNumber { get; set; }
+
+        public IReadOnlyCollection<Invoice> Invoices { get; set; }
     }
 }

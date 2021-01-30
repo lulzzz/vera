@@ -10,7 +10,7 @@ using ProductTypes = Vera.Models.ProductTypes;
 
 namespace Vera.Portugal
 {
-    public class AuditTransformer2
+    public class AuditCreator : IAuditCreator<AuditFile>
     {
         private const string AuditFileVersion = "1.04_01";
         private const string TaxEntity = "Global";
@@ -22,22 +22,21 @@ namespace Vera.Portugal
 
         private readonly string _productCompanyTaxId;
 
-        public AuditTransformer2(string productCompanyTaxId)
+        public AuditCreator(string productCompanyTaxId)
         {
             _productCompanyTaxId = productCompanyTaxId;
         }
 
-        public AuditFile Transform(AuditContext context, AuditCriteria criteria,
-            ICollection<Vera.Models.Invoice> invoices)
+        public AuditFile Create(AuditContext context, AuditCriteria criteria)
         {
             var taxCountryRegion = context.Account.Address.Country;
 
             var auditFile = CreateAuditFileModel(context, criteria);
 
-            ApplyCustomers(invoices, auditFile);
-            ApplyProducts(invoices, auditFile);
-            ApplyTaxTable(invoices, auditFile, taxCountryRegion);
-            ApplyInvoices(invoices, auditFile, taxCountryRegion);
+            ApplyCustomers(context.Invoices, auditFile);
+            ApplyProducts(context.Invoices, auditFile);
+            ApplyTaxTable(context.Invoices, auditFile, taxCountryRegion);
+            ApplyInvoices(context.Invoices, auditFile, taxCountryRegion);
 
             return auditFile;
         }
@@ -204,7 +203,7 @@ namespace Vera.Portugal
             }).ToArray();
         }
 
-        private static void ApplyInvoices(ICollection<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
+        private static void ApplyInvoices(IEnumerable<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
         {
             var calculator = new InvoiceTotalsCalculator();
 
@@ -282,7 +281,7 @@ namespace Vera.Portugal
                 }
             }
 
-            sourceDocumentsSalesInvoices.NumberOfEntries = invoices.Count.ToString();
+            sourceDocumentsSalesInvoices.NumberOfEntries = invoices.Count().ToString();
             sourceDocumentsSalesInvoices.TotalDebit = Round(totalDebitExTax, 2);
             sourceDocumentsSalesInvoices.TotalCredit = Round(totalCreditExTax, 2);
         }

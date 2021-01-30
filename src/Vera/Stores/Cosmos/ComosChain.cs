@@ -5,7 +5,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Vera.Models;
 
-namespace Vera.Stores
+namespace Vera.Stores.Cosmos
 {
     public sealed class CosmosChain<T> where T : class
     {

@@ -10,6 +10,7 @@ using Vera.Portugal;
 using Vera.Security;
 using Vera.Services;
 using Vera.Stores;
+using Vera.Stores.Cosmos;
 
 namespace Vera.Bootstrap
 {

@@ -15,6 +15,8 @@ namespace Vera.Bootstrap
         /// <param name="account">account to resolve the factory for</param>
         /// <returns>factory based on the given account</returns>
         IAccountComponentFactory GetOrThrow(Account account);
+
+        IComponentFactory GetComponentFactory(Account account);
     }
 
     public sealed class AccountComponentFactoryCollection : IAccountComponentFactoryCollection
@@ -34,6 +36,11 @@ namespace Vera.Bootstrap
             }
 
             throw new InvalidOperationException($"No component factory available for certification {account.Certification}");
+        }
+
+        public IComponentFactory GetComponentFactory(Account account)
+        {
+            return GetOrThrow(account).CreateComponentFactory(account);
         }
     }
 }

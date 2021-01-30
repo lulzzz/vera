@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Bogus;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Vera.Grpc;
 using Vera.Integration.Tests.Common;
@@ -59,6 +58,8 @@ namespace Vera.Integration.Tests.Portugal
             }, setup.CreateAuthorizedMetadata());
 
             var getInvoiceCallReply = await getInvoiceCall.ResponseAsync;
+
+            // TODO(kevin): verify
 
             Assert.Equal(createInvoiceReply.Number, getInvoiceCallReply.Number);
         }

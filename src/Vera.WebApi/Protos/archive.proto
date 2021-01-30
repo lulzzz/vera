@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "Protos/shared.proto";
 import "google/protobuf/timestamp.proto";
 
 package vera.grpc;
@@ -19,7 +18,7 @@ message ArchiveRequest {
     google.protobuf.Timestamp start = 2;
 
     // End of the period to generate the archive for
-    google.protobuf.Timestamp end = 2;
+    google.protobuf.Timestamp end = 3;
 }
 
 message ArchiveReply {

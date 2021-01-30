@@ -5,6 +5,7 @@ using Azure.Storage.Blobs;
 
 namespace Vera.Audit
 {
+    // TODO: generic file storage?
     public interface IAuditStorage
     {
         Task Store(Stream s);

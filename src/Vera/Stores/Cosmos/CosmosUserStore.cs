@@ -6,7 +6,7 @@ using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
 using User = Vera.Models.User;
 
-namespace Vera.Stores
+namespace Vera.Stores.Cosmos
 {
     public sealed class CosmosUserStore : IUserStore
     {

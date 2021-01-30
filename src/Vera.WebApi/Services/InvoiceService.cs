@@ -34,27 +34,17 @@ namespace Vera.WebApi.Services
 
         public override async Task<CreateInvoiceReply> Create(CreateInvoiceRequest request, ServerCallContext context)
         {
-            var companyId = context.GetCompanyId();
-            var accountId = Guid.Parse(request.Invoice.Account);
-
-            var account = await _accountStore.Get(companyId, accountId);
-
-            if (account == null)
-            {
-                // Not allowed to create an invoice for this account because it does not belong to the company
-                // to which the user has rights
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Unauthorized"));
-            }
+            var account = await context.ResolveAccount(_accountStore, request.Invoice.Account);
 
             // TODO: validate invoice, very, very, very strict
             // TODO(kevin): PT - invoices > 1000 euros require a customer
             // TODO(kevin): NF525 - requires signature of original invoice on the returned line
 
-            var factory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
+            var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
-            var facade = new InvoiceProcessor(_invoiceStore, factory);
+            var processor = new InvoiceProcessor(_invoiceStore, factory);
 
-            var result = await facade.Process(Map(request.Invoice));
+            var result = await processor.Process(Map(request.Invoice));
 
             return new CreateInvoiceReply
             {
@@ -70,19 +60,8 @@ namespace Vera.WebApi.Services
 
         public override async Task<GetInvoiceReply> GetByNumber(GetInvoiceByNumberRequest request, ServerCallContext context)
         {
-            var companyId = context.GetCompanyId();
-            var accountId = Guid.Parse(request.AccountId);
-
-            var account = await _accountStore.Get(companyId, accountId);
-
-            if (account == null)
-            {
-                // Not allowed to create an invoice for this account because it does not belong to the company
-                // to which the user has rights
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "Unauthorized"));
-            }
-
-            var invoice = await _invoiceStore.GetByNumber(accountId, request.Number);
+            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var invoice = await _invoiceStore.GetByNumber(account.Id, request.Number);
 
             return new GetInvoiceReply
             {

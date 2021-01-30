@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
 using Vera.Audit;
 using Vera.Concurrency;
-using Vera.Configuration;
 using Vera.Invoices;
 using Vera.Portugal.Models;
 using Vera.Signing;
@@ -51,21 +50,6 @@ namespace Vera.Portugal
                 _configuration.SocialCapital,
                 _configuration.CertificateName,
                 _configuration.CertificateNumber
-            );
-        }
-
-        public AbstractAccountConfiguration CreateConfiguration()
-        {
-            return new Configuration();
-        }
-
-        public IAuditFacade CreateFacade()
-        {
-            return new AuditFacade<AuditFile>(
-                null,
-                // new AuditTransformer(_configuration.ProductCompanyTaxId),
-                new AuditArchive(), 
-                _invoiceStore
             );
         }
     }

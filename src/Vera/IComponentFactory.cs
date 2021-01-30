@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Vera.Audit;
 using Vera.Concurrency;
 using Vera.Configuration;
 using Vera.Invoices;

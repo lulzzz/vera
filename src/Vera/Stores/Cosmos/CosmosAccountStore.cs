@@ -1,12 +1,12 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Newtonsoft.Json;
 using Vera.Models;
 
-namespace Vera.Stores
+namespace Vera.Stores.Cosmos
 {
     public class CosmosAccountStore : IAccountStore
     {

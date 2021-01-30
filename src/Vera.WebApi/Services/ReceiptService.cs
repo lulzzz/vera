@@ -35,19 +35,8 @@ namespace Vera.WebApi.Services
 
         public override async Task<RenderThermalReply> RenderThermal(RenderThermalRequest request, ServerCallContext context)
         {
-            var companyId = context.GetCompanyId();
-            var accountId = Guid.Parse(request.Account);
-
-            var account = await _accountStore.Get(companyId, accountId);
-
-            if (account == null)
-            {
-                // Not allowed to create an invoice for this account because it does not belong to the company
-                // to which the user has rights
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthorized"));
-            }
-
-            var invoice = await _invoiceStore.GetByNumber(accountId, request.Number);
+            var account = await context.ResolveAccount(_accountStore, request.Account);
+            var invoice = await _invoiceStore.GetByNumber(account.Id, request.Number);
 
             if (invoice == null)
             {
@@ -65,7 +54,7 @@ namespace Vera.WebApi.Services
                 _ => throw new ArgumentOutOfRangeException(nameof(request.Type), "unknown requested output type")
             };
 
-            var componentFactory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
+            var componentFactory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
             var receiptContextFactory = new ThermalReceiptContextFactory();
             var generatorContext = receiptContextFactory.Create(account, invoice);

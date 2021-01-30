@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 using Vera.Audit;
 using Vera.Models;
 
-namespace Vera.Stores
+namespace Vera.Stores.Cosmos
 {
     public sealed class CosmosInvoiceStore : IInvoiceStore
     {
