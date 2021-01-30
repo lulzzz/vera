@@ -11,9 +11,6 @@
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-  </ItemGroup>
   <PropertyGroup>
     <NoWarn>NU1701,CS8632</NoWarn>
 	<WarningsAsErrors>NU1605;CS0108;CS4014</WarningsAsErrors>

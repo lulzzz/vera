@@ -1,11 +1,9 @@
 using System;
-using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
-using Vera.Configuration;
 using Vera.Portugal;
 using Vera.Security;
 using Vera.Services;
