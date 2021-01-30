@@ -41,10 +41,10 @@ namespace Vera.Portugal.Tests
                         Street = "Lalala"
                     },
                 },
-                Employee = new Billable
+                Employee = new Employee
                 {
                     SystemId = "007",
-                    Name = "Kevin"
+                    FirstName = "Kevin"
                 },
                 TerminalId = "ST01.44",
                 Date = DateTime.UtcNow,
@@ -79,20 +79,21 @@ namespace Vera.Portugal.Tests
                         Description = "Debit"
                     }
                 },
-                Receipts = new List<PinReceipt>
-                {
-                    new PinReceipt
-                    {
-                        Lines = new[]
-                        {
-                            "PIN RECEIPT",
-                            "LINES",
-                            "GO",
-                            "HERE",
-                            "MASTERCARD ***123"
-                        }
-                    }
-                }
+                // TODO(kevin): pin receipt
+                // Receipts = new List<PinReceipt>
+                // {
+                //     new PinReceipt
+                //     {
+                //         Lines = new[]
+                //         {
+                //             "PIN RECEIPT",
+                //             "LINES",
+                //             "GO",
+                //             "HERE",
+                //             "MASTERCARD ***123"
+                //         }
+                //     }
+                // }
             };
 
             var account = new Account

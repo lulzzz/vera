@@ -19,7 +19,7 @@ namespace Vera.Audit.Extract
         {
             var customer = invoice.Customer;
 
-            if (customer == null || _customers.Any(c => customer.SystemID == c.SystemID))
+            if (customer == null || _customers.Any(c => customer.SystemId == c.SystemID))
             {
                 return;
             }
@@ -38,7 +38,7 @@ namespace Vera.Audit.Extract
 
             _customers.Add(new Customer
             {
-                SystemID = customer.SystemID,
+                SystemID = customer.SystemId,
                 Name = customer.CompanyName,
                 RegistrationNumber = customer.RegistrationNumber,
                 TaxRegistration = new TaxRegistration

@@ -33,6 +33,7 @@ namespace Vera.Audit
         public async Task Process(AuditContext context, AuditCriteria criteria)
         {
             // TODO(kevin): check if there is an archive already that matches (or overlaps) the criteria
+            // TODO(kevin): gather all the unique customers, employees, taxtable etc.
 
             var audit = await CreateAudit(context, criteria);
             var result = _transformer.Transform(context, criteria, audit);
@@ -48,7 +49,6 @@ namespace Vera.Audit
             var extractors = new IAuditDataExtractor[]
             {
                 new CustomerAuditDataExtractor(),
-                new EmployeeAuditDataExtractor(),
                 new PaymentAuditDataExtractor(),
                 new ProductAuditDataExtractor(),
                 new TaxTableAuditExtractor(), 

@@ -19,16 +19,11 @@ namespace Vera.Audit.Extract
         public void Extract(Invoice invoice)
         {
             var products = invoice.Lines
-                .Where(l => l.Product != null)
+                .Where(l => l.Product != null && !_products.ContainsKey(l.Product.Code))
                 .Select(l => l.Product);
             
             foreach (var product in products)
             {
-                if (_products.ContainsKey(product.Code))
-                {
-                    continue;
-                }
-
                 _products[product.Code] = new Product
                 {
                     Barcode = product.Barcode,
@@ -47,7 +42,7 @@ namespace Vera.Audit.Extract
             }
         }
         
-        private ProductTypes ExtractProductType(Models.Product product)
+        private static ProductTypes ExtractProductType(Models.Product product)
         {
             return product.Type switch
             {

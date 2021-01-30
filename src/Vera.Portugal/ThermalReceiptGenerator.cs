@@ -110,10 +110,13 @@ namespace Vera.Portugal
 
             string printNumberPrefix;
 
+            // TODO(kevin): invoice number of prints
+            // var prints = invoice.Prints.Count;
+            var prints = 0;
             if (string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber)) {
-                printNumberPrefix = invoice.Prints.Count == 0 ? "ORIGINAL" : $"DUPLICADO #{invoice.Prints.Count}";
+                printNumberPrefix = prints == 0 ? "ORIGINAL" : $"DUPLICADO #{prints}";
             } else {
-                printNumberPrefix = $"DUPLICADO REIMPRESSAO #{invoice.Prints.Count}";
+                printNumberPrefix = $"DUPLICADO REIMPRESSAO #{prints}";
             }
 
             yield return new TextThermalNode($"{printNumberPrefix}");
@@ -304,27 +307,28 @@ namespace Vera.Portugal
                 yield return new TextThermalNode(sb.ToString());
             }
 
-            var receipts = context.Invoice.Receipts;
-            if (receipts.Count != 0)
-            {
-                yield return new SpacingThermalNode(1);
-
-                // Output credit/debit receipt
-                foreach (var receipt in receipts)
-                {
-                    foreach (var line in receipt.Lines)
-                    {
-                        yield return new TextThermalNode(line);
-                    }
-
-                    if (receipt.SignatureData != null)
-                    {
-                        yield return new ImageThermalNode(receipt.SignatureMimeType, receipt.SignatureData);
-                    }
-                }                
-
-                yield return new SpacingThermalNode(1);
-            }            
+            // TODO(kevin): PIN slip output
+            // var receipts = context.Invoice.Receipts;
+            // if (receipts.Count != 0)
+            // {
+            //     yield return new SpacingThermalNode(1);
+            //
+            //     // Output credit/debit receipt
+            //     foreach (var receipt in receipts)
+            //     {
+            //         foreach (var line in receipt.Lines)
+            //         {
+            //             yield return new TextThermalNode(line);
+            //         }
+            //
+            //         if (receipt.SignatureData != null)
+            //         {
+            //             yield return new ImageThermalNode(receipt.SignatureMimeType, receipt.SignatureData);
+            //         }
+            //     }
+            //
+            //     yield return new SpacingThermalNode(1);
+            // }
         }
 
         private IEnumerable<IThermalNode> GenerateFooter(ThermalReceiptContext context)

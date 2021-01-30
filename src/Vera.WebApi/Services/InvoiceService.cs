@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf;
@@ -12,7 +11,6 @@ using Vera.Models;
 using Vera.Stores;
 using Vera.WebApi.Models;
 using Vera.WebApi.Security;
-using Address = Vera.Models.Address;
 using Invoice = Vera.Grpc.Invoice;
 using InvoiceLine = Vera.Models.InvoiceLine;
 using Payment = Vera.Models.Payment;
@@ -106,49 +104,42 @@ namespace Vera.WebApi.Services
                 Remark = invoice.Remark,
                 AccountId = Guid.Parse(invoice.Account),
                 TerminalId = invoice.TerminalId,
-            };
-
-            result.Supplier = new Billable
-            {
-                SystemId = invoice.Supplier.SystemId,
-                Name = invoice.Supplier.Name,
-                RegistrationNumber = invoice.Supplier.RegistrationNumber,
-                TaxRegistrationNumber = invoice.Supplier.TaxRegistrationNumber,
-                Address = invoice.Supplier.Address.Unpack(),
+                Supplier = new Billable
+                {
+                    SystemId = invoice.Supplier.SystemId,
+                    Name = invoice.Supplier.Name,
+                    RegistrationNumber = invoice.Supplier.RegistrationNumber,
+                    TaxRegistrationNumber = invoice.Supplier.TaxRegistrationNumber,
+                    Address = invoice.Supplier.Address.Unpack(),
+                },
+                Employee = new Vera.Models.Employee
+                {
+                    SystemId = invoice.Employee.SystemId,
+                    FirstName = invoice.Employee.FirstName,
+                    LastName = invoice.Employee.LastName
+                }
             };
 
             if (invoice.Customer != null)
             {
                 result.Customer = new Vera.Models.Customer
                 {
-                    SystemID = invoice.Customer.SystemId,
+                    SystemId = invoice.Customer.SystemId,
                     Email = invoice.Customer.Email,
                     FirstName = invoice.Customer.FirstName,
                     LastName = invoice.Customer.LastName,
                     CompanyName = invoice.Customer.CompanyName,
                     RegistrationNumber = invoice.Customer.RegistrationNumber,
                     TaxRegistrationNumber = invoice.Customer.TaxRegistrationNumber,
-
-                    // TODO(kevin): remove these fields? it doesn't make much sense
                     ShippingAddress = invoice.Customer.ShippingAddress.Unpack(),
                     BillingAddress = invoice.Customer.BillingAddress.Unpack()
                 };
             }
 
-            if (invoice.Employee != null)
-            {
-                // TODO: map some more fields and billable may not be the optimal type here
-                result.Employee = new Billable
-                {
-                    SystemId = invoice.Employee.SystemId,
-                };
-            }
-
             result.ShipTo = invoice.ShippingAddress.Unpack();
-
-            result.Payments = invoice.Payments.Select(Map).ToList();
-
             result.Lines = invoice.Lines.Select(Map).ToList();
+            result.Payments = invoice.Payments.Select(Map).ToList();
+            result.Settlements = invoice.Settlements.Select(Map).ToList();
 
             return result;
         }
@@ -174,6 +165,13 @@ namespace Vera.WebApi.Services
             };
         }
 
+        private static Settlement Map(Vera.Grpc.Settlement s) => new()
+        {
+            Amount = s.Amount,
+            Description = s.Description,
+            SystemId = s.SystemId
+        };
+
         private static InvoiceLine Map(Vera.Grpc.InvoiceLine line)
         {
             // TODO(kevin): validate that when exempt is given that a reason and/or code is also available
@@ -198,8 +196,10 @@ namespace Vera.WebApi.Services
                         TaxValue.Types.Category.Zero => TaxesCategory.Zero,
                         TaxValue.Types.Category.Exempt => TaxesCategory.Exempt,
                         TaxValue.Types.Category.Intermediate => TaxesCategory.Intermediate,
-                        _ => throw new ArgumentOutOfRangeException()
-                    }
+                        _ => throw new ArgumentOutOfRangeException(nameof(line.Tax.Category), line.Tax.Category, "unknown tax category")
+                    },
+                    ExemptionCode = line.Tax.ExemptionCode,
+                    ExemptionReason = line.Tax.ExemptionReason
                 }
             };
 
@@ -208,7 +208,7 @@ namespace Vera.WebApi.Services
                 var productType = line.Product.Group switch
                 {
                     Product.Types.Group.Other => ProductTypes.Goods,
-                    _ => throw new ArgumentOutOfRangeException(nameof(line.Product.Group))
+                    _ => throw new ArgumentOutOfRangeException(nameof(line.Product.Group), line.Product.Group, "unknown product group")
                 };
 
                 result.Product = new Vera.Models.Product
@@ -221,12 +221,7 @@ namespace Vera.WebApi.Services
 
             if (line.Settlements != null)
             {
-                result.Settlements = line.Settlements.Select(s => new Settlement
-                {
-                    Amount = s.Amount,
-                    Description = s.Description,
-                    SystemId = s.SystemId
-                }).ToList();
+                result.Settlements = line.Settlements.Select(Map).ToList();
             }
 
             return result;

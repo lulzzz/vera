@@ -1,5 +1,6 @@
 using System.Collections.Generic;
-using Vera.Models;
+using Vera.StandardAuditFileTaxation;
+using Invoice = Vera.Models.Invoice;
 using Payment = Vera.StandardAuditFileTaxation.Payment;
 
 namespace Vera.Audit.Extract
@@ -15,7 +16,16 @@ namespace Vera.Audit.Extract
 
         public void Extract(Invoice invoice)
         {
-            // TODO(kevin): map the payments
+            foreach (var p in invoice.Payments)
+            {
+                _payments.Add(new Payment
+                {
+                    Reference = p.SystemId,
+                    TransactionDate = p.Date,
+                    Description = p.Description,
+                    Method = p.Category.ToString()
+                });
+            }
         }
 
         public void Apply(StandardAuditFileTaxation.Audit audit)

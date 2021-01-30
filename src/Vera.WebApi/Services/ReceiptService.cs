@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,10 +7,8 @@ using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using Vera.Bootstrap;
-using Vera.Documents;
 using Vera.Documents.Visitors;
 using Vera.Grpc;
-using Vera.Models;
 using Vera.Stores;
 using Vera.Thermal;
 using Vera.WebApi.Security;

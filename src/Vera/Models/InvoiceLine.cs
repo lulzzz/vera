@@ -46,6 +46,16 @@ namespace Vera.Models
         public string Code { get; set; }
 
         public TaxesCategory Category { get; set; }
+
+        /// <summary>
+        /// Code for the tax exemption.
+        /// </summary>
+        public string ExemptionCode { get; set; }
+
+        /// <summary>
+        /// Reason for the tax exemption.
+        /// </summary>
+        public string ExemptionReason { get; set; }
     }
 
     public enum TaxesCategory

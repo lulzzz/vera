@@ -45,7 +45,6 @@ message Signature {
 }
 
 message Invoice {
-    // TODO(kevin): may not be needed (extract from token of user)
     string account = 1;
     
     // Identifier of the invoice in the external system
@@ -76,7 +75,8 @@ message Invoice {
     vera.grpc.shared.Address shippingAddress = 13;
 
     repeated InvoiceLine lines = 14;
-    repeated Payment payments = 15;
+    repeated Settlement settlements = 15;
+    repeated Payment payments = 16;
 }
 
 message InvoiceLine {
@@ -224,4 +224,7 @@ message TaxValue {
     vera.grpc.shared.DecimalValue rate = 1;
     string code = 2;
     Category category = 3;
+
+    string exemptionCode = 4;
+    string exemptionReason = 5;
 }

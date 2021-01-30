@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+import "Protos/shared.proto";
+import "google/protobuf/timestamp.proto";
+
+package vera.grpc;
+
+service ArchiveService {
+    // Starts the creation of an archive based on the given parameters
+    rpc Archive (ArchiveRequest) returns (ArchiveReply);
+}
+
+message ArchiveRequest {
+    string accountId = 1;
+
+    // TODO(kevin): include store number..?
+
+    // Start of the period to generate the archive for
+    google.protobuf.Timestamp start = 2;
+
+    // End of the period to generate the archive for
+    google.protobuf.Timestamp end = 2;
+}
+
+message ArchiveReply {
+    // Unique identifier of the archive to retrieve when it's ready
+    string archiveId = 1;
+}
