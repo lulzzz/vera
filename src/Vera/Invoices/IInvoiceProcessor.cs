@@ -30,18 +30,26 @@ namespace Vera.Invoices
         public byte[] Signature { get; set; }
     }
 
-    // TODO: rename to invoice service
-    public interface IInvoiceFacade
+    public interface IInvoiceProcessor
     {
+        /// <summary>
+        /// Responsible for processing the invoice by:
+        ///
+        /// 1. Putting in the correct chain/bucket
+        /// 2. Generating and assigning the correct invoice number
+        /// 3. Generating and assigning a sequence
+        /// 4. Signing the invoice and assigning it
+        /// 5. Storing the invoice
+        /// </summary>
         Task<InvoiceResult> Process(Invoice invoice);
     }
 
-    public sealed class InvoiceFacade : IInvoiceFacade
+    public sealed class InvoiceProcessor : IInvoiceProcessor
     {
         private readonly IInvoiceStore _store;
         private readonly IComponentFactory _factory;
 
-        public InvoiceFacade(IInvoiceStore store, IComponentFactory factory)
+        public InvoiceProcessor(IInvoiceStore store, IComponentFactory factory)
         {
             _store = store;
             _factory = factory;
@@ -76,8 +84,13 @@ namespace Vera.Invoices
                     Number = number
                 });
 
-                invoice.RawSignature = result.Input;
-                invoice.Signature = result.Output;
+                invoice.Signature = new Signature
+                {
+                    Input = result.Input,
+                    Output = result.Output,
+
+                    // TODO(kevin): map/get the version of the certificate
+                };
 
                 await _store.Save(invoice, bucket);
 

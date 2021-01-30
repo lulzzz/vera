@@ -4,8 +4,14 @@ namespace Vera.Models
 {
     public class InvoiceLine
     {
+        /// <summary>
+        /// Quantity that was invoiced.
+        /// </summary>
         public int Quantity { get; set; }
 
+        /// <summary>
+        /// Description of the invoice line. Useful in case of a service rather than goods.
+        /// </summary>
         public string Description { get; set; }
         
         /// <summary>
@@ -17,7 +23,14 @@ namespace Vera.Models
         /// Unit of measure of the product/service.
         /// </summary>
         public string UnitOfMeasure { get; set; }
-        
+
+        /// <summary>
+        /// Product that was invoiced in case of goods.
+        /// </summary>
+        public Product? Product { get; set; }
+
+        public CreditReference? CreditReference { get; set; }
+
         /// <summary>
         /// Total amount including taxes.
         /// </summary>
@@ -27,58 +40,28 @@ namespace Vera.Models
         /// Total amount excluding taxes. 
         /// </summary>
         public decimal Net { get; set; }
-        
-        public ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
+
+        /// <summary>
+        /// Taxes that apply to the line.
+        /// </summary>
         public Taxes Taxes { get; set; }
-        public Product Product { get; set; }
-    }
-
-    public class Taxes
-    {
-        /// <summary>
-        /// Percentage of the tax as a rate, so 1.21 for 21%.
-        /// </summary>
-        public decimal Rate { get; set; }
 
         /// <summary>
-        /// Tax code that applies to this tax.
+        /// Settlements specific to this line.
         /// </summary>
-        public string Code { get; set; }
+        public ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
+    }
 
-        public TaxesCategory Category { get; set; }
+    public class CreditReference
+    {
+        /// <summary>
+        /// Reference to the original invoice by it's <see cref="Invoice.Number"/>.
+        /// </summary>
+        public string Number { get; set; }
 
         /// <summary>
-        /// Code for the tax exemption.
+        /// Reason of crediting this line. E.g reason it's being returned.
         /// </summary>
-        public string ExemptionCode { get; set; }
-
-        /// <summary>
-        /// Reason for the tax exemption.
-        /// </summary>
-        public string ExemptionReason { get; set; }
-    }
-
-    public enum TaxesCategory
-    {
-        High,
-        Low,
-        Zero,
-        Exempt,
-        Intermediate
-    }
-    
-    public class Product
-    {
-        public string SystemId { get; set; }
-        public ProductTypes Type { get; set; }
-        public string Code { get; set; }
-        public string Barcode { get; set; }
-        public string Description { get; set; }
-    }
-
-    public enum ProductTypes
-    {
-        Service = 1,
-        Goods = 2
+        public string Reason { get; set; }
     }
 }

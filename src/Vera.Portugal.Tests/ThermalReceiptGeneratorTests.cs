@@ -65,7 +65,10 @@ namespace Vera.Portugal.Tests
                         }
                     }
                 },
-                Signature = new byte[32],
+                Signature = new Signature
+                {
+                    Output = new byte[32]
+                },
                 Payments = new List<Payment>
                 {
                     new Payment

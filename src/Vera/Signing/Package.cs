@@ -14,7 +14,7 @@ namespace Vera.Signing
             Number = invoice.Number;
             Net = invoice.Lines.Sum(l => l.Net);
             Gross = invoice.Lines.Sum(l => l.Gross);
-            PreviousSignature = previous?.Signature;
+            PreviousSignature = previous?.Signature.Output;
         }
 
         /// <summary>

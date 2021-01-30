@@ -11,11 +11,6 @@ using Vera.Models;
 using Vera.Stores;
 using Vera.WebApi.Models;
 using Vera.WebApi.Security;
-using Invoice = Vera.Grpc.Invoice;
-using InvoiceLine = Vera.Models.InvoiceLine;
-using Payment = Vera.Models.Payment;
-using Product = Vera.Grpc.Product;
-using Settlement = Vera.Models.Settlement;
 
 namespace Vera.WebApi.Services
 {
@@ -52,11 +47,12 @@ namespace Vera.WebApi.Services
             }
 
             // TODO: validate invoice, very, very, very strict
-            // TODO(kevin): for example, in Portugal orders > 1000 euros require a customer
+            // TODO(kevin): PT - invoices > 1000 euros require a customer
+            // TODO(kevin): NF525 - requires signature of original invoice on the returned line
 
             var factory = _accountComponentFactoryCollection.GetOrThrow(account).CreateComponentFactory(account);
 
-            var facade = new InvoiceFacade(_invoiceStore, factory);
+            var facade = new InvoiceProcessor(_invoiceStore, factory);
 
             var result = await facade.Process(Map(request.Invoice));
 
@@ -64,7 +60,7 @@ namespace Vera.WebApi.Services
             {
                 Number = result.Number,
                 Sequence = result.Sequence,
-                Signature = new Signature
+                Signature = new Grpc.Signature
                 {
                     Input = ByteString.CopyFromUtf8(result.RawSignature),
                     Output = ByteString.CopyFrom(result.Signature)
@@ -94,7 +90,7 @@ namespace Vera.WebApi.Services
             };
         }
 
-        private static Vera.Models.Invoice Map(Invoice invoice)
+        private static Vera.Models.Invoice Map(Grpc.Invoice invoice)
         {
             var result = new Vera.Models.Invoice
             {
@@ -144,16 +140,16 @@ namespace Vera.WebApi.Services
             return result;
         }
 
-        private static Payment Map(Vera.Grpc.Payment p)
+        private static Vera.Models.Payment Map(Grpc.Payment p)
         {
             var category = p.Category switch
             {
-                Vera.Grpc.Payment.Types.Category.Other => PaymentCategory.Other,
-                Vera.Grpc.Payment.Types.Category.Debit => PaymentCategory.Debit,
-                Vera.Grpc.Payment.Types.Category.Credit => PaymentCategory.Credit,
-                Vera.Grpc.Payment.Types.Category.Cash => PaymentCategory.Cash,
-                Vera.Grpc.Payment.Types.Category.Voucher => PaymentCategory.Voucher,
-                Vera.Grpc.Payment.Types.Category.Online => PaymentCategory.Online,
+                Grpc.Payment.Types.Category.Other => PaymentCategory.Other,
+                Grpc.Payment.Types.Category.Debit => PaymentCategory.Debit,
+                Grpc.Payment.Types.Category.Credit => PaymentCategory.Credit,
+                Grpc.Payment.Types.Category.Cash => PaymentCategory.Cash,
+                Grpc.Payment.Types.Category.Voucher => PaymentCategory.Voucher,
+                Grpc.Payment.Types.Category.Online => PaymentCategory.Online,
                 _ => throw new ArgumentOutOfRangeException(nameof(p.Category), p.Category, null)
             };
 
@@ -165,19 +161,19 @@ namespace Vera.WebApi.Services
             };
         }
 
-        private static Settlement Map(Vera.Grpc.Settlement s) => new()
+        private static Vera.Models.Settlement Map(Grpc.Settlement s) => new()
         {
             Amount = s.Amount,
             Description = s.Description,
             SystemId = s.SystemId
         };
 
-        private static InvoiceLine Map(Vera.Grpc.InvoiceLine line)
+        private static Vera.Models.InvoiceLine Map(Grpc.InvoiceLine line)
         {
             // TODO(kevin): validate that when exempt is given that a reason and/or code is also available
             // TODO(kevin): check if this is a requirement or optional (may depend on certifications?)
 
-            var result = new InvoiceLine
+            var result = new Vera.Models.InvoiceLine
             {
                 Description = line.Description,
                 Gross = line.Gross,
@@ -207,7 +203,7 @@ namespace Vera.WebApi.Services
             {
                 var productType = line.Product.Group switch
                 {
-                    Product.Types.Group.Other => ProductTypes.Goods,
+                    Grpc.Product.Types.Group.Other => ProductTypes.Goods,
                     _ => throw new ArgumentOutOfRangeException(nameof(line.Product.Group), line.Product.Group, "unknown product group")
                 };
 

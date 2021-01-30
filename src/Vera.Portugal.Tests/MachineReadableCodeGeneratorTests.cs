@@ -28,7 +28,10 @@ namespace Vera.Portugal.Tests
         },
         Date = new DateTime(2019, 8, 12),
         Number = "FS CDVF/12345",
-        Signature = Encoding.UTF8.GetBytes("qV6q+SN5dLalOD2cK3s7aBRIWv9q3fimnRAVmutDvVZtjDEzykiQr619UW/0bzTAmPERv+4yiZcOQ7FIja1pzPOgSa9CHQsFAdLjDObZQcNcVEVZPblzCnuJL279/YQERV5q5k2bSZfeQyyA6OfYzReV8NbjAZRabcMEHZhxmdw="),
+        Signature = new Signature
+        {
+          Output = Encoding.UTF8.GetBytes("qV6q+SN5dLalOD2cK3s7aBRIWv9q3fimnRAVmutDvVZtjDEzykiQr619UW/0bzTAmPERv+4yiZcOQ7FIja1pzPOgSa9CHQsFAdLjDObZQcNcVEVZPblzCnuJL279/YQERV5q5k2bSZfeQyyA6OfYzReV8NbjAZRabcMEHZhxmdw=")
+        },
         Lines = new List<InvoiceLine>
         {
           new()

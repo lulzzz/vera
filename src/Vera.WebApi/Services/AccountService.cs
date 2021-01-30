@@ -150,6 +150,8 @@ namespace Vera.WebApi.Services
             }
 
             // TODO(kevin): do more extensive testing of the configuration - like checking that the public/private keys works
+            // TODO(kevin): create component that checks differences between configuration that checks if "version" needs to be plussed
+            // TODO(kevin): ^ NO and PT require the version of the key to be present that was used for signing
 
             account.Configuration = request.Fields;
 

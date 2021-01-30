@@ -346,7 +346,7 @@ namespace Vera.Portugal
             yield return new TextThermalNode($"certificado no {_certificateNumber}/AT");
             yield return new TextThermalNode("preços unitários com iva incluido");
 
-            yield return new QRCodeThermalNode(Convert.ToBase64String(context.Invoice.Signature));
+            yield return new QRCodeThermalNode(Convert.ToBase64String(context.Invoice.Signature.Output));
             yield return new SpacingThermalNode(1);
 
             if (context.Footer != null)

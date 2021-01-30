@@ -5,8 +5,6 @@ using Vera.Audit;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Models;
-using Vera.StandardAuditFileTaxation;
-using Address = Vera.Models.Address;
 using Invoice = Vera.Models.Invoice;
 using ProductTypes = Vera.Models.ProductTypes;
 
@@ -29,7 +27,8 @@ namespace Vera.Portugal
             _productCompanyTaxId = productCompanyTaxId;
         }
 
-        public AuditFile Transform(AuditContext context, AuditCriteria criteria, ICollection<Vera.Models.Invoice> invoices)
+        public AuditFile Transform(AuditContext context, AuditCriteria criteria,
+            ICollection<Vera.Models.Invoice> invoices)
         {
             var taxCountryRegion = context.Account.Address.Country;
 
@@ -41,29 +40,6 @@ namespace Vera.Portugal
             ApplyInvoices(invoices, auditFile, taxCountryRegion);
 
             return auditFile;
-        }
-
-        private static void ApplyTaxTable(ICollection<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
-        {
-            var taxes = invoices
-                .SelectMany(i => i.Lines)
-                .Select(l => l.Taxes)
-                .GroupBy(t => t.Category);
-
-            auditFile.MasterFiles.TaxTable = taxes.Select(g =>
-            {
-                var t = g.First();
-
-                return new Models.TaxTableEntry()
-                {
-                    TaxType = TaxType.IVA,
-                    TaxCountryRegion = taxCountryRegion,
-                    TaxCode = GetTaxCode(t.Category),
-                    Description = GetTaxPercentage(t.Rate) + "%",
-                    Item = GetTaxPercentage(t.Rate),
-                    ItemElementName = ItemChoiceType2.TaxPercentage
-                };
-            }).ToArray();
         }
 
         private AuditFile CreateAuditFileModel(AuditContext context, AuditCriteria criteria)
@@ -113,117 +89,6 @@ namespace Vera.Portugal
                     SalesInvoices = new SourceDocumentsSalesInvoices()
                 }
             };
-        }
-
-        private static void ApplyInvoices(ICollection<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
-        {
-            var calculator = new InvoiceTotalsCalculator();
-
-            var sourceDocumentsSalesInvoices = auditFile.SourceDocuments.SalesInvoices;
-
-            sourceDocumentsSalesInvoices.Invoice = invoices.Select(invoice =>
-            {
-                var totals = calculator.Calculate(invoice);
-
-                return new SourceDocumentsSalesInvoicesInvoice
-                {
-                    InvoiceNo = invoice.Number,
-                    ATCUD = Constants.ATCUD,
-                    DocumentStatus = new SourceDocumentsSalesInvoicesInvoiceDocumentStatus
-                    {
-                        InvoiceStatus = InvoiceStatus.N,
-                        InvoiceStatusDate = GetDateTime(invoice.Date),
-                        SourceID = SourceId,
-                        SourceBilling = invoice.Manual ? SAFTPTSourceBilling.M : SAFTPTSourceBilling.P
-                    },
-
-                    DocumentTotals = new SourceDocumentsSalesInvoicesInvoiceDocumentTotals
-                    {
-                        TaxPayable = Round(totals.Taxes.Total, 2),
-                        NetTotal = Round(totals.Net, 2),
-                        GrossTotal = Round(totals.Gross, 2),
-                        Settlement = invoice.Settlements?.Select(s => new Models.Settlement
-                        {
-                            SettlementAmount = Round(s.Amount, 2),
-                            SettlementAmountSpecified = true,
-                            PaymentTerms = s.Description,
-
-                            // TODO(kevin): check if SAF-T file is valid without these
-                            // SettlementDate = s.Date,
-                            // SettlementDateSpecified = true
-                        }).ToArray()
-                    },
-
-                    Hash = Convert.ToBase64String(invoice.Signature),
-
-                    // TODO(kevin): how to get this?
-                    // HashControl = GetHashControl(invoice.SignatureKeyVersion, invoice),
-
-                    Period = invoice.Date.Month.ToString(),
-                    InvoiceDate = GetDateTime(invoice.Date),
-                    InvoiceType = InvoiceTypeHelper.DetermineType(invoice),
-
-                    SpecialRegimes = new SpecialRegimes
-                    {
-                        SelfBillingIndicator = SelfBillingIndicator,
-                        CashVATSchemeIndicator = CashVatSchemeIndicator,
-                        ThirdPartiesBillingIndicator = ThirdPartiesBillingIndicator
-                    },
-
-                    SourceID = SourceId,
-                    SystemEntryDate = GetDateTime(invoice.Date),
-                    CustomerID = ComputeCustomerID(invoice.Customer?.SystemId, invoice.Customer?.RegistrationNumber),
-                    Line = invoice.Lines.Select((line, i) => MapInvoiceLine(invoice, taxCountryRegion, line, i))
-                        .ToArray()
-                };
-            }).ToArray();
-
-            var totalDebitExTax = 0m;
-            var totalCreditExTax = 0m;
-
-            foreach (var invoice in invoices)
-            {
-                var totals = calculator.Calculate(invoice);
-
-                if (totals.Net > 0)
-                {
-                    totalDebitExTax += totals.Net;
-                }
-                else
-                {
-                    totalCreditExTax += totals.Net;
-                }
-            }
-
-            sourceDocumentsSalesInvoices.NumberOfEntries = invoices.Count.ToString();
-            sourceDocumentsSalesInvoices.TotalDebit = Round(totalDebitExTax, 2);
-            sourceDocumentsSalesInvoices.TotalCredit = Round(totalCreditExTax, 2);
-        }
-
-        private static void ApplyProducts(IEnumerable<Invoice> invoices, AuditFile auditFile)
-        {
-            var products = invoices
-                .SelectMany(l => l.Lines)
-                .Select(l => l.Product)
-                .GroupBy(p => p.SystemId);
-
-            auditFile.MasterFiles.Product = products.Select(g =>
-            {
-                var p = g.First();
-
-                return new Models.Product
-                {
-                    ProductCode = p.Code,
-                    ProductNumberCode = p.Barcode,
-                    ProductType = p.Type switch
-                    {
-                        ProductTypes.Service => ProductType.S,
-                        ProductTypes.Goods => ProductType.P,
-                        _ => ProductType.O
-                    },
-                    ProductDescription = p.Description
-                };
-            }).ToArray();
         }
 
         private static void ApplyCustomers(IEnumerable<Invoice> invoices, AuditFile auditFile)
@@ -290,7 +155,140 @@ namespace Vera.Portugal
             }).Concat(new[] {anonymous}).ToArray();
         }
 
-        private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(Invoice invoice, string taxCountryRegion, Vera.Models.InvoiceLine line, int index)
+        private static void ApplyProducts(IEnumerable<Invoice> invoices, AuditFile auditFile)
+        {
+            var products = invoices
+                .SelectMany(l => l.Lines)
+                .Select(l => l.Product)
+                .GroupBy(p => p.SystemId);
+
+            auditFile.MasterFiles.Product = products.Select(g =>
+            {
+                var p = g.First();
+
+                return new Models.Product
+                {
+                    ProductCode = p.Code,
+                    ProductNumberCode = p.Barcode,
+                    ProductType = p.Type switch
+                    {
+                        ProductTypes.Service => ProductType.S,
+                        ProductTypes.Goods => ProductType.P,
+                        _ => ProductType.O
+                    },
+                    ProductDescription = p.Description
+                };
+            }).ToArray();
+        }
+
+        private static void ApplyTaxTable(IEnumerable<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
+        {
+            var taxes = invoices
+                .SelectMany(i => i.Lines)
+                .Select(l => l.Taxes)
+                .GroupBy(t => t.Category);
+
+            auditFile.MasterFiles.TaxTable = taxes.Select(g =>
+            {
+                var t = g.First();
+
+                return new Models.TaxTableEntry()
+                {
+                    TaxType = TaxType.IVA,
+                    TaxCountryRegion = taxCountryRegion,
+                    TaxCode = GetTaxCode(t.Category),
+                    Description = GetTaxPercentage(t.Rate) + "%",
+                    Item = GetTaxPercentage(t.Rate),
+                    ItemElementName = ItemChoiceType2.TaxPercentage
+                };
+            }).ToArray();
+        }
+
+        private static void ApplyInvoices(ICollection<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
+        {
+            var calculator = new InvoiceTotalsCalculator();
+
+            var sourceDocumentsSalesInvoices = auditFile.SourceDocuments.SalesInvoices;
+
+            sourceDocumentsSalesInvoices.Invoice = invoices.Select(invoice =>
+            {
+                var totals = calculator.Calculate(invoice);
+
+                return new SourceDocumentsSalesInvoicesInvoice
+                {
+                    InvoiceNo = invoice.Number,
+                    ATCUD = Constants.ATCUD,
+                    DocumentStatus = new SourceDocumentsSalesInvoicesInvoiceDocumentStatus
+                    {
+                        InvoiceStatus = InvoiceStatus.N,
+                        InvoiceStatusDate = GetDateTime(invoice.Date),
+                        SourceID = SourceId,
+                        SourceBilling = invoice.Manual ? SAFTPTSourceBilling.M : SAFTPTSourceBilling.P
+                    },
+
+                    DocumentTotals = new SourceDocumentsSalesInvoicesInvoiceDocumentTotals
+                    {
+                        TaxPayable = Round(totals.Taxes.Total, 2),
+                        NetTotal = Round(totals.Net, 2),
+                        GrossTotal = Round(totals.Gross, 2),
+                        Settlement = invoice.Settlements?.Select(s => new Models.Settlement
+                        {
+                            SettlementAmount = Round(s.Amount, 2),
+                            SettlementAmountSpecified = true,
+                            PaymentTerms = s.Description,
+
+                            // TODO(kevin): check if SAF-T file is valid without these
+                            // SettlementDate = s.Date,
+                            // SettlementDateSpecified = true
+                        }).ToArray()
+                    },
+
+                    Hash = Convert.ToBase64String(invoice.Signature.Output),
+                    HashControl = GetHashControl(invoice),
+
+                    Period = invoice.Date.Month.ToString(),
+                    InvoiceDate = GetDateTime(invoice.Date),
+                    InvoiceType = InvoiceTypeHelper.DetermineType(invoice),
+
+                    SpecialRegimes = new SpecialRegimes
+                    {
+                        SelfBillingIndicator = SelfBillingIndicator,
+                        CashVATSchemeIndicator = CashVatSchemeIndicator,
+                        ThirdPartiesBillingIndicator = ThirdPartiesBillingIndicator
+                    },
+
+                    SourceID = SourceId,
+                    SystemEntryDate = GetDateTime(invoice.Date),
+                    CustomerID = ComputeCustomerID(invoice.Customer?.SystemId, invoice.Customer?.RegistrationNumber),
+                    Line = invoice.Lines.Select((line, i) => MapInvoiceLine(invoice, taxCountryRegion, line, i))
+                        .ToArray()
+                };
+            }).ToArray();
+
+            var totalDebitExTax = 0m;
+            var totalCreditExTax = 0m;
+
+            foreach (var invoice in invoices)
+            {
+                var totals = calculator.Calculate(invoice);
+
+                if (totals.Net > 0)
+                {
+                    totalDebitExTax += totals.Net;
+                }
+                else
+                {
+                    totalCreditExTax += totals.Net;
+                }
+            }
+
+            sourceDocumentsSalesInvoices.NumberOfEntries = invoices.Count.ToString();
+            sourceDocumentsSalesInvoices.TotalDebit = Round(totalDebitExTax, 2);
+            sourceDocumentsSalesInvoices.TotalCredit = Round(totalCreditExTax, 2);
+        }
+
+        private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(Invoice invoice, string taxCountryRegion,
+            Vera.Models.InvoiceLine line, int index)
         {
             var settlement = Round((line.Settlements?.Sum(s => s.Amount) ?? 0), 2);
 
@@ -298,18 +296,22 @@ namespace Vera.Portugal
             {
                 LineNumber = (index + 1).ToString(),
 
-                ProductCode = line.Product.Code,
-                ProductDescription = line.Product.Description,
+                ProductCode = line.Product?.Code,
+                ProductDescription = line.Product?.Description,
 
                 Quantity = Math.Abs(line.Quantity),
                 UnitOfMeasure = UnitOfMeasure,
 
-                // TODO(kevin): extend the request to include references to original ones
-                // References = line.CreditReferences.Select(c => new References
-                // {
-                //     Reason = c.Reason,
-                //     Reference = c.Reference
-                // }).ToArray(),
+                References = line.CreditReference == null
+                    ? Array.Empty<References>()
+                    : new References[]
+                    {
+                        new()
+                        {
+                            Reference = line.CreditReference.Number,
+                            Reason = line.CreditReference.Reason
+                        }
+                    },
 
                 Description = line.Description,
 
@@ -347,7 +349,7 @@ namespace Vera.Portugal
             };
         }
 
-        private static int GetTaxPercentage(decimal taxRate) => (int)(100 * (taxRate - 1));
+        private static int GetTaxPercentage(decimal taxRate) => (int) (100 * (taxRate - 1));
 
         private static string ComputeCustomerID(string systemID, string registrationNumber)
         {
@@ -359,8 +361,10 @@ namespace Vera.Portugal
             return systemID;
         }
 
-        private static string GetHashControl(int hashControl, Vera.Models.Invoice invoice)
+        private static string GetHashControl(Vera.Models.Invoice invoice)
         {
+            var hashControl = invoice.Signature.Version;
+
             if (invoice.Manual)
             {
                 var type = InvoiceTypeHelper.DetermineType(invoice);
@@ -371,7 +375,8 @@ namespace Vera.Portugal
             return hashControl.ToString();
         }
 
-        private static DateTime GetDateTime(DateTime dt) => new(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
+        private static DateTime GetDateTime(DateTime dt) =>
+            new(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
 
         private static decimal Round(decimal d, int decimals) => Math.Round(Math.Abs(d), decimals);
     }

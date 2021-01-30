@@ -40,14 +40,9 @@ namespace Vera.Models
         public int Sequence { get; set; }
 
         /// <summary>
-        /// Input that was used to eventually generate the <see cref="Signature"/>.
+        /// Signature details of the invoice.
         /// </summary>
-        public string RawSignature { get; set; }
-
-        /// <summary>
-        /// Signature as bytes that is based on the implementation of the <see cref="Vera.Signing.IPackageSigner"/>.
-        /// </summary>
-        public byte[] Signature { get; set; }
+        public Signature Signature { get; set; }
 
         /// <summary>
         /// Supplier is the seller of the goods/services on the invoice.
@@ -104,6 +99,25 @@ namespace Vera.Models
         /// Payments that were made to pay the invoice.
         /// </summary>
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+    }
+
+    public class Signature
+    {
+        // /// <summary>
+        // /// Input that was used to eventually generate the <see cref="Signature"/>.
+        // /// </summary>
+        public string Input { get; set; }
+
+        // /// <summary>
+        // /// Signature as bytes that is based on the implementation of the <see cref="Vera.Signing.IPackageSigner"/>.
+        // /// </summary>
+        public byte[] Output { get; set; }
+
+        /// <summary>
+        /// Optional. Contains the version of the certificate that was used to generate the signature.
+        /// Required by some countries.
+        /// </summary>
+        public int? Version { get; set; }
     }
 
     public class PinReceipt
