@@ -1,7 +1,5 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Threading.Tasks;
 using Vera.Models;
 using Vera.Stores;
@@ -38,8 +36,10 @@ namespace Vera.Audits
             // TODO(kevin): audit should be created earlier - updated in this section with relevant information
             // TODO(kevin): ^ can probably fetch the context for the generation from this as well
 
-            // TODO(kevin): split up the generation per month and per supplier
+            // TODO(kevin): split up the generation per month, per supplier
+            // TODO(kevin): ^ make output a zip if more then 1 file
 
+            // TODO(kevin): how to get all the suppliers for an account? do we even need to?
             var criteria = new AuditCriteria
             {
                 AccountId = account.Id,
@@ -48,6 +48,7 @@ namespace Vera.Audits
                 EndDate = audit.End
             };
 
+            // TODO(kevin): list/page per supplier per month
             var result = _invoiceStore.List(criteria);
             var invoices = new List<Invoice>();
 
@@ -66,6 +67,8 @@ namespace Vera.Audits
             await using var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose);
 
             var writer = _componentFactory.CreateAuditWriter();
+
+            // TODO(kevin): pass extra context so the writer can split it up in multiple files?
             await writer.Write(context, criteria, stream);
 
             // TODO: store should also come from factory - because it could be in an external system (fiskaly)

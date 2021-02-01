@@ -44,6 +44,9 @@ namespace Vera.WebApi
             services.AddGrpc();
 
             services.AddTransient<ISecurityTokenGenerator>(p => new JwtSecurityTokenGenerator(Configuration));
+
+            services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
+            services.AddHostedService<QueueHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

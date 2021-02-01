@@ -37,6 +37,9 @@ namespace Vera.Bootstrap
             collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
             collection.AddTransient<IAccountComponentFactoryCollection, AccountComponentFactoryCollection>();
 
+            // Stores
+            collection.AddTransient<IBlobStore, TemporaryBlobStore>();
+
             // Services
             collection.AddTransient<IUserRegisterService, UserRegisterService>();
         }
@@ -69,16 +72,20 @@ namespace Vera.Bootstrap
                 cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Invoices)
             ));
 
-            collection.AddTransient<ICompanyStore>(_ => new CosmosCompanyStore(
+            collection.AddSingleton<ICompanyStore>(_ => new CosmosCompanyStore(
                 cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
             ));
 
-            collection.AddTransient<IAccountStore>(_ => new CosmosAccountStore(
+            collection.AddSingleton<IAccountStore>(_ => new CosmosAccountStore(
                 cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
             ));
 
-            collection.AddTransient<IUserStore>(_ => new CosmosUserStore(
+            collection.AddSingleton<IUserStore>(_ => new CosmosUserStore(
                 cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Users)
+            ));
+
+            collection.AddSingleton<IAuditStore>(_ => new CosmosAuditStore(
+                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Audits)
             ));
         }
 

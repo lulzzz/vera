@@ -1,6 +1,4 @@
-using System;
 using System.Threading.Tasks;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Audits;
@@ -16,17 +14,26 @@ namespace Vera.WebApi.Services
     {
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
+        private readonly IBlobStore _blobStore;
+        private readonly IAuditStore _auditStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
+        private readonly IBackgroundTaskQueue _backgroundTaskQueue;
 
         public ArchiveService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
-            IAccountComponentFactoryCollection accountComponentFactoryCollection
+            IBlobStore blobStore,
+            IAuditStore auditStore,
+            IAccountComponentFactoryCollection accountComponentFactoryCollection,
+            IBackgroundTaskQueue backgroundTaskQueue
         )
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
+            _blobStore = blobStore;
+            _auditStore = auditStore;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
+            _backgroundTaskQueue = backgroundTaskQueue;
         }
 
         public override async Task<ArchiveReply> Archive(ArchiveRequest request, ServerCallContext context)
@@ -34,22 +41,30 @@ namespace Vera.WebApi.Services
             var account = await context.ResolveAccount(_accountStore, request.AccountId);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
-            // TODO(kevin): simply create an audit entry and return that
-            // TODO(kevin): new service to retrieve status of the audit
+            var audit = await _auditStore.Create(new AuditCriteria
+            {
+                AccountId = account.Id,
+                // TODO(kevin): optional parameter?
+                // SupplierSystemId = request...
+                StartDate = request.StartDate.ToDateTime(),
+                EndDate = request.EndDate.ToDateTime()
+            });
 
-            // TODO(kevin): fix dependencies
-            var processor = new AuditProcessor(_invoiceStore, null, null, factory);
+            var processor = new AuditProcessor(
+                _invoiceStore,
+                _blobStore,
+                _auditStore,
+                factory
+            );
 
-            // TODO(kevin): want this to happen async, so it can run in the background
-            // TODO(kevin): do something with result to return a reply
-            // await processor.Process(new AuditCriteria
-            // {
-            //     AccountId = account.Id,
-            //     StartDate = request.Start.ToDateTime(),
-            //     EndDate = request.End.ToDateTime()
-            // });
+            _backgroundTaskQueue.Queue(_ => processor.Process(account, audit));
 
-            return new ArchiveReply();
+            return new ArchiveReply
+            {
+                AuditId = audit.Id.ToString()
+            };
         }
+
+        // TODO(kevin): service to fetch (status) of audit - also used to fetch location so client can download
     }
 }

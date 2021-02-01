@@ -22,16 +22,21 @@ namespace Vera.Bootstrap
         /// <summary>
         /// Name of the invoices container.
         /// </summary>
-        public string Invoices { get; set; }
+        public string Invoices { get; set; } = "invoices";
 
         /// <summary>
         /// Name of the companies container.
         /// </summary>
-        public string Companies { get; set; }
+        public string Companies { get; set; } = "companies";
 
         /// <summary>
         /// Names of the users container.
         /// </summary>
-        public string Users { get; set; }
+        public string Users { get; set; } = "users";
+
+        /// <summary>
+        /// Name of the audits container.
+        /// </summary>
+        public string Audits { get; set; } = "audits";
     }
 }
