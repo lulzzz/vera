@@ -63,7 +63,7 @@ namespace Vera.Stores.Cosmos
             return response.FirstOrDefault()?.Invoice;
         }
 
-        public async IAsyncEnumerable<Invoice> List(AuditCriteria criteria)
+        public async Task<ICollection<Invoice>> List(AuditCriteria criteria)
         {
             // TODO(kevin): filter on fiscal period(s) instead of start/end date
             var definition = new QueryDefinition(@"
@@ -81,16 +81,17 @@ where c.Invoice.AccountId = @accountId
 
             var iterator = _container.GetItemQueryIterator<InvoiceDocument>(definition);
 
+            var invoices = new List<Invoice>();
+
             // TODO(kevin): paging?
             while (iterator.HasMoreResults)
             {
                 var results = await iterator.ReadNextAsync();
 
-                foreach (var result in results)
-                {
-                    yield return result.Invoice;
-                }
+                invoices.AddRange(results.Select(result => result.Invoice));
             }
+
+            return invoices;
         }
 
         private static string PartitionKeyByBucket(Guid accountId, string bucket) => $"{accountId}#B#{bucket}";

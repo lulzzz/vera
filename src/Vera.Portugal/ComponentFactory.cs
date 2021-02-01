@@ -55,7 +55,11 @@ namespace Vera.Portugal
 
         public IAuditWriter CreateAuditWriter()
         {
-            return new AuditWriter();
+            return new AuditWriter(
+                _configuration.ProductCompanyTaxId,
+                _configuration.CertificateName,
+                _configuration.CertificateNumber
+            );
         }
     }
 }

@@ -33,6 +33,6 @@ namespace Vera.Stores
         /// <returns></returns>
         Task<Invoice> GetByNumber(Guid accountId, string number);
 
-        IAsyncEnumerable<Invoice> List(AuditCriteria criteria);
+        Task<ICollection<Invoice>> List(AuditCriteria criteria);
     }
 }

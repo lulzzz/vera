@@ -49,19 +49,12 @@ namespace Vera.Audits
             };
 
             // TODO(kevin): list/page per supplier per month
-            var result = _invoiceStore.List(criteria);
-            var invoices = new List<Invoice>();
-
-            await foreach (var invoice in result)
-            {
-                invoices.Add(invoice);
-            }
+            var invoices = await _invoiceStore.List(criteria);
 
             var context = new AuditContext
             {
                 Invoices = invoices,
                 Account = account
-                // TODO(kevin): map other properties
             };
 
             await using var stream = File.Create(Path.GetTempFileName(), 4096, FileOptions.DeleteOnClose);

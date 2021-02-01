@@ -10,7 +10,7 @@ using Vera.WebApi.Security;
 namespace Vera.WebApi.Services
 {
     [Authorize]
-    public class ArchiveService : Grpc.ArchiveService.ArchiveServiceBase
+    public class AuditService : Grpc.AuditService.AuditServiceBase
     {
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
@@ -19,7 +19,7 @@ namespace Vera.WebApi.Services
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
         private readonly IBackgroundTaskQueue _backgroundTaskQueue;
 
-        public ArchiveService(
+        public AuditService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
             IBlobStore blobStore,
@@ -36,7 +36,7 @@ namespace Vera.WebApi.Services
             _backgroundTaskQueue = backgroundTaskQueue;
         }
 
-        public override async Task<ArchiveReply> Archive(ArchiveRequest request, ServerCallContext context)
+        public override async Task<CreateAuditReply> Create(CreateAuditRequest request, ServerCallContext context)
         {
             var account = await context.ResolveAccount(_accountStore, request.AccountId);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
@@ -59,7 +59,7 @@ namespace Vera.WebApi.Services
 
             _backgroundTaskQueue.Queue(_ => processor.Process(account, audit));
 
-            return new ArchiveReply
+            return new CreateAuditReply
             {
                 AuditId = audit.Id.ToString()
             };

@@ -10,25 +10,19 @@ namespace Vera.Audits
         /// <summary>
         /// Name of the company that is behind the generation of the exports.
         /// </summary>
-        public string SoftwareCompanyName { get; set; }
+        public string SoftwareCompanyName { get; set; } = "New Black";
 
         /// <summary>
         /// Name of the software that does the certification.
         /// </summary>
-        public string SoftwareName { get; set; }
+        public string SoftwareName { get; set; } = "Vera";
 
         /// <summary>
         /// Version of the software. Note that each change to this value would require a new
         /// auditing trial.
         /// </summary>
-        public string SoftwareVersion { get; set; }
+        public string SoftwareVersion { get; set; } = "0.1.0";
 
-        // Name of the certificate that was given by the authority
-        public string CertificateName { get; set; }
-
-        // Number of the certificate that was given by the authority
-        public string CertificateNumber { get; set; }
-
-        public IReadOnlyCollection<Invoice> Invoices { get; set; }
+        public ICollection<Invoice> Invoices { get; set; }
     }
 }

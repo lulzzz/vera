@@ -4,12 +4,12 @@ import "google/protobuf/timestamp.proto";
 
 package vera.grpc;
 
-service ArchiveService {
+service AuditService {
     // Starts the creation of an archive based on the given parameters
-    rpc Archive (ArchiveRequest) returns (ArchiveReply);
+    rpc Create (CreateAuditRequest) returns (CreateAuditReply);
 }
 
-message ArchiveRequest {
+message CreateAuditRequest {
     string accountId = 1;
 
     // TODO(kevin): include store number..?
@@ -21,7 +21,7 @@ message ArchiveRequest {
     google.protobuf.Timestamp endDate = 3;
 }
 
-message ArchiveReply {
+message CreateAuditReply {
     // Unique identifier of the audit to retrieve when it's ready
     string auditId = 1;
 }

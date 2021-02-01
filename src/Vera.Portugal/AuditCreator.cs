@@ -21,10 +21,14 @@ namespace Vera.Portugal
         private const string UnitOfMeasure = "UN";
 
         private readonly string _productCompanyTaxId;
+        private readonly string _certificateName;
+        private readonly string _certificateNumber;
 
-        public AuditCreator(string productCompanyTaxId)
+        public AuditCreator(string productCompanyTaxId, string certificateName, string certificateNumber)
         {
             _productCompanyTaxId = productCompanyTaxId;
+            _certificateName = certificateName;
+            _certificateNumber = certificateNumber;
         }
 
         public AuditFile Create(AuditContext context, AuditCriteria criteria)
@@ -43,7 +47,7 @@ namespace Vera.Portugal
 
         private AuditFile CreateAuditFileModel(AuditContext context, AuditCriteria criteria)
         {
-            var productId = context.SoftwareVersion + "/" + context.CertificateName;
+            var productId = context.SoftwareVersion + "/" + _certificateName;
             var companyAddress = context.Account.Address;
             var startDate = criteria.StartDate;
             var endDate = criteria.EndDate;
@@ -78,7 +82,7 @@ namespace Vera.Portugal
                     DateCreated = DateTime.Today,
                     TaxEntity = TaxEntity,
                     ProductCompanyTaxID = _productCompanyTaxId,
-                    SoftwareCertificateNumber = context.CertificateNumber,
+                    SoftwareCertificateNumber = _certificateNumber,
                     ProductID = productId,
                     ProductVersion = context.SoftwareVersion
                 },
