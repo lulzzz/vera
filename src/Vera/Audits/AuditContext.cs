@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Vera.Models;
 
-namespace Vera.Audit
+namespace Vera.Audits
 {
     public class AuditContext
     {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Vera.Audit;
+using Vera.Audits;
 using Vera.Models;
 
 namespace Vera.Stores

@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-using Vera.Audit;
+using Vera.Audits;
 using Vera.Concurrency;
 using Vera.Invoices;
 using Vera.Portugal.Models;
@@ -51,6 +51,11 @@ namespace Vera.Portugal
                 _configuration.CertificateName,
                 _configuration.CertificateNumber
             );
+        }
+
+        public IAuditWriter CreateAuditWriter()
+        {
+            return new AuditWriter();
         }
     }
 }

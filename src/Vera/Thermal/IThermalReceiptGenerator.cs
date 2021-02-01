@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Vera.Audit;
 using Vera.Documents.Nodes;
 using Vera.Models;
 

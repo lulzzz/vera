@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Vera.Audit;
+using Vera.Audits;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Models;
@@ -10,7 +10,7 @@ using ProductTypes = Vera.Models.ProductTypes;
 
 namespace Vera.Portugal
 {
-    public class AuditCreator : IAuditCreator<AuditFile>
+    public class AuditCreator
     {
         private const string AuditFileVersion = "1.04_01";
         private const string TaxEntity = "Global";

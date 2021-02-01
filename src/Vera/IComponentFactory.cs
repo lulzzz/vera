@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Vera.Audit;
+using Vera.Audits;
 using Vera.Concurrency;
 using Vera.Configuration;
 using Vera.Invoices;
@@ -8,6 +8,7 @@ using Vera.Thermal;
 
 namespace Vera
 {
+    // TODO(kevin): add docs
     public interface IComponentFactory
     {
         ILocker CreateLocker();
@@ -15,5 +16,6 @@ namespace Vera
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
         IPackageSigner CreatePackageSigner();
         IThermalReceiptGenerator CreateThermalReceiptGenerator();
+        IAuditWriter CreateAuditWriter();
     }
 }

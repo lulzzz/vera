@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
 using Newtonsoft.Json;
-using Vera.Audit;
+using Vera.Audits;
 using Vera.Models;
 
 namespace Vera.Stores.Cosmos
@@ -65,29 +65,30 @@ namespace Vera.Stores.Cosmos
 
         public async IAsyncEnumerable<Invoice> List(AuditCriteria criteria)
         {
-            // TODO(kevin): paging
-            var query = _chain.Query().Where(x => x.Value.AccountId == criteria.AccountId);
+            // TODO(kevin): filter on fiscal period(s) instead of start/end date
+            var definition = new QueryDefinition(@"
+select * 
+ from c
+where c.Invoice.AccountId = @accountId
+  and c.Invoice.Date >= @startDate
+  and c.Invoice.Date <= @endDate
+");
 
-            if (!string.IsNullOrWhiteSpace(criteria.SupplierSystemId))
-            {
-                query = query.Where(x => x.Value.Supplier.SystemId == criteria.SupplierSystemId);
-            }
+            definition
+                .WithParameter("@accountId", criteria.AccountId)
+                .WithParameter("@startDate", criteria.StartDate)
+                .WithParameter("@endDate", criteria.EndDate);
 
-            query = query.Where(x =>
-                x.Value.FiscalYear >= criteria.StartFiscalYear &&
-                x.Value.FiscalYear <= criteria.EndFiscalYear &&
-                x.Value.FiscalPeriod >= criteria.StartFiscalPeriod &&
-                x.Value.FiscalPeriod <= criteria.EndFiscalPeriod
-            );
+            var iterator = _container.GetItemQueryIterator<InvoiceDocument>(definition);
 
-            var iterator = query.ToFeedIterator();
+            // TODO(kevin): paging?
             while (iterator.HasMoreResults)
             {
                 var results = await iterator.ReadNextAsync();
 
                 foreach (var result in results)
                 {
-                    yield return result.Value;
+                    yield return result.Invoice;
                 }
             }
         }

@@ -2,21 +2,17 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Blobs.Specialized;
 
-namespace Vera.Audit
+namespace Vera.Stores.Azure
 {
-    // TODO: generic file storage?
-    public interface IAuditStorage
-    {
-        Task Store(Stream s);
-    }
-
-    public class AzureAuditStorage
+    public class AzureBlobStore : IBlobStore
     {
         private readonly string _containerName;
         private readonly BlobServiceClient _client;
 
-        public AzureAuditStorage(string connectionString, string containerName = "audits")
+        public AzureBlobStore(string connectionString, string containerName)
         {
             if (string.IsNullOrWhiteSpace(containerName)) throw new NullReferenceException(nameof(containerName));
 
@@ -24,10 +20,18 @@ namespace Vera.Audit
             _client = new BlobServiceClient(connectionString);
         }
 
-        public async Task Store(Stream s)
+        public async Task<string> Store(Guid accountId, Stream data)
         {
             var container = _client.GetBlobContainerClient(_containerName);
             await container.CreateIfNotExistsAsync();
+
+            var name = Guid.NewGuid().ToString();
+
+            var client = container.GetBlockBlobClient(name);
+
+            await client.UploadAsync(data);
+
+            return name;
         }
     }
 }

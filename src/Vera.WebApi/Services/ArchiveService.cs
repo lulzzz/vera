@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
-using Vera.Audit;
+using Vera.Audits;
 using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Stores;
@@ -34,16 +34,20 @@ namespace Vera.WebApi.Services
             var account = await context.ResolveAccount(_accountStore, request.AccountId);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
-            var processor = new AuditProcessor(_invoiceStore);
+            // TODO(kevin): simply create an audit entry and return that
+            // TODO(kevin): new service to retrieve status of the audit
+
+            // TODO(kevin): fix dependencies
+            var processor = new AuditProcessor(_invoiceStore, null, null, factory);
 
             // TODO(kevin): want this to happen async, so it can run in the background
             // TODO(kevin): do something with result to return a reply
-            await processor.Process(new AuditCriteria
-            {
-                AccountId = account.Id,
-                StartDate = request.Start.ToDateTime(),
-                EndDate = request.End.ToDateTime()
-            });
+            // await processor.Process(new AuditCriteria
+            // {
+            //     AccountId = account.Id,
+            //     StartDate = request.Start.ToDateTime(),
+            //     EndDate = request.End.ToDateTime()
+            // });
 
             return new ArchiveReply();
         }
