@@ -8,12 +8,12 @@ using Xunit;
 
 namespace Vera.Integration.Tests.Portugal
 {
-    public class InvoiceTests : IClassFixture<ApiWebApplicationFactory>
+    public class InvoiceServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
         private readonly GrpcChannel _channel;
         private readonly Faker _faker;
 
-        public InvoiceTests(ApiWebApplicationFactory fixture)
+        public InvoiceServiceTests(ApiWebApplicationFactory fixture)
         {
             var client = fixture.CreateClient();
 

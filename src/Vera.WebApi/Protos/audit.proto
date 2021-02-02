@@ -7,21 +7,34 @@ package vera.grpc;
 service AuditService {
     // Starts the creation of an archive based on the given parameters
     rpc Create (CreateAuditRequest) returns (CreateAuditReply);
+    rpc Get (GetAuditRequest) returns (GetAuditReply);
 }
 
 message CreateAuditRequest {
     string accountId = 1;
 
-    // TODO(kevin): include store number..?
+    string supplierSystemId = 2;
 
     // Start of the period to generate the archive for
-    google.protobuf.Timestamp startDate = 2;
+    google.protobuf.Timestamp startDate = 3;
 
     // End of the period to generate the archive for
-    google.protobuf.Timestamp endDate = 3;
+    google.protobuf.Timestamp endDate = 4;
 }
 
 message CreateAuditReply {
     // Unique identifier of the audit to retrieve when it's ready
     string auditId = 1;
+}
+
+
+message GetAuditRequest {
+    string accountId = 1;
+    string auditId = 2;
+}
+
+message GetAuditReply {
+    google.protobuf.Timestamp startDate = 1;
+    google.protobuf.Timestamp endDate = 2;
+    string location = 3;
 }

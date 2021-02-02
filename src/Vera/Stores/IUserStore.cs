@@ -6,7 +6,7 @@ namespace Vera.Stores
 {
     public interface IUserStore
     {
-        Task<User> Store(User user);
+        Task Store(User user);
         Task Update(User user);
         Task<User> GetByCompany(Guid companyId, string username);
     }

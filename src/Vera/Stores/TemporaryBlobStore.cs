@@ -12,10 +12,12 @@ namespace Vera.Stores
         public async Task<string> Store(Guid accountId, Stream data)
         {
             var dir = Path.Join(Path.GetTempPath(), "vera", accountId.ToString());
+
+            Directory.CreateDirectory(dir);
+
             var fileName = Guid.NewGuid().ToString();
 
             await using var fs = File.Create(Path.Join(dir, fileName), 4096, FileOptions.Asynchronous);
-
             await data.CopyToAsync(fs);
 
             return fileName;

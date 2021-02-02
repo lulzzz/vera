@@ -17,23 +17,21 @@ namespace Vera.Stores.Cosmos
             _container = container;
         }
 
-        public async Task<User> Store(User user)
+        public Task Store(User user)
         {
             var toCreate = new UserDocument(user);
 
-            var document = await _container.CreateItemAsync(
+            return _container.CreateItemAsync(
                 toCreate,
                 new PartitionKey(toCreate.PartitionKey)
             );
-
-            return document.Resource.User;
         }
 
         public async Task Update(User user)
         {
             var document = new UserDocument(user);
 
-            await _container.ReplaceItemAsync<UserDocument>(
+            await _container.ReplaceItemAsync(
                 document,
                 document.Id.ToString(),
                 new PartitionKey(document.PartitionKey)
@@ -42,17 +40,18 @@ namespace Vera.Stores.Cosmos
 
         public async Task<User> GetByCompany(Guid companyId, string username)
         {
-            var iterator = _container.GetItemLinqQueryable<UserDocument>(requestOptions: new QueryRequestOptions
+            var definition = new QueryDefinition("select top 1 * from c where c.User.CompanyId = @companyId")
+                .WithParameter("@companyId", companyId);
+
+            var iterator = _container.GetItemQueryIterator<UserDocument>(definition,
+                requestOptions: new QueryRequestOptions
                 {
                     PartitionKey = new PartitionKey(username.ToLower())
-                })
-                .Where(x => x.User.CompanyId == companyId)
-                .Take(1)
-                .ToFeedIterator();
+                });
 
-            var result = await iterator.ReadNextAsync();
+            var response = await iterator.ReadNextAsync();
 
-            return result.FirstOrDefault()?.User;
+            return response.FirstOrDefault()?.User;
         }
 
         private class UserDocument

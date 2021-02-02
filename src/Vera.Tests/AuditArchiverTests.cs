@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Vera.Audits;
 using Vera.Models;
@@ -14,10 +13,20 @@ namespace Vera.Tests
     public class AuditArchiverTests
     {
         [Fact]
-        public async Task Should_process()
+        public async Task Should_throw_when_start_is_before_end()
         {
-            const string expectedLocation = "my-static-location";
+            var archiver = new AuditArchiver(null, null, null, null);
 
+            await Assert.ThrowsAsync<InvalidOperationException>(() => archiver.Archive(new Account(), new Audit
+            {
+                Start = new DateTime(2020, 01, 01),
+                End = new DateTime(2019, 01, 01)
+            }));
+        }
+
+        [Fact]
+        public async Task Should_invoke_writer_multiple_times()
+        {
             var invoiceStore = new Mock<IInvoiceStore>();
             var blobStore = new Mock<IBlobStore>();
             var auditStore = new Mock<IAuditStore>();
@@ -31,15 +40,15 @@ namespace Vera.Tests
                     new()
                 });
 
-            blobStore
-                .Setup(store => store.Store(It.IsAny<Guid>(), It.IsAny<Stream>()))
-                .ReturnsAsync(expectedLocation);
-
             factory
                 .Setup(f => f.CreateAuditWriter())
                 .Returns(writer.Object);
 
-            var processor = new AuditArchiver(
+            writer
+                .Setup(w => w.ResolveName(It.IsAny<AuditCriteria>(), It.IsAny<int>(), It.IsAny<int>()))
+                .ReturnsAsync(() => "abc.xml");
+
+            var archiver = new AuditArchiver(
                 invoiceStore.Object,
                 blobStore.Object,
                 auditStore.Object,
@@ -53,9 +62,12 @@ namespace Vera.Tests
                 End = new DateTime(2021, 1, 1)
             };
 
-            await processor.Archive(account, audit);
+            await archiver.Archive(account, audit);
 
-            Assert.Equal(expectedLocation, audit.Location);
+            writer.Verify(
+                w => w.Write(It.IsAny<AuditContext>(), It.IsAny<AuditCriteria>(), It.IsAny<Stream>()),
+                Times.Exactly(12)
+            );
         }
     }
 }

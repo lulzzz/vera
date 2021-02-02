@@ -9,11 +9,11 @@ namespace Vera.Audits
         /// Should return the name of the file that is going to be written. Note that this should also include
         /// any extensions.
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="criteria"></param>
         /// <param name="sequence"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        Task<string> ResolveName(AuditContext context, int sequence, int total);
+        Task<string> ResolveName(AuditCriteria criteria, int sequence, int total);
 
         /// <summary>
         /// Write the contents of the audit to the given stream.

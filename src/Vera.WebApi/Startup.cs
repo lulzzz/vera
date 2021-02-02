@@ -79,6 +79,7 @@ namespace Vera.WebApi
                 endpoints.MapGrpcService<TokenService>();
                 endpoints.MapGrpcService<InvoiceService>();
                 endpoints.MapGrpcService<ReceiptService>();
+                endpoints.MapGrpcService<AuditService>();
             });
         }
     }

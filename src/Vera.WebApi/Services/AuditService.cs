@@ -1,4 +1,6 @@
+using System;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Audits;
@@ -41,23 +43,24 @@ namespace Vera.WebApi.Services
             var account = await context.ResolveAccount(_accountStore, request.AccountId);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
+            // TODO(kevin): validate the request, start < end and supplier is not empty/nil
+
             var audit = await _auditStore.Create(new AuditCriteria
             {
                 AccountId = account.Id,
-                // TODO(kevin): optional parameter?
-                // SupplierSystemId = request...
+                SupplierSystemId = request.SupplierSystemId,
                 StartDate = request.StartDate.ToDateTime(),
                 EndDate = request.EndDate.ToDateTime()
             });
 
-            var processor = new AuditArchiver(
+            var archiver = new AuditArchiver(
                 _invoiceStore,
                 _blobStore,
                 _auditStore,
                 factory
             );
 
-            _backgroundTaskQueue.Queue(_ => processor.Archive(account, audit));
+            _backgroundTaskQueue.Queue(_ => archiver.Archive(account, audit));
 
             return new CreateAuditReply
             {
@@ -65,6 +68,17 @@ namespace Vera.WebApi.Services
             };
         }
 
-        // TODO(kevin): service to fetch (status) of audit - also used to fetch location so client can download
+        public override async Task<GetAuditReply> Get(GetAuditRequest request, ServerCallContext context)
+        {
+            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var audit = await _auditStore.Get(account.Id, Guid.Parse(request.AuditId));
+
+            return new GetAuditReply
+            {
+                StartDate = audit.Start.ToTimestamp(),
+                EndDate = audit.End.ToTimestamp(),
+                Location = audit.Location ?? string.Empty
+            };
+        }
     }
 }

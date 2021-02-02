@@ -52,7 +52,7 @@ namespace Vera.Bootstrap
 
             var cosmosContainerOptions = context.Configuration
                 .GetSection(CosmosContainerOptions.Section)
-                .Get<CosmosContainerOptions>();
+                .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
 
             if (string.IsNullOrEmpty(cosmosOptions.ConnectionString) || string.IsNullOrEmpty(cosmosOptions.Database))
             {
@@ -60,6 +60,8 @@ namespace Vera.Bootstrap
             }
 
             var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
+                // TODO(kevin): enable once this is supported in the SDK
+                // .WithContentResponseOnWrite(false)
                 .WithRequestTimeout(TimeSpan.FromSeconds(5))
                 .WithConnectionModeDirect()
                 .WithApplicationName("vera")

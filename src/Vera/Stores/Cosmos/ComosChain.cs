@@ -44,22 +44,19 @@ namespace Vera.Stores.Cosmos
             }
         }
 
-        public IQueryable<ChainableDocument<T>> Query()
-        {
-            return _container.GetItemLinqQueryable<ChainableDocument<T>>();
-        }
-        
         public async Task<ChainableDocument<T>> Tail(PartitionKey partitionKey)
         {
-            var iterator = _container.GetItemLinqQueryable<ChainableDocument<T>>(requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = partitionKey
-            })
-                .Where(x => x.Next.IsNull())
-                .Take(1)
-                .ToFeedIterator();
+            var definition = new QueryDefinition("select top 1 * from c where c.Next = null");
 
-            return (await iterator.ReadNextAsync()).FirstOrDefault();
+            var iterator = _container.GetItemQueryIterator<ChainableDocument<T>>(definition,
+                requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = partitionKey
+                });
+
+            var response = await iterator.ReadNextAsync();
+
+            return response.FirstOrDefault();
         }
     }
 }

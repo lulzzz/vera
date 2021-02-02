@@ -66,7 +66,7 @@ namespace Vera.WebApi
 
             var cosmosContainerOptions = config
                 .GetSection(CosmosContainerOptions.Section)
-                .Get<CosmosContainerOptions>();
+                .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
 
             var client = scope.ServiceProvider.GetRequiredService<CosmosClient>();
 
@@ -78,6 +78,7 @@ namespace Vera.WebApi
             await db.CreateContainerIfNotExistsAsync(cosmosContainerOptions.Companies, partitionKeyPath);
             await db.CreateContainerIfNotExistsAsync(cosmosContainerOptions.Users, partitionKeyPath);
             await db.CreateContainerIfNotExistsAsync(cosmosContainerOptions.Invoices, partitionKeyPath);
+            await db.CreateContainerIfNotExistsAsync(cosmosContainerOptions.Audits, partitionKeyPath);
         }
     }
 }

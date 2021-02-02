@@ -1,11 +1,10 @@
-using System.Collections.Generic;
+using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
 using Vera.Audits;
-using Vera.Models;
 using Vera.Portugal.Models;
 
 namespace Vera.Portugal
@@ -21,6 +20,12 @@ namespace Vera.Portugal
             _productCompanyTaxId = productCompanyTaxId;
             _certificateName = certificateName;
             _certificateNumber = certificateNumber;
+        }
+
+        public Task<string> ResolveName(AuditCriteria criteria, int sequence, int total)
+        {
+            // TODO(kevin): use localized timezone?
+            return Task.FromResult($"{criteria.SupplierSystemId}-{DateTime.UtcNow:yyyyMMdd}-{sequence}_{total}.xml");
         }
 
         public Task Write(AuditContext context, AuditCriteria criteria, Stream stream)

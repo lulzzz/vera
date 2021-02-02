@@ -44,7 +44,7 @@ namespace Vera.Audits
             // TODO: extract "archiver" interface? to make it more testable and don't depend on filesystem
             await using var streamToZip = File.Create(Path.GetTempFileName());
 
-            using var archive = new ZipArchive(streamToZip, ZipArchiveMode.Create);
+            using (var archive = new ZipArchive(streamToZip, ZipArchiveMode.Create, true))
             {
                 await FillArchive(account, audit, archive);
             }
@@ -85,10 +85,9 @@ namespace Vera.Audits
 
                 context.Invoices = await _invoiceStore.List(criteria);
 
-                var entryName = await writer.ResolveName(context, sequence++, ranges.Count);
+                var entryName = await writer.ResolveName(criteria, sequence++, ranges.Count);
 
-                await using var stream = archive.CreateEntry(entryName).Open();
-
+                await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();
                 await writer.Write(context, criteria, stream);
             }
         }
