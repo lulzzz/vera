@@ -50,14 +50,14 @@ namespace Vera.WebApi.Services
                 EndDate = request.EndDate.ToDateTime()
             });
 
-            var processor = new AuditProcessor(
+            var processor = new AuditArchiver(
                 _invoiceStore,
                 _blobStore,
                 _auditStore,
                 factory
             );
 
-            _backgroundTaskQueue.Queue(_ => processor.Process(account, audit));
+            _backgroundTaskQueue.Queue(_ => processor.Archive(account, audit));
 
             return new CreateAuditReply
             {
