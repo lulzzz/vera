@@ -20,7 +20,7 @@ jobs:
         run: |  
           Write-Host "Launching Cosmos DB Emulator"
           Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-          Start-CosmosDbEmulator
+          Start-Process Start-CosmosDbEmulator
           
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v1
