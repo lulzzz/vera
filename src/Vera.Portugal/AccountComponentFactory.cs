@@ -14,12 +14,13 @@ namespace Vera.Portugal
     {
         protected override IComponentFactory Create(Configuration config)
         {
-            RSA rsa;
+            RSA rsa = null;
 
-            var privateKey = config.PrivateKey;
-
-            using (var sr = new StringReader(privateKey))
+            if (!string.IsNullOrEmpty(config.PrivateKey))
             {
+                var privateKey = config.PrivateKey;
+
+                using var sr = new StringReader(privateKey);
                 var reader = new PemReader(sr);
                 var keyPair = (AsymmetricCipherKeyPair) reader.ReadObject();
 

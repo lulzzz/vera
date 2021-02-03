@@ -13,7 +13,7 @@ namespace Vera.Portugal
 
         public PackageSigner(RSA rsa)
         {
-            _rsa = rsa;
+            _rsa = rsa ?? throw new NullReferenceException(nameof(rsa));
         }
 
         public Task<PackageSignResult> Sign(Package package)

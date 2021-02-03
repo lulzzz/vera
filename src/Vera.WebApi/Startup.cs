@@ -56,7 +56,7 @@ namespace Vera.WebApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // TODO: used for ESC POS output
+            // Used for the ESC POS encoding. See EscPosVisitor
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
             if (env.IsDevelopment())

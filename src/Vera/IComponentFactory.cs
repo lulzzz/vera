@@ -13,6 +13,7 @@ namespace Vera
     /// </summary>
     public interface IComponentFactory
     {
+        IConfigurationValidator CreateConfigurationValidator();
         IInvoiceBucketGenerator CreateInvoiceBucketGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
         IPackageSigner CreatePackageSigner();

@@ -1,50 +1,60 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.ConstrainedExecution;
-using Microsoft.Azure.Cosmos.Serialization.HybridRow.Layouts;
 using Vera.Configuration;
 
 namespace Vera.Portugal
 {
-    // TODO(kevin): extract magic strings for the keys of the fields
     public class Configuration : AbstractAccountConfiguration
     {
         public override void Initialize(IDictionary<string, string> config)
         {
-            if (config.TryGetValue("PrivateKey", out var pk))
+            string value;
+
+            if (config.TryGetValue("PrivateKey", out value))
             {
-                PrivateKey = pk;
+                PrivateKey = value;
             }
 
-            if (config.TryGetValue("ProductCompanyTaxId", out var taxId))
+            if (config.TryGetValue("PrivateKeyVersion", out value))
             {
-                ProductCompanyTaxId = taxId;
+                PrivateKeyVersion = Convert.ToInt32(value);
             }
 
-            if (config.TryGetValue("SocialCapital", out var sc))
+            if (config.TryGetValue("ProductCompanyTaxId", out value))
             {
-                SocialCapital = Convert.ToDecimal(sc);
+                ProductCompanyTaxId = value;
             }
 
-            if (config.TryGetValue("CertificateNumber", out var certNumber))
+            if (config.TryGetValue("SocialCapital", out value))
             {
-                CertificateNumber = certNumber;
+                SocialCapital = Convert.ToDecimal(value);
             }
 
-            if (config.TryGetValue("CertificateName", out var certName))
+            if (config.TryGetValue("CertificateNumber", out value))
             {
-                CertificateName = certName;
+                CertificateNumber = value;
+            }
+
+            if (config.TryGetValue("CertificateName", out value))
+            {
+                CertificateName = value;
             }
         }
 
         [Required]
         [Display(
-            Name = "PrivateKey",
             GroupName = "Security",
             Description = "RSA private key to use for signing the invoices"
         )]
         public string PrivateKey { get; set; }
+
+        [Range(1, 999)]
+        [Display(
+            GroupName = "Security",
+            Description = "Version of the private key that is being used. Must be incremented whenever the private key changes"
+        )]
+        public int PrivateKeyVersion { get; set; }
 
         [Required]
         [Display(

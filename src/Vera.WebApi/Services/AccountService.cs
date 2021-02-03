@@ -42,11 +42,12 @@ namespace Vera.WebApi.Services
             {
                 throw new RpcException(new Status(
                     StatusCode.InvalidArgument,
-                    $"Account with name {existing.Name} already exists"
+                    $"account with name {existing.Name} already exists"
                 ));
             }
 
             // TODO: limit the certification values to existing ones
+            // _accountComponentFactoryCollection.Names
 
             var accountId = Guid.NewGuid();
 
@@ -96,7 +97,7 @@ namespace Vera.WebApi.Services
 
             if (account == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Account does not exist"));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "account does not exist"));
             }
 
             // TODO(kevin): more validation on the new state of the account (attributes?)
@@ -129,29 +130,22 @@ namespace Vera.WebApi.Services
 
             if (account == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Account {request.Id} does not exist"));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, $"account {request.Id} does not exist"));
             }
 
-            // TODO(kevin): this looks like a very weird pattern and feels like chicken <-> egg
-            // maybe extract it to a separate component?
-            var configuration = _accountComponentFactoryCollection
-                .GetOrThrow(account)
-                .CreateConfiguration();
+            var validator = _accountComponentFactoryCollection
+                .GetComponentFactory(account)
+                .CreateConfigurationValidator();
 
-            configuration.Initialize(request.Fields);
+            var validationResults = validator.Validate(account.Configuration, request.Fields);
 
-            var validationContext = new ValidationContext(configuration);
-
-            if (!Validator.TryValidateObject(configuration, validationContext, new List<ValidationResult>()))
+            if (validationResults.Any())
             {
-                // TODO(kevin): throw matching exception
-                throw new RpcException(new Status(StatusCode.FailedPrecondition,
-                    "One or more fields did not pass validation"));
+                throw new RpcException(new Status(
+                    StatusCode.InvalidArgument,
+                    string.Join(Environment.NewLine, validationResults.Select(v => v.ErrorMessage))
+                ));
             }
-
-            // TODO(kevin): do more extensive testing of the configuration - like checking that the public/private keys works
-            // TODO(kevin): create component that checks differences between configuration that checks if "version" needs to be plussed
-            // TODO(kevin): ^ NO and PT require the version of the key to be present that was used for signing
 
             account.Configuration = request.Fields;
 

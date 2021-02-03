@@ -17,8 +17,6 @@ namespace Vera.Dependencies
             return Create(config);
         }
 
-        public AbstractAccountConfiguration CreateConfiguration() => new T();
-
         protected abstract IComponentFactory Create(T configuration);
 
         public abstract string Name { get; }

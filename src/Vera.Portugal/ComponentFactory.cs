@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using Vera.Audits;
+using Vera.Configuration;
 using Vera.Invoices;
 using Vera.Signing;
 using Vera.Thermal;
@@ -15,6 +16,11 @@ namespace Vera.Portugal
         {
             _rsa = rsa;
             _configuration = configuration;
+        }
+
+        public IConfigurationValidator CreateConfigurationValidator()
+        {
+            return new ConfigurationValidator();
         }
 
         public IInvoiceBucketGenerator CreateInvoiceBucketGenerator()

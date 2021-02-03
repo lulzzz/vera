@@ -36,6 +36,7 @@ tq4HEcmINDkh3fy0/V5XRqzAmGlH6dgxPMgEdddzdRrl
                 Fields =
                 {
                     {"PrivateKey", pk},
+                    {"PrivateKeyVersion", "1"},
                     {"ProductCompanyTaxId", "123 123 123"},
                     {"SocialCapital", "1234"},
                     {"CertificateNumber", "9999"},

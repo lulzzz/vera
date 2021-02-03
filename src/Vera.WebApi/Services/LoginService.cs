@@ -67,8 +67,7 @@ namespace Vera.WebApi.Services
 
             if (!string.Equals(user.RefreshToken, request.Token))
             {
-                // TODO(kevin): what to return here? (token is invalid)
-                throw new RpcException(new Status(StatusCode.Unauthenticated, string.Empty));
+                throw new RpcException(new Status(StatusCode.Unauthenticated, "invalid token"));
             }
 
             var company = await _companyStore.GetByName(context.GetCompanyName());
