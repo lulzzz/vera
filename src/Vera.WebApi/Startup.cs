@@ -41,7 +41,11 @@ namespace Vera.WebApi
                 });
 
             services.AddControllers();
-            services.AddGrpc();
+            services.AddGrpc(o =>
+            {
+                // TODO(kevin): only in development mode
+                o.EnableDetailedErrors = true;
+            });
 
             services.AddTransient<ISecurityTokenGenerator>(p => new JwtSecurityTokenGenerator(Configuration));
 

@@ -1,4 +1,6 @@
 using System;
+using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +30,43 @@ namespace Vera.Bootstrap
             builder.UseVeraPortugal();
 
             return builder;
+        }
+
+        public static IHost ConfigureCosmos(this IHost host)
+        {
+            using var scope = host.Services.CreateScope();
+
+            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+            var cosmosOptions = config
+                .GetSection(CosmosOptions.Section)
+                .Get<CosmosOptions>();
+
+            var cosmosContainerOptions = config
+                .GetSection(CosmosContainerOptions.Section)
+                .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
+
+            var client = scope.ServiceProvider.GetRequiredService<CosmosClient>();
+
+            var response = client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database).GetAwaiter().GetResult();
+            var db = response.Database;
+
+            const string partitionKeyPath = "/PartitionKey";
+
+            var containers = new[]
+            {
+                cosmosContainerOptions.Companies,
+                cosmosContainerOptions.Users,
+                cosmosContainerOptions.Invoices,
+                cosmosContainerOptions.Audits
+            };
+
+            foreach (var container in containers)
+            {
+                db.CreateContainerIfNotExistsAsync(container, partitionKeyPath).GetAwaiter().GetResult();
+            }
+
+            return host;
         }
 
         private static void RegisterDefaults(IServiceCollection collection)
