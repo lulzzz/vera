@@ -43,8 +43,6 @@ namespace Vera.Services
 
             if (existingCompany != null)
             {
-                // TODO(kevin): handle the case where the company is created but the user is not
-
                 var existingUser = await _userStore.GetByCompany(existingCompany.Id, userToCreate.Username);
 
                 if (existingUser != null)

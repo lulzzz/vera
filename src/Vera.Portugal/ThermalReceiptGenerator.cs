@@ -73,7 +73,7 @@ namespace Vera.Portugal
 
             yield return new SpacingThermalNode(1);
 
-            if (context.Totals.Gross > 0)
+            if (context.Invoice.Totals.Gross > 0)
             {
                 yield return new TextThermalNode("FATURA SIMPLIFICADA")
                 {
@@ -193,7 +193,7 @@ namespace Vera.Portugal
         {
             const string format = "{0,-12}{1,-12}{2,12}{3,12}";
 
-            var totals = context.Totals;
+            var totals = context.Invoice.Totals;
 
             var sb = new StringBuilder();
             sb.AppendFormat(
@@ -246,7 +246,7 @@ namespace Vera.Portugal
 
         private IEnumerable<IThermalNode> GenerateTotals(ThermalReceiptContext context)
         {
-            var totals = context.Totals;
+            var totals = context.Invoice.Totals;
             var prefix = totals.Gross >= 0 ? "TOTAL FATURA" : "TROCO";
 
             yield return new TextThermalNode($"{prefix}: {FormatCurrency(totals.Gross)}")

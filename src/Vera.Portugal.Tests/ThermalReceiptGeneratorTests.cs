@@ -6,6 +6,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using Vera.Documents;
 using Vera.Documents.Visitors;
+using Vera.Invoices;
 using Vera.Models;
 using Vera.Thermal;
 using Xunit;
@@ -25,6 +26,7 @@ namespace Vera.Portugal.Tests
         [Fact]
         public void Should_generate_receipt()
         {
+            // TODO(kevin): use invoice generator to generate test cases
             // TODO(kevin): test that receipt contains correct values
 
             var invoice = new Invoice
@@ -54,7 +56,7 @@ namespace Vera.Portugal.Tests
                 OrderReferences = new List<string>{"3001"},
                 Lines = new List<InvoiceLine>
                 {
-                    new InvoiceLine
+                    new()
                     {
                         Gross = 15m,
                         Description = "Shower foam dao",
@@ -71,12 +73,12 @@ namespace Vera.Portugal.Tests
                 },
                 Payments = new List<Payment>
                 {
-                    new Payment
+                    new()
                     {
                         Amount = 10m,
                         Description = "Cash"
                     },
-                    new Payment
+                    new()
                     {
                         Amount = 5m,
                         Description = "Debit"
@@ -98,6 +100,8 @@ namespace Vera.Portugal.Tests
                 //     }
                 // }
             };
+
+            invoice.Totals = new InvoiceTotalsCalculator().Calculate(invoice);
 
             var account = new Account
             {

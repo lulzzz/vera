@@ -4,12 +4,15 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using Vera.Concurrency;
 using Vera.Portugal;
 using Vera.Security;
 using Vera.Services;
 using Vera.Stores;
+using Vera.Stores.Azure;
 using Vera.Stores.Cosmos;
 
 namespace Vera.Bootstrap
@@ -22,18 +25,26 @@ namespace Vera.Bootstrap
         {
             builder.ConfigureServices((context, collection) =>
             {
-                RegisterDefaults(collection);
+                // Components
+                collection.AddTransient<ITokenFactory, RandomTokenFactory>();
+                collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
+                collection.AddTransient<IAccountComponentFactoryCollection, AccountComponentFactoryCollection>();
 
-                // TODO(kevin): extract so other methods can be used
-                UseCosmosStores(context, collection);
-                UseBlobLocker(context, collection);
+                // Stores
+                collection.AddSingleton<IBlobStore, TemporaryBlobStore>();
+                collection.AddSingleton<ILocker, NullLocker>();
+
+                // Services
+                collection.AddTransient<IUserRegisterService, UserRegisterService>();
             });
 
+            // Registration of all the certification implementations
             builder.UseVeraPortugal();
 
             return builder;
         }
 
+        // TODO(kevin): do not like this, but also don't know a better way for this do-once on startup kind of work
         public static IHost ConfigureCosmos(this IHost host)
         {
             using var scope = host.Services.CreateScope();
@@ -83,75 +94,85 @@ namespace Vera.Bootstrap
             return host;
         }
 
-        private static void RegisterDefaults(IServiceCollection collection)
+        /// <summary>
+        /// Use Cosmos as the main backing store for the entities.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
+        /// <seealso cref="CosmosOptions"/>
+        /// <seealso cref="CosmosContainerOptions"/>
+        public static IHostBuilder UseCosmosStores(this IHostBuilder builder)
         {
-            // Components
-            collection.AddTransient<ITokenFactory, RandomTokenFactory>();
-            collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
-            collection.AddTransient<IAccountComponentFactoryCollection, AccountComponentFactoryCollection>();
+            return builder.ConfigureServices((context, collection) =>
+            {
+                var cosmosOptions = context.Configuration
+                    .GetSection(CosmosOptions.Section)
+                    .Get<CosmosOptions>();
 
-            // Stores
-            collection.AddTransient<IBlobStore, TemporaryBlobStore>();
+                var cosmosContainerOptions = context.Configuration
+                    .GetSection(CosmosContainerOptions.Section)
+                    .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
 
-            // Services
-            collection.AddTransient<IUserRegisterService, UserRegisterService>();
+                if (string.IsNullOrEmpty(cosmosOptions.ConnectionString) || string.IsNullOrEmpty(cosmosOptions.Database))
+                {
+                    return;
+                }
+
+                var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
+                    // TODO(kevin): enable once this is supported in the SDK
+                    // .WithContentResponseOnWrite(false)
+                    .WithRequestTimeout(TimeSpan.FromSeconds(5))
+                    .WithConnectionModeDirect()
+                    .WithApplicationName("vera")
+                    .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
+                    .Build();
+
+                collection.AddSingleton(cosmosClient);
+
+                collection.AddSingleton<IInvoiceStore>(_ => new CosmosInvoiceStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Invoices)
+                ));
+
+                collection.AddSingleton<ICompanyStore>(_ => new CosmosCompanyStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
+                ));
+
+                collection.AddSingleton<IAccountStore>(_ => new CosmosAccountStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
+                ));
+
+                collection.AddSingleton<IUserStore>(_ => new CosmosUserStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Users)
+                ));
+
+                collection.AddSingleton<IAuditStore>(_ => new CosmosAuditStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Audits)
+                ));
+            });
         }
 
-        private static void UseCosmosStores(HostBuilderContext context, IServiceCollection collection)
+        public static IHostBuilder UseAzureBlobs(this IHostBuilder builder)
         {
-            var cosmosOptions = context.Configuration
-                .GetSection(CosmosOptions.Section)
-                .Get<CosmosOptions>();
-
-            var cosmosContainerOptions = context.Configuration
-                .GetSection(CosmosContainerOptions.Section)
-                .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
-
-            if (string.IsNullOrEmpty(cosmosOptions.ConnectionString) || string.IsNullOrEmpty(cosmosOptions.Database))
+            return builder.ConfigureServices((context, collection) =>
             {
-                return;
-            }
+                // Do not configure Azure dependency when running in development mode
+                if (context.HostingEnvironment.IsDevelopment())
+                {
+                    Log.Warning("not using Azure blob storage because we're running in development mode");
+                    return;
+                }
 
-            var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
-                // TODO(kevin): enable once this is supported in the SDK
-                // .WithContentResponseOnWrite(false)
-                .WithRequestTimeout(TimeSpan.FromSeconds(5))
-                .WithConnectionModeDirect()
-                .WithApplicationName("vera")
-                .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
-                .Build();
+                var blobConnectionString = context.Configuration["VERA:BLOB:CONNECTIONSTRING"];
 
-            collection.AddSingleton(cosmosClient);
+                if (string.IsNullOrEmpty(blobConnectionString))
+                {
+                    Log.Warning("not using Azure blob storage because the connection string is empty");
+                    return;
+                }
 
-            collection.AddSingleton<IInvoiceStore>(_ => new CosmosInvoiceStore(
-                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Invoices)
-            ));
-
-            collection.AddSingleton<ICompanyStore>(_ => new CosmosCompanyStore(
-                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
-            ));
-
-            collection.AddSingleton<IAccountStore>(_ => new CosmosAccountStore(
-                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
-            ));
-
-            collection.AddSingleton<IUserStore>(_ => new CosmosUserStore(
-                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Users)
-            ));
-
-            collection.AddSingleton<IAuditStore>(_ => new CosmosAuditStore(
-                cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Audits)
-            ));
-        }
-
-        private static void UseBlobLocker(HostBuilderContext context, IServiceCollection collection)
-        {
-            var blobConnectionString = context.Configuration["VERA:BLOB:CONNECTIONSTRING"];
-
-            if (!string.IsNullOrEmpty(blobConnectionString))
-            {
-                collection.AddSingleton<ILocker>(new AzureBlobLocker(blobConnectionString));
-            }
+                collection.Replace(ServiceDescriptor.Singleton<ILocker>(new AzureBlobLocker(blobConnectionString)));
+                collection.Replace(ServiceDescriptor.Singleton<IBlobStore>(new AzureBlobStore(blobConnectionString)));
+            });
         }
     }
 }

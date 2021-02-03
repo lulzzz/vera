@@ -50,7 +50,9 @@ namespace Vera.WebApi
             return Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(wb => wb.UseStartup<Startup>())
                 .UseSerilog()
-                .UseVera();
+                .UseVera()
+                .UseCosmosStores()
+                .UseAzureBlobs();
         }
     }
 }

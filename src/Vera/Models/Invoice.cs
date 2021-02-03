@@ -78,7 +78,10 @@ namespace Vera.Models
         /// </summary>
         public string? Remark { get; set; }
 
-        // TODO(kevin): add total amounts and tax table?
+        /// <summary>
+        /// Summary of the totals on the invoice.
+        /// </summary>
+        public Totals Totals { get; set; }
 
         /// <summary>
         /// Identifiers of the orders from which this invoice is made up.
@@ -118,12 +121,5 @@ namespace Vera.Models
         /// Required by some countries.
         /// </summary>
         public int? Version { get; set; }
-    }
-
-    public class PinReceipt
-    {
-        public IEnumerable<string> Lines { get; set; }
-        public byte[] SignatureData { get; set; }
-        public string SignatureMimeType { get; set; }
     }
 }

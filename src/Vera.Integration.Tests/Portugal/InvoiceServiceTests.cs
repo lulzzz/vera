@@ -59,9 +59,8 @@ namespace Vera.Integration.Tests.Portugal
 
             var getInvoiceCallReply = await getInvoiceCall.ResponseAsync;
 
-            // TODO(kevin): verify
-
             Assert.Equal(createInvoiceReply.Number, getInvoiceCallReply.Number);
+            Assert.True(createInvoiceReply.Sequence > 0);
         }
 
         // TODO(kevin): write tests that generate different invoices and verify that the number matches the expected format

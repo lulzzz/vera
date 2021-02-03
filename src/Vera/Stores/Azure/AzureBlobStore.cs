@@ -11,7 +11,7 @@ namespace Vera.Stores.Azure
         private readonly string _containerName;
         private readonly BlobServiceClient _client;
 
-        public AzureBlobStore(string connectionString, string containerName)
+        public AzureBlobStore(string connectionString, string containerName = "blobs")
         {
             if (string.IsNullOrWhiteSpace(containerName)) throw new NullReferenceException(nameof(containerName));
 

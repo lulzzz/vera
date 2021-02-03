@@ -24,7 +24,6 @@ namespace Vera.Portugal
 
         public Task<string> ResolveName(AuditCriteria criteria, int sequence, int total)
         {
-            // TODO(kevin): use localized timezone?
             return Task.FromResult($"{criteria.SupplierSystemId}-{DateTime.UtcNow:yyyyMMdd}-{sequence}_{total}.xml");
         }
 

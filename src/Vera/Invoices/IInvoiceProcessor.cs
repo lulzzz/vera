@@ -20,14 +20,14 @@ namespace Vera.Invoices
         public string Number { get; set; }
 
         /// <summary>
-        /// Input that was used to generate the <see cref="Signature"/>.
+        /// Input that was used to generate the <see cref="Output"/>.
         /// </summary>
-        public string RawSignature { get; set; }
+        public string Input { get; set; }
 
         /// <summary>
         /// Resulting signature.
         /// </summary>
-        public byte[] Signature { get; set; }
+        public byte[] Output { get; set; }
     }
 
     public interface IInvoiceProcessor
@@ -47,24 +47,27 @@ namespace Vera.Invoices
     public sealed class InvoiceProcessor : IInvoiceProcessor
     {
         private readonly IInvoiceStore _store;
+        private readonly ILocker _locker;
         private readonly IComponentFactory _factory;
+        private readonly InvoiceTotalsCalculator _invoiceTotalsCalculator;
 
-        public InvoiceProcessor(IInvoiceStore store, IComponentFactory factory)
+        public InvoiceProcessor(IInvoiceStore store, ILocker locker, IComponentFactory factory)
         {
             _store = store;
+            _locker = locker;
             _factory = factory;
+            _invoiceTotalsCalculator = new InvoiceTotalsCalculator();
         }
 
         public async Task<InvoiceResult> Process(Invoice invoice)
         {
             var invoiceBucketGenerator = _factory.CreateInvoiceBucketGenerator();
-            var locker = _factory.CreateLocker();
 
             // Prefix with accountId to make sure the bucket is unique per account
             var bucket = invoiceBucketGenerator.Generate(invoice);
 
             // Lock on the unique sequence of the invoice
-            await using (await locker.Lock(bucket, TimeSpan.FromMinutes(1)))
+            await using (await _locker.Lock(bucket, TimeSpan.FromMinutes(1)))
             {
                 var invoiceNumberGenerator = _factory.CreateInvoiceNumberGenerator();
                 var packageSigner = _factory.CreatePackageSigner();
@@ -92,14 +95,16 @@ namespace Vera.Invoices
                     // TODO(kevin): map/get the version of the certificate
                 };
 
+                invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
+
                 await _store.Save(invoice, bucket);
 
                 return new InvoiceResult
                 {
                     Sequence = invoice.Sequence,
                     Number = number,
-                    RawSignature = result.Input,
-                    Signature = result.Output
+                    Input = result.Input,
+                    Output = result.Output
                 };
             }
         }

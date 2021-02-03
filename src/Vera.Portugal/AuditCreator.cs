@@ -72,10 +72,7 @@ namespace Vera.Portugal
                         Region = companyAddress.Region,
                         Country = companyAddress.Country
                     },
-
-                    // TODO(kevin): probably not correct - want the REAL fiscal year
                     FiscalYear = startDate.Year.ToString(),
-
                     StartDate = startDate,
                     EndDate = endDate,
                     CurrencyCode = context.Account.Currency,
@@ -215,7 +212,7 @@ namespace Vera.Portugal
 
             sourceDocumentsSalesInvoices.Invoice = invoices.Select(invoice =>
             {
-                var totals = calculator.Calculate(invoice);
+                var totals = invoice.Totals;
 
                 return new SourceDocumentsSalesInvoicesInvoice
                 {
@@ -273,7 +270,7 @@ namespace Vera.Portugal
 
             foreach (var invoice in invoices)
             {
-                var totals = calculator.Calculate(invoice);
+                var totals = invoice.Totals;
 
                 if (totals.Net > 0)
                 {

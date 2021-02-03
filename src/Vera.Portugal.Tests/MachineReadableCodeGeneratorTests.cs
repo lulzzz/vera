@@ -13,6 +13,10 @@ namespace Vera.Portugal.Tests
     {
       const string expected = "A:123456789*B:999999990*C:PT*D:FS*E:N*F:20190812*G:FS CDVF/12345*H:0*I1:PT*I7:0.65*I8:0.15*N:0.15*O:0.80*Q:qaai*R:9999";
 
+      var rate = 1.23m;
+      var gross = .8m;
+      var net = gross / rate;
+
       var invoice = new Invoice
       {
         Supplier = new Billable
@@ -32,17 +36,16 @@ namespace Vera.Portugal.Tests
         {
           Output = Encoding.UTF8.GetBytes("qV6q+SN5dLalOD2cK3s7aBRIWv9q3fimnRAVmutDvVZtjDEzykiQr619UW/0bzTAmPERv+4yiZcOQ7FIja1pzPOgSa9CHQsFAdLjDObZQcNcVEVZPblzCnuJL279/YQERV5q5k2bSZfeQyyA6OfYzReV8NbjAZRabcMEHZhxmdw=")
         },
-        Lines = new List<InvoiceLine>
+        Totals = new Totals
         {
-          new()
+          Gross = gross,
+          Net = net,
+          Taxes = new TaxTable
           {
-            Gross = .8m,
-            Net = .8m / 1.23m,
-            Taxes = new()
+            High = new TaxTable.Entry(rate)
             {
-              Category = TaxesCategory.High,
-              Code = "NOR",
-              Rate = 1.23m
+              Base = net,
+              Value = gross - net
             }
           }
         }

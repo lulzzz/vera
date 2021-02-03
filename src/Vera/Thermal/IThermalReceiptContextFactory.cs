@@ -22,8 +22,7 @@ namespace Vera.Thermal
             return new()
             {
                 Account = account,
-                Invoice = invoice,
-                Totals = _calculator.Calculate(invoice)
+                Invoice = invoice
 
                 // TODO(kevin): set the other properties (header/footer/etc.)
             };

@@ -19,8 +19,7 @@ namespace Vera.Portugal
 
     public string Generate(Invoice invoice)
     {
-      var calculator = new InvoiceTotalsCalculator();
-      var totals = calculator.Calculate(invoice);
+      var totals = invoice.Totals;
       var table = totals.Taxes;
 
       var builder = new MachineCodeBuilder()

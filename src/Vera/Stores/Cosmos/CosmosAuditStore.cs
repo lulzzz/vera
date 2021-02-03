@@ -49,9 +49,6 @@ namespace Vera.Stores.Cosmos
         {
             var document = new AuditDocument(audit);
 
-            // TODO(kevin): ensure that just properties that we deem mutable are persisted
-            // TODO(kevin): ^ pretty much just the Location property at the moment
-
             return _container.ReplaceItemAsync(
                 document,
                 document.Id.ToString(),

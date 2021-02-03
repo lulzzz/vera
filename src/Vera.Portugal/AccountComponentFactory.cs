@@ -12,18 +12,6 @@ namespace Vera.Portugal
 {
     public class AccountComponentFactory : AbstractAccountComponentFactory<Configuration>
     {
-        private readonly IInvoiceStore _invoiceStore;
-        private readonly ILocker _locker;
-
-        public AccountComponentFactory(
-            IInvoiceStore invoiceStore,
-            ILocker locker
-        )
-        {
-            _invoiceStore = invoiceStore;
-            _locker = locker;
-        }
-
         protected override IComponentFactory Create(Configuration config)
         {
             RSA rsa;
@@ -40,7 +28,7 @@ namespace Vera.Portugal
                 rsa = RSA.Create(rsaParameters);
             }
 
-            return new ComponentFactory(_invoiceStore, _locker, rsa, config);
+            return new ComponentFactory(rsa, config);
         }
 
         public override string Name => "PT";

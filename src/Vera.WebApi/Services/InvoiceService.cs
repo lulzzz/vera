@@ -5,6 +5,7 @@ using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Bootstrap;
+using Vera.Concurrency;
 using Vera.Grpc;
 using Vera.Invoices;
 using Vera.Models;
@@ -19,16 +20,19 @@ namespace Vera.WebApi.Services
     {
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
+        private readonly ILocker _locker;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
         public InvoiceService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
+            ILocker locker,
             IAccountComponentFactoryCollection accountComponentFactoryCollection
         )
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
+            _locker = locker;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
@@ -42,7 +46,7 @@ namespace Vera.WebApi.Services
 
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
-            var processor = new InvoiceProcessor(_invoiceStore, factory);
+            var processor = new InvoiceProcessor(_invoiceStore, _locker, factory);
 
             var result = await processor.Process(Map(request.Invoice));
 
@@ -52,8 +56,8 @@ namespace Vera.WebApi.Services
                 Sequence = result.Sequence,
                 Signature = new Grpc.Signature
                 {
-                    Input = ByteString.CopyFromUtf8(result.RawSignature),
-                    Output = ByteString.CopyFrom(result.Signature)
+                    Input = ByteString.CopyFromUtf8(result.Input),
+                    Output = ByteString.CopyFrom(result.Output)
                 }
             };
         }

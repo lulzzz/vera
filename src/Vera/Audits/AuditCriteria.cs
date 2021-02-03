@@ -1,12 +1,20 @@
 using System;
+using Vera.Models;
 
 namespace Vera.Audits
 {
     public sealed class AuditCriteria
     {
+        /// <summary>
+        /// Id of the account to generate the audit for.
+        /// </summary>
+        /// <see cref="Account.Id"/>
         public Guid AccountId { get; set; }
-        
-        // TODO(kevin): refers to the number of the store from the 3th party
+
+        /// <summary>
+        /// SystemId of the supplier of the invoice(s).
+        /// </summary>
+        /// <see cref="Vera.Models.Invoice.Supplier"/>
         public string SupplierSystemId { get; set; }
 
         public DateTime StartDate { get; set; }

@@ -83,7 +83,6 @@ where c.Invoice.AccountId = @accountId
 
             var invoices = new List<Invoice>();
 
-            // TODO(kevin): paging?
             while (iterator.HasMoreResults)
             {
                 var results = await iterator.ReadNextAsync();
