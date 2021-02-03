@@ -16,6 +16,8 @@ namespace Vera.Bootstrap
 {
     public static class HostBuilderExtensions
     {
+        private static volatile object _lock = new();
+
         public static IHostBuilder UseVera(this IHostBuilder builder)
         {
             builder.ConfigureServices((context, collection) =>
@@ -48,22 +50,34 @@ namespace Vera.Bootstrap
 
             var client = scope.ServiceProvider.GetRequiredService<CosmosClient>();
 
-            var response = client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database).GetAwaiter().GetResult();
-            var db = response.Database;
-
-            const string partitionKeyPath = "/PartitionKey";
-
-            var containers = new[]
+            // Locking here for the integration tests to prevent concurrency issues
+            // when creating the database and containers. Integration test spins up
+            // multiple instances of the app, every test get its own app that runs this
+            // piece of code
+            lock (_lock)
             {
-                cosmosContainerOptions.Companies,
-                cosmosContainerOptions.Users,
-                cosmosContainerOptions.Invoices,
-                cosmosContainerOptions.Audits
-            };
+                var response = client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database)
+                    .GetAwaiter()
+                    .GetResult();
 
-            foreach (var container in containers)
-            {
-                db.CreateContainerIfNotExistsAsync(container, partitionKeyPath).GetAwaiter().GetResult();
+                var db = response.Database;
+
+                const string partitionKeyPath = "/PartitionKey";
+
+                var containers = new[]
+                {
+                    cosmosContainerOptions.Companies,
+                    cosmosContainerOptions.Users,
+                    cosmosContainerOptions.Invoices,
+                    cosmosContainerOptions.Audits
+                };
+
+                foreach (var container in containers)
+                {
+                    db.CreateContainerIfNotExistsAsync(container, partitionKeyPath)
+                        .GetAwaiter()
+                        .GetResult();
+                }
             }
 
             return host;
