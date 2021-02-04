@@ -30,8 +30,7 @@ message GetInvoiceByNumberRequest {
 }
 
 message GetInvoiceReply {
-    // TODO(kevin): extend this to return the full invoice
-    string number = 1;
+
 }
 
 // Signature captures the in-/output of the signing of the invoice

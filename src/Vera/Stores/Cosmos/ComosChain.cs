@@ -2,8 +2,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
-using Vera.Models;
 
 namespace Vera.Stores.Cosmos
 {
@@ -22,7 +20,7 @@ namespace Vera.Stores.Cosmos
             var last = await Tail(partitionKey);
             var tx = _container.CreateTransactionalBatch(partitionKey);
 
-            var next = new ChainableDocument<T>(document, partitionKeyValue);
+            var next = new ChainedDocument<T>(document, partitionKeyValue);
 
             tx.CreateItem(next);
             
@@ -44,11 +42,11 @@ namespace Vera.Stores.Cosmos
             }
         }
 
-        public async Task<ChainableDocument<T>> Tail(PartitionKey partitionKey)
+        public async Task<ChainedDocument<T>> Tail(PartitionKey partitionKey)
         {
             var definition = new QueryDefinition("select top 1 * from c where c.Next = null");
 
-            var iterator = _container.GetItemQueryIterator<ChainableDocument<T>>(definition,
+            var iterator = _container.GetItemQueryIterator<ChainedDocument<T>>(definition,
                 requestOptions: new QueryRequestOptions
                 {
                     PartitionKey = partitionKey

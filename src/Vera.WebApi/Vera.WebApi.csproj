@@ -1,24 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <ItemGroup>
-      <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.2" />
       <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Vera.Bootstrap\Vera.Bootstrap.csproj" />
+      <ProjectReference Include="..\Vera.Grpc\Vera.Grpc.csproj" />
       <ProjectReference Include="..\Vera\Vera.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Protobuf Include="Protos\shared.proto" GrpcServices="Both" />
-        <Protobuf Include="Protos\register.proto" GrpcServices="Both" />
-        <Protobuf Include="Protos\login.proto" GrpcServices="Both" />
-        <Protobuf Include="Protos\account.proto" GrpcServices="Both" />
-        <Protobuf Include="Protos\invoice.proto" GrpcServices="Both" />
-        <Protobuf Include="Protos\receipt.proto" GrpcServices="Both" />
-        <Protobuf Include="Protos\audit.proto" GrpcServices="Both" />
     </ItemGroup>
 
 </Project>

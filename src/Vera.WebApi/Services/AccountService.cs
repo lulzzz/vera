@@ -8,9 +8,9 @@ using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Bootstrap;
 using Vera.Grpc;
+using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
 using Vera.Stores;
-using Vera.WebApi.Models;
 using Vera.WebApi.Security;
 
 namespace Vera.WebApi.Services

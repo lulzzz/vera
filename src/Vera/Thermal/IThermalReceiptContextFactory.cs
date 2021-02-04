@@ -1,28 +1,34 @@
-using Vera.Invoices;
+using System.Linq;
+using System.Threading.Tasks;
 using Vera.Models;
+using Vera.Stores;
 
 namespace Vera.Thermal
 {
     public interface IThermalReceiptContextFactory
     {
-        ThermalReceiptContext Create(Account account, Invoice invoice);
+        Task<ThermalReceiptContext> Create(Account account, Invoice invoice);
     }
 
     public class ThermalReceiptContextFactory
     {
-        private readonly InvoiceTotalsCalculator _calculator;
+        private readonly IPrintAuditTrailStore _printAuditTrailStore;
 
-        public ThermalReceiptContextFactory()
+        public ThermalReceiptContextFactory(IPrintAuditTrailStore printAuditTrailStore)
         {
-            _calculator = new InvoiceTotalsCalculator();
+            _printAuditTrailStore = printAuditTrailStore;
         }
 
-        public ThermalReceiptContext Create(Account account, Invoice invoice)
+        public async Task<ThermalReceiptContext> Create(Account account, Invoice invoice)
         {
+            var prints = await _printAuditTrailStore.GetByInvoice(invoice.Id);
+
             return new()
             {
                 Account = account,
-                Invoice = invoice
+                Invoice = invoice,
+                Prints = prints,
+                Original = !prints.Any(x => x.Success)
 
                 // TODO(kevin): set the other properties (header/footer/etc.)
             };

@@ -12,11 +12,19 @@ namespace Vera.Bootstrap
         /// <summary>
         /// Name of the companies container.
         /// </summary>
+        /// <seealso cref="Vera.Models.Company"/>
+        /// <seealso cref="Vera.Models.Account"/>
+        /// <seealso cref="Vera.Models.User"/>
         public string Companies { get; set; } = "companies";
 
         /// <summary>
         /// Name of the audits container.
         /// </summary>
         public string Audits { get; set; } = "audits";
+
+        /// <summary>
+        /// Name of the trails container.
+        /// </summary>
+        public string Trails { get; set; } = "trails";
     }
 }

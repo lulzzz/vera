@@ -12,7 +12,7 @@ namespace Vera.Grpc.Shared
 
         public static implicit operator decimal(DecimalValue grpcDecimal)
         {
-            return grpcDecimal.Units + grpcDecimal.Nanos / NanoFactor;
+            return grpcDecimal == null ? 0m : grpcDecimal.Units + grpcDecimal.Nanos / NanoFactor;
         }
 
         public static implicit operator DecimalValue(decimal value)

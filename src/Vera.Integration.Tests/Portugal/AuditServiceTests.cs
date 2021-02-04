@@ -4,7 +4,9 @@ using Bogus;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Net.Client;
 using Vera.Grpc;
+using Vera.Grpc.Models;
 using Vera.Integration.Tests.Common;
+using Vera.Tests.Shared;
 using Xunit;
 
 namespace Vera.Integration.Tests.Portugal
@@ -37,11 +39,11 @@ namespace Vera.Integration.Tests.Portugal
             await portugalSetup.ConfigureAccount(account);
 
             var invoiceGenerator = new InvoiceGenerator(_faker);
-            var invoice = invoiceGenerator.CreateInvoiceWithCustomerAndSingleProduct(account);
+            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(account);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = invoice
+                Invoice = invoice.Pack()
             };
 
             var invoiceService = new InvoiceService.InvoiceServiceClient(_channel);

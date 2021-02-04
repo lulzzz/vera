@@ -38,7 +38,7 @@ namespace Vera.Stores.Cosmos
 
         public async Task<Account> Get(Guid companyId, Guid accountId)
         {
-            var document = await _container.ReadItemAsync<DocumentWithType<Account>>(
+            var document = await _container.ReadItemAsync<TypedDocument<Account>>(
                 accountId.ToString(),
                 new PartitionKey(companyId.ToString())
             );
@@ -72,7 +72,7 @@ where a.Type = @type")
             return accounts;
         }
 
-        private static DocumentWithType<Account> ToDocument(Account account)
+        private static TypedDocument<Account> ToDocument(Account account)
         {
             return new(
                 a => a.Id,

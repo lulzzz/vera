@@ -40,7 +40,7 @@ namespace Vera.Stores.Cosmos
 
         public async Task<Company> GetById(Guid companyId)
         {
-            var result = await _container.ReadItemAsync<DocumentWithType<Company>>(
+            var result = await _container.ReadItemAsync<TypedDocument<Company>>(
                 companyId.ToString(), new PartitionKey(companyId.ToString())
             );
 
@@ -64,7 +64,7 @@ select top 1 value c[""Value""]
             return response.FirstOrDefault();
         }
 
-        private static DocumentWithType<Company> ToDocument(Company company)
+        private static TypedDocument<Company> ToDocument(Company company)
         {
             return new(
                 c => c.Id,

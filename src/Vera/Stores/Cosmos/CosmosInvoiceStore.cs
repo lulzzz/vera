@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
-using Newtonsoft.Json;
 using Vera.Audits;
 using Vera.Models;
 
@@ -26,19 +24,22 @@ namespace Vera.Stores.Cosmos
             await _chain.Append(invoice, PartitionKeyByBucket(invoice.AccountId, bucket));
 
             // Also create document to look up by number efficiently
-            var invoiceByNumberDocument = new Document<Invoice>(
+            var byNumber = new Document<Invoice>(
                 i => i.Id,
                 i => PartitionKeyByNumber(i.AccountId, i.Number),
                 invoice
             );
 
+            var byId = new Document<Invoice>(
+                i => i.Id,
+                i => i.Id.ToString(),
+                invoice
+            );
+
             // TODO(kevin): can store reference with id/partitionKey as well
             // but that would require 2 reads, not sure what's better here
-            // also need to keep these documents in sync now
-            await _container.CreateItemAsync(
-                invoiceByNumberDocument,
-                new PartitionKey(invoiceByNumberDocument.PartitionKey)
-            );
+            // also need to keep these documents in sync now (change feed?)
+            await _container.CreateItemAsync(byNumber, new PartitionKey(byNumber.PartitionKey));
         }
 
         public async Task<Invoice> Last(Guid accountId, string bucket)

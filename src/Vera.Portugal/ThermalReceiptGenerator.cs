@@ -110,11 +110,9 @@ namespace Vera.Portugal
 
             string printNumberPrefix;
 
-            // TODO(kevin): invoice number of prints
-            // var prints = invoice.Prints.Count;
-            var prints = 0;
+            var prints = context.Prints.Count;
             if (string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber)) {
-                printNumberPrefix = prints == 0 ? "ORIGINAL" : $"DUPLICADO #{prints}";
+                printNumberPrefix = context.Original ? "ORIGINAL" : $"DUPLICADO #{prints}";
             } else {
                 printNumberPrefix = $"DUPLICADO REIMPRESSAO #{prints}";
             }

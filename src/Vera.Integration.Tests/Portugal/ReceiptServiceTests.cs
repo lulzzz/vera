@@ -2,7 +2,9 @@ using System.Threading.Tasks;
 using Bogus;
 using Grpc.Net.Client;
 using Vera.Grpc;
+using Vera.Grpc.Models;
 using Vera.Integration.Tests.Common;
+using Vera.Tests.Shared;
 using Xunit;
 
 namespace Vera.Integration.Tests.Portugal
@@ -35,11 +37,11 @@ namespace Vera.Integration.Tests.Portugal
             await portugalSetup.ConfigureAccount(account);
 
             var invoiceGenerator = new InvoiceGenerator(_faker);
-            var invoice = invoiceGenerator.CreateInvoiceWithCustomerAndSingleProduct(account);
+            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(account);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = invoice
+                Invoice = invoice.Pack()
             };
 
             var invoiceService = new InvoiceService.InvoiceServiceClient(_channel);
@@ -50,8 +52,8 @@ namespace Vera.Integration.Tests.Portugal
             var receiptService = new ReceiptService.ReceiptServiceClient(_channel);
             using var renderReceiptCall = receiptService.RenderThermalAsync(new RenderThermalRequest
             {
-                Account = account,
-                Number = createInvoiceReply.Number,
+                AccountId = account,
+                InvoiceNumber = createInvoiceReply.Number,
                 Type = ReceiptOutputType.Json
             }, setup.CreateAuthorizedMetadata());
 

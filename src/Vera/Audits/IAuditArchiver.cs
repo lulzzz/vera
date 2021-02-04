@@ -85,6 +85,8 @@ namespace Vera.Audits
 
                 context.Invoices = await _invoiceStore.List(criteria);
 
+                // TODO(kevin): fetch print trail?
+
                 var entryName = await writer.ResolveName(criteria, sequence++, ranges.Count);
 
                 await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();

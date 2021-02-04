@@ -61,7 +61,7 @@ where c[""Value""].Username = @username
             return response.FirstOrDefault();
         }
 
-        private static DocumentWithType<User> ToDocument(User user)
+        private static TypedDocument<User> ToDocument(User user)
         {
             return new(
                 u => u.Id,

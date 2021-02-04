@@ -79,7 +79,8 @@ namespace Vera.Bootstrap
                 {
                     cosmosContainerOptions.Companies,
                     cosmosContainerOptions.Invoices,
-                    cosmosContainerOptions.Audits
+                    cosmosContainerOptions.Audits,
+                    cosmosContainerOptions.Trails
                 };
 
                 foreach (var container in containers)
@@ -146,6 +147,10 @@ namespace Vera.Bootstrap
 
                 collection.AddSingleton<IAuditStore>(_ => new CosmosAuditStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Audits)
+                ));
+
+                collection.AddSingleton<IPrintAuditTrailStore>(_ => new CosmosPrintAuditTrailStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Trails)
                 ));
             });
         }

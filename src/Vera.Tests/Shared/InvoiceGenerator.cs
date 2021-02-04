@@ -1,9 +1,8 @@
 using System;
 using Bogus;
-using Google.Protobuf.WellKnownTypes;
-using Vera.Grpc;
+using Vera.Models;
 
-namespace Vera.Integration.Tests.Common
+namespace Vera.Tests.Shared
 {
     public class InvoiceGenerator
     {
@@ -14,11 +13,13 @@ namespace Vera.Integration.Tests.Common
             _faker = faker;
         }
 
-        public Invoice CreateInvoiceWithCustomerAndSingleProduct(string account)
+        public Invoice CreateWithCustomerAndSingleProduct(string account)
         {
+            // TODO(kevin): convert to builder pattern
+
             return new()
             {
-                Account = account,
+                AccountId = Guid.Parse(account),
                 SystemId = "1",
                 TerminalId = "616.1337",
                 Remark = "hello world",
@@ -38,10 +39,8 @@ namespace Vera.Integration.Tests.Common
                     LastName = _faker.Person.LastName
                 },
                 Manual = false,
-                Timestamp = Timestamp.FromDateTime(DateTime.UtcNow),
-                BillingAddress = CreateAddress(),
-                ShippingAddress = CreateAddress(),
-                Supplier = new Supplier
+                Date = DateTime.UtcNow,
+                Supplier = new Billable
                 {
                     SystemId = "1",
                     Name = _faker.Company.CompanyName(),
@@ -52,10 +51,10 @@ namespace Vera.Integration.Tests.Common
                     new Payment
                     {
                         Amount = 1.99m,
-                        Category = Payment.Types.Category.Cash,
-                        Code = "CASH",
+                        Category = PaymentCategory.Cash,
                         Description = "Cash",
-                        Timestamp = Timestamp.FromDateTime(DateTime.UtcNow)
+                        Date = DateTime.UtcNow,
+                        SystemId = "1"
                     }
                 },
                 Lines =
@@ -65,18 +64,17 @@ namespace Vera.Integration.Tests.Common
                         Description = "Coca cola",
                         Product = new Product
                         {
-                            Group = Product.Types.Group.Other,
+                            Type = ProductTypes.Goods,
                             Code = "COCA",
                             Description = "Coca cola"
                         },
                         Quantity = 1,
-                        Type = InvoiceLine.Types.Type.Goods,
-                        Unit = "EA",
                         UnitPrice = 1.99m / 1.21m,
                         Gross = 1.99m / 1.21m,
                         Net = 1.99m,
-                        Tax = new TaxValue
+                        Taxes = new Taxes
                         {
+                            Category = TaxesCategory.High,
                             Code = "HIGH",
                             Rate = 1.21m
                         }
@@ -85,7 +83,7 @@ namespace Vera.Integration.Tests.Common
             };
         }
 
-        private Grpc.Shared.Address CreateAddress()
+        private Address CreateAddress()
         {
             return new()
             {

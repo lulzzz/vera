@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Text.Json;
-using Newtonsoft.Json;
-using Vera.Documents;
+using Bogus;
 using Vera.Documents.Visitors;
 using Vera.Invoices;
 using Vera.Models;
+using Vera.Tests.Shared;
 using Vera.Thermal;
 using Xunit;
 using Xunit.Abstractions;
@@ -28,6 +27,8 @@ namespace Vera.Portugal.Tests
         {
             // TODO(kevin): use invoice generator to generate test cases
             // TODO(kevin): test that receipt contains correct values
+
+            var invoiceGenerator = new InvoiceGenerator(new Faker());
 
             var invoice = new Invoice
             {
@@ -116,7 +117,12 @@ namespace Vera.Portugal.Tests
                 }
             };
 
-            var context = new ThermalReceiptContextFactory().Create(account, invoice);
+            var context = new ThermalReceiptContext
+            {
+                Account = account,
+                Invoice =  invoice,
+                Original = true
+            };
 
             var generator = new ThermalReceiptGenerator(258501m, "PELICAN THEORY", "9999");
             var node = generator.Generate(context);

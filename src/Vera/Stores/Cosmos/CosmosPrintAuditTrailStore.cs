@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Vera.Models;
@@ -30,16 +31,6 @@ namespace Vera.Stores.Cosmos
             return trail;
         }
 
-        public async Task<PrintTrail> Get(Guid trailId, Guid invoiceId)
-        {
-            var response = await _container.ReadItemAsync<ChainableDocument<PrintTrail>>(
-                trailId.ToString(),
-                new PartitionKey(invoiceId.ToString())
-            );
-
-            return response.Resource.Value;
-        }
-
         public Task Update(PrintTrail trail)
         {
             return _container.ReplaceItemAsync(
@@ -47,6 +38,34 @@ namespace Vera.Stores.Cosmos
                 trail.Id.ToString(),
                 new PartitionKey(trail.InvoiceId.ToString())
             );
+        }
+
+        public async Task<PrintTrail> Get(Guid trailId, Guid invoiceId)
+        {
+            var response = await _container.ReadItemAsync<Document<PrintTrail>>(
+                trailId.ToString(),
+                new PartitionKey(invoiceId.ToString())
+            );
+
+            return response.Resource.Value;
+        }
+
+        public async Task<ICollection<PrintTrail>> GetByInvoice(Guid invoiceId)
+        {
+            var query = new QueryDefinition(@"select value c[""Value""] from c");
+            using var iterator = _container.GetItemQueryIterator<PrintTrail>(query, requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(invoiceId.ToString())
+            });
+
+            var results = new List<PrintTrail>();
+
+            while (iterator.HasMoreResults)
+            {
+                results.AddRange(await iterator.ReadNextAsync());
+            }
+
+            return results;
         }
 
         private static Document<PrintTrail> ToDocument(PrintTrail trail)

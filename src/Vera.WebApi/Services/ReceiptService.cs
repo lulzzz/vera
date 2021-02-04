@@ -27,20 +27,20 @@ namespace Vera.WebApi.Services
         public ReceiptService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
-            IAccountComponentFactoryCollection accountComponentFactoryCollection,
-            IPrintAuditTrailStore printAuditTrailStore
+            IPrintAuditTrailStore printAuditTrailStore,
+            IAccountComponentFactoryCollection accountComponentFactoryCollection
         )
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
-            _accountComponentFactoryCollection = accountComponentFactoryCollection;
             _printAuditTrailStore = printAuditTrailStore;
+            _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
         public override async Task<RenderThermalReply> RenderThermal(RenderThermalRequest request, ServerCallContext context)
         {
-            var account = await context.ResolveAccount(_accountStore, request.Account);
-            var invoice = await _invoiceStore.GetByNumber(account.Id, request.Number);
+            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var invoice = await _invoiceStore.GetByNumber(account.Id, request.InvoiceNumber);
 
             if (invoice == null)
             {
@@ -60,8 +60,8 @@ namespace Vera.WebApi.Services
 
             var componentFactory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
-            var receiptContextFactory = new ThermalReceiptContextFactory();
-            var generatorContext = receiptContextFactory.Create(account, invoice);
+            var receiptContextFactory = new ThermalReceiptContextFactory(_printAuditTrailStore);
+            var generatorContext = await receiptContextFactory.Create(account, invoice);
 
             var generator = componentFactory.CreateThermalReceiptGenerator();
             var node = generator.Generate(generatorContext);
@@ -112,9 +112,6 @@ namespace Vera.WebApi.Services
             trail.Success = request.Success;
 
             await _printAuditTrailStore.Update(trail);
-
-            // TODO: update status of the ledger
-            // TODO: update print count on the invoice?
 
             return new Empty();
         }

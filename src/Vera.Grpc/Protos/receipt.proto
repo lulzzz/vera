@@ -13,10 +13,10 @@ service ReceiptService {
 }
 
 message RenderThermalRequest {
-    string account = 1;
+    string accountId = 1;
 
     // Number of the invoice to generate the thermal receipt for
-    string number = 2;
+    string invoiceNumber = 2;
 
     // Type specifies the output type that the client is requesting
     ReceiptOutputType type = 3;
@@ -33,8 +33,9 @@ message RenderThermalReply {
 }
 
 message UpdatePrintResultRequest {
-    string trailId = 1;
-    bool success = 2;
+    string accountId = 1;
+    string trailId = 2;
+    bool success = 3;
 }
 
 enum ReceiptOutputType {
