@@ -44,7 +44,7 @@ namespace Vera.WebApi.Services
                 throw new RpcException(new Status(StatusCode.AlreadyExists, $"User with username {request.Username} already exists"));
             }
 
-            var company = await _companyStore.GetByName(context.GetCompanyName());
+            var company = await _companyStore.GetById(context.GetCompanyId());
 
             var auth = _passwordStrategy.Encrypt(_tokenFactory.Create());
 

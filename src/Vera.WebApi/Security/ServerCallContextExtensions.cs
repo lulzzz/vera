@@ -38,11 +38,6 @@ namespace Vera.WebApi.Security
             return Guid.Parse(context.FindFirstValue(ClaimTypes.CompanyId));
         }
 
-        public static string GetCompanyName(this ServerCallContext context)
-        {
-            return context.FindFirstValue(ClaimTypes.CompanyName);
-        }
-
         public static string GetUsername(this ServerCallContext context)
         {
             return context.FindFirstValue(ClaimTypes.Username);

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Vera.Configuration;
 
 namespace Vera.Models
@@ -18,6 +19,7 @@ namespace Vera.Models
         /// </summary>
         public Guid CompanyId { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
         /// <summary>
@@ -40,11 +42,13 @@ namespace Vera.Models
         /// <summary>
         /// Certification provider to use for this account.
         /// </summary>
+        [Required]
         public string Certification { get; set; }
 
         /// <summary>
         /// ISO 4217 currency code that is used by the company.
         /// </summary>
+        [Required]
         public string Currency { get; set; }
 
         /// <summary>

@@ -5,7 +5,12 @@ namespace Vera.Models
 {
     public class Invoice
     {
-        public Invoice() { }
+        public Invoice()
+        {
+            Id = Guid.NewGuid();
+        }
+
+        public Guid Id { get; set; }
 
         /// <summary>
         /// Identifier of the <see cref="Account"/> for which the invoice was created.

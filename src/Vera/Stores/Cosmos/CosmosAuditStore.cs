@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json;
 using Vera.Audits;
 using Vera.Models;
 
@@ -28,7 +27,7 @@ namespace Vera.Stores.Cosmos
                 End = criteria.EndDate
             };
 
-            var document = new AuditDocument(audit);
+            var document = ToDocument(audit);
 
             await _container.CreateItemAsync(document, new PartitionKey(document.PartitionKey));
 
@@ -37,17 +36,17 @@ namespace Vera.Stores.Cosmos
 
         public async Task<Audit> Get(Guid accountId, Guid auditId)
         {
-            var document = await _container.ReadItemAsync<AuditDocument>(
+            var document = await _container.ReadItemAsync<Document<Audit>>(
                 auditId.ToString(),
                 new PartitionKey(accountId.ToString())
             );
 
-            return document.Resource?.Audit;
+            return document.Resource.Value;
         }
 
         public Task Update(Audit audit)
         {
-            var document = new AuditDocument(audit);
+            var document = ToDocument(audit);
 
             return _container.ReplaceItemAsync(
                 document,
@@ -56,23 +55,13 @@ namespace Vera.Stores.Cosmos
             );
         }
 
-        private class AuditDocument
+        private static Document<Audit> ToDocument(Audit audit)
         {
-            public AuditDocument() { }
-
-            public AuditDocument(Audit audit)
-            {
-                Id = audit.Id;
-                Audit = audit;
-                PartitionKey = audit.AccountId.ToString();
-            }
-
-            [JsonProperty("id")]
-            public Guid Id { get; set; }
-
-            public Audit Audit { get; set; }
-
-            public string PartitionKey { get; set; }
+            return new(
+                a => a.Id,
+                a => a.AccountId.ToString(),
+                audit
+            );
         }
     }
 }

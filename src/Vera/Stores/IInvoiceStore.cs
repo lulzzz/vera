@@ -14,7 +14,7 @@ namespace Vera.Stores
         /// <param name="invoice"></param>
         /// <param name="bucket"></param>
         /// <returns></returns>
-        Task Save(Invoice invoice, string bucket);
+        Task Store(Invoice invoice, string bucket);
 
         /// <summary>
         /// Returns the last invoice (if any) based on the given invoice. E.g. invoices may have there own

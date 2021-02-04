@@ -1,10 +1,15 @@
 syntax = "proto3";
 
+import "Protos/shared.proto";
+
 package vera.grpc;
 
 service ReceiptService {
     // Invoked to render a thermal receipt for the given invoice
-    rpc RenderThermal(RenderThermalRequest) returns (RenderThermalReply);
+    rpc RenderThermal (RenderThermalRequest) returns (RenderThermalReply);
+
+    // Invoked to update the result of an invoke to render a thermal earlier
+    rpc UpdatePrintResult (UpdatePrintResultRequest) returns (vera.grpc.shared.Empty);
 }
 
 message RenderThermalRequest {
@@ -18,11 +23,18 @@ message RenderThermalRequest {
 }
 
 message RenderThermalReply {
+    string trailId = 1;
+
     // Type of the output as requested in the RenderThermalRequest
-    ReceiptOutputType type = 1;
+    ReceiptOutputType type = 2;
 
     // Content of the thermal receipt in the requested type
-    bytes content = 2;
+    bytes content = 3;
+}
+
+message UpdatePrintResultRequest {
+    string trailId = 1;
+    bool success = 2;
 }
 
 enum ReceiptOutputType {

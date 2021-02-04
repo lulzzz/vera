@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Vera.Bootstrap;
 using Vera.Documents.Visitors;
 using Vera.Grpc;
+using Vera.Grpc.Shared;
 using Vera.Stores;
 using Vera.Thermal;
 using Vera.WebApi.Security;
@@ -21,16 +22,19 @@ namespace Vera.WebApi.Services
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
+        private readonly IPrintAuditTrailStore _printAuditTrailStore;
 
         public ReceiptService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
-            IAccountComponentFactoryCollection accountComponentFactoryCollection
+            IAccountComponentFactoryCollection accountComponentFactoryCollection,
+            IPrintAuditTrailStore printAuditTrailStore
         )
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
+            _printAuditTrailStore = printAuditTrailStore;
         }
 
         public override async Task<RenderThermalReply> RenderThermal(RenderThermalRequest request, ServerCallContext context)
@@ -78,13 +82,41 @@ namespace Vera.WebApi.Services
 
             ms.Position = 0;
 
-            // TODO(kevin): mark as "printed" at this point? or separate endpoint to confirm printing?
+            // TODO: also store "document" on the trail so we know exactly what should've been printed?
+            // Ledger fact that a render has been requested
+            var trail = await _printAuditTrailStore.Create(invoice.Id);
 
             return new RenderThermalReply
             {
+                // TODO(kevin): rename to token?
+                TrailId = $"{invoice.Id}:{trail.Id}",
                 Type = request.Type,
                 Content = await ByteString.FromStreamAsync(ms)
             };
+        }
+
+        public override async Task<Empty> UpdatePrintResult(UpdatePrintResultRequest request, ServerCallContext context)
+        {
+            var parts = request.TrailId.Split(':');
+
+            if (parts.Length != 2)
+            {
+                // TODO(kevin): throw error
+                return new Empty();
+            }
+
+            var invoiceId = Guid.Parse(parts[0]);
+            var trailId = Guid.Parse(parts[1]);
+
+            var trail = await _printAuditTrailStore.Get(invoiceId, trailId);
+            trail.Success = request.Success;
+
+            await _printAuditTrailStore.Update(trail);
+
+            // TODO: update status of the ledger
+            // TODO: update print count on the invoice?
+
+            return new Empty();
         }
     }
 }

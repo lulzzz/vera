@@ -78,7 +78,6 @@ namespace Vera.Bootstrap
                 var containers = new[]
                 {
                     cosmosContainerOptions.Companies,
-                    cosmosContainerOptions.Users,
                     cosmosContainerOptions.Invoices,
                     cosmosContainerOptions.Audits
                 };
@@ -142,7 +141,7 @@ namespace Vera.Bootstrap
                 ));
 
                 collection.AddSingleton<IUserStore>(_ => new CosmosUserStore(
-                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Users)
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
                 ));
 
                 collection.AddSingleton<IAuditStore>(_ => new CosmosAuditStore(

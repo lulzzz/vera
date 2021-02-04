@@ -70,7 +70,7 @@ namespace Vera.WebApi.Services
                 throw new RpcException(new Status(StatusCode.Unauthenticated, "invalid token"));
             }
 
-            var company = await _companyStore.GetByName(context.GetCompanyName());
+            var company = await _companyStore.GetById(context.GetCompanyId());
 
             return await Authorize(user, company);
         }

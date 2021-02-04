@@ -24,8 +24,7 @@ namespace Vera.WebApi.Security
             var claims = new[]{
                 new Claim(ClaimTypes.Id, user.Id.ToString()),
                 new Claim(ClaimTypes.Username, user.Username),
-                new Claim(ClaimTypes.CompanyId, company.Id.ToString()),
-                new Claim(ClaimTypes.CompanyName, company.Name)
+                new Claim(ClaimTypes.CompanyId, company.Id.ToString())
             };
 
             var token = new JwtSecurityToken(

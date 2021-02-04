@@ -54,13 +54,15 @@ namespace Vera.Services
             }
             else
             {
-                var company = await _companyStore.Store(new Company
+                var company = new Company
                 {
                     Id = Guid.NewGuid(),
                     Name = companyName
-                });
+                };
 
                 companyId = company.Id;
+
+                await _companyStore.Store(company);
             }
 
             await _userStore.Store(new User

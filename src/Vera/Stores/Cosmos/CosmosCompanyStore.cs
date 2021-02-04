@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json;
 using Vera.Models;
 
 namespace Vera.Stores.Cosmos
@@ -18,66 +17,61 @@ namespace Vera.Stores.Cosmos
             _container = container;
         }
 
-        public async Task<Company> Store(Company company)
+        public async Task Store(Company company)
         {
-            var toCreate = new CompanyDocument(company);
+            var toCreate = ToDocument(company);
 
-            var document = await _container.CreateItemAsync(
+            await _container.CreateItemAsync(
                 toCreate,
                 new PartitionKey(toCreate.PartitionKey)
             );
-
-            return document.Resource.Company;
         }
 
-        public async Task<Company> Update(Company company)
+        public async Task Update(Company company)
         {
-            var document = new CompanyDocument(company);
+            var document = ToDocument(company);
 
             await _container.ReplaceItemAsync(
                 document,
                 document.Id.ToString(),
                 new PartitionKey(document.PartitionKey)
             );
+        }
 
-            return company;
+        public async Task<Company> GetById(Guid companyId)
+        {
+            var result = await _container.ReadItemAsync<DocumentWithType<Company>>(
+                companyId.ToString(), new PartitionKey(companyId.ToString())
+            );
+
+            return result.Resource.Value;
         }
 
         public async Task<Company> GetByName(string name)
         {
-            var definition = new QueryDefinition("select * from c where c.Type = @documentType")
-                .WithParameter("@documentType", DocumentType);
+            var definition = new QueryDefinition(@"
+select top 1 value c[""Value""]
+  from c
+ where c.Type = @type
+  and  c[""Value""].Name = @name")
+                .WithParameter("@type", DocumentType)
+                .WithParameter("@name", name);
 
-            using var iterator = _container.GetItemQueryIterator<CompanyDocument>(definition, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(name.ToLower())
-            });
+            using var iterator = _container.GetItemQueryIterator<Company>(definition);
 
             var response = await iterator.ReadNextAsync();
 
-            return response.FirstOrDefault()?.Company;
+            return response.FirstOrDefault();
         }
 
-        private class CompanyDocument
+        private static DocumentWithType<Company> ToDocument(Company company)
         {
-            public CompanyDocument() { }
-
-            public CompanyDocument(Company company)
-            {
-                Id = company.Id;
-                Company = company;
-
-                // TODO(kevin): better to use the Id as the partition key instead?
-                // have that available on the user and feels like a more logical option
-                PartitionKey = company.Name.ToLower();
-                Type = DocumentType;
-            }
-
-            [JsonProperty("id")]
-            public Guid Id { get; set; }
-            public Company Company { get; set; }
-            public string PartitionKey { get; set; }
-            public string Type { get; set; }
+            return new(
+                c => c.Id,
+                c => c.Id.ToString(),
+                company,
+                DocumentType
+            );
         }
     }
 }

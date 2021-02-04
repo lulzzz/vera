@@ -21,17 +21,16 @@ namespace Vera.Stores.Cosmos
             _container = container;
         }
 
-        public async Task Save(Invoice invoice, string bucket)
+        public async Task Store(Invoice invoice, string bucket)
         {
             await _chain.Append(invoice, PartitionKeyByBucket(invoice.AccountId, bucket));
 
             // Also create document to look up by number efficiently
-            var invoiceByNumberDocument = new InvoiceDocument
-            {
-                Id = Guid.NewGuid().ToString(),
-                Invoice = invoice,
-                PartitionKey = PartitionKeyByNumber(invoice.AccountId, invoice.Number)
-            };
+            var invoiceByNumberDocument = new Document<Invoice>(
+                i => i.Id,
+                i => PartitionKeyByNumber(i.AccountId, i.Number),
+                invoice
+            );
 
             // TODO(kevin): can store reference with id/partitionKey as well
             // but that would require 2 reads, not sure what's better here
@@ -51,27 +50,27 @@ namespace Vera.Stores.Cosmos
 
         public async Task<Invoice> GetByNumber(Guid accountId, string number)
         {
-            var definition = new QueryDefinition("select * from c");
+            var definition = new QueryDefinition(@"select value c[""Value""] from c");
 
-            using var iterator = _container.GetItemQueryIterator<InvoiceDocument>(definition, requestOptions: new QueryRequestOptions
+            using var iterator = _container.GetItemQueryIterator<Invoice>(definition, requestOptions: new QueryRequestOptions
             {
                 PartitionKey = new PartitionKey(PartitionKeyByNumber(accountId, number))
             });
 
             var response = await iterator.ReadNextAsync();
 
-            return response.FirstOrDefault()?.Invoice;
+            return response.FirstOrDefault();
         }
 
         public async Task<ICollection<Invoice>> List(AuditCriteria criteria)
         {
             // TODO(kevin): filter on fiscal period(s) instead of start/end date
             var definition = new QueryDefinition(@"
-select * 
- from c
-where c.Invoice.AccountId = @accountId
-  and c.Invoice.Date >= @startDate
-  and c.Invoice.Date <= @endDate
+select value i
+ from c[""Value""] i
+where i.AccountId = @accountId
+  and i.Date >= @startDate
+  and i.Date <= @endDate
 ");
 
             definition
@@ -79,15 +78,14 @@ where c.Invoice.AccountId = @accountId
                 .WithParameter("@startDate", criteria.StartDate)
                 .WithParameter("@endDate", criteria.EndDate);
 
-            var iterator = _container.GetItemQueryIterator<InvoiceDocument>(definition);
+            var iterator = _container.GetItemQueryIterator<Invoice>(definition);
 
             var invoices = new List<Invoice>();
 
             while (iterator.HasMoreResults)
             {
                 var results = await iterator.ReadNextAsync();
-
-                invoices.AddRange(results.Select(result => result.Invoice));
+                invoices.AddRange(results);
             }
 
             return invoices;
@@ -95,13 +93,5 @@ where c.Invoice.AccountId = @accountId
 
         private static string PartitionKeyByBucket(Guid accountId, string bucket) => $"{accountId}#B#{bucket}";
         private static string PartitionKeyByNumber(Guid accountId, string invoiceNumber) => $"{accountId}#N#{invoiceNumber}";
-
-        public class InvoiceDocument
-        {
-            [JsonProperty("id")]
-            public string Id { get; set; }
-            public Invoice Invoice { get; set; }
-            public string PartitionKey { get; set; }
-        }
     }
 }

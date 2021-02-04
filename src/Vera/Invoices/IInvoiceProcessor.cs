@@ -97,7 +97,7 @@ namespace Vera.Invoices
 
                 invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
 
-                await _store.Save(invoice, bucket);
+                await _store.Store(invoice, bucket);
 
                 return new InvoiceResult
                 {

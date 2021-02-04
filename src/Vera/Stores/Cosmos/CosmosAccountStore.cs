@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json;
 using Vera.Models;
 
 namespace Vera.Stores.Cosmos
@@ -21,14 +20,14 @@ namespace Vera.Stores.Cosmos
 
         public Task Store(Account account)
         {
-            var document = new AccountDocument(account);
+            var document = ToDocument(account);
 
             return _container.CreateItemAsync(document, new PartitionKey(document.PartitionKey));
         }
 
         public Task Update(Account account)
         {
-            var document = new AccountDocument(account);
+            var document = ToDocument(account);
 
             return _container.ReplaceItemAsync(
                 document,
@@ -39,21 +38,23 @@ namespace Vera.Stores.Cosmos
 
         public async Task<Account> Get(Guid companyId, Guid accountId)
         {
-            var document = await _container.ReadItemAsync<AccountDocument>(
+            var document = await _container.ReadItemAsync<DocumentWithType<Account>>(
                 accountId.ToString(),
                 new PartitionKey(companyId.ToString())
             );
 
-
-            return document.Resource?.Account;
+            return document.Resource.Value;
         }
 
         public async Task<ICollection<Account>> GetByCompany(Guid companyId)
         {
-            var definition = new QueryDefinition("select * from a where a.Type = @documentType")
-                .WithParameter("@documentType", DocumentType);
+            var definition = new QueryDefinition(@"
+select value a[""Value""] 
+from a 
+where a.Type = @type")
+                .WithParameter("@type", DocumentType);
 
-            using var iterator = _container.GetItemQueryIterator<AccountDocument>(definition, requestOptions: new QueryRequestOptions
+            using var iterator = _container.GetItemQueryIterator<Account>(definition, requestOptions: new QueryRequestOptions
             {
                 PartitionKey = new PartitionKey(companyId.ToString())
             });
@@ -64,30 +65,21 @@ namespace Vera.Stores.Cosmos
             {
                 accounts.AddRange(
                     from result in await iterator.ReadNextAsync()
-                    select result.Account
+                    select result
                 );
             }
 
             return accounts;
         }
 
-        private class AccountDocument
+        private static DocumentWithType<Account> ToDocument(Account account)
         {
-            public AccountDocument() { }
-
-            public AccountDocument(Account account)
-            {
-                Id = account.Id;
-                Account = account;
-                PartitionKey = account.CompanyId.ToString();
-                Type = DocumentType;
-            }
-
-            [JsonProperty("id")]
-            public Guid Id { get; set; }
-            public Account Account { get; set; }
-            public string PartitionKey { get; set; }
-            public string Type { get; set; }
+            return new(
+                a => a.Id,
+                a => a.CompanyId.ToString(),
+                account,
+                DocumentType
+            );
         }
     }
 }

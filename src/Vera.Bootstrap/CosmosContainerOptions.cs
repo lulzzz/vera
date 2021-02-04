@@ -15,11 +15,6 @@ namespace Vera.Bootstrap
         public string Companies { get; set; } = "companies";
 
         /// <summary>
-        /// Names of the users container.
-        /// </summary>
-        public string Users { get; set; } = "users";
-
-        /// <summary>
         /// Name of the audits container.
         /// </summary>
         public string Audits { get; set; } = "audits";

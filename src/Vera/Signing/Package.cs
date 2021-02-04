@@ -40,6 +40,6 @@ namespace Vera.Signing
         /// <summary>
         /// Signature of the previous package (may be null if this is the first package).
         /// </summary>
-        public byte[] PreviousSignature { get; set; }
+        public byte[]? PreviousSignature { get; set; }
     }
 }
