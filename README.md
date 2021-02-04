@@ -6,7 +6,7 @@ Latin for true. We want this product to be the one and only source for all the a
   - Where the core magic happens of Vera. All the generic steps e.d are defined in here
 - Vera.Bootstrap
   - The "glue" between the core of Vera and all the specific certification implementations
-- Vera.WebApi
+- Vera.Host
   - Use the components of Vera to expose a gRPC API to allow other parties to make use of the
     internal certification capabilities that Vera offers
 - Vera.Documents
@@ -19,19 +19,15 @@ Latin for true. We want this product to be the one and only source for all the a
 - ASP.NET core for hosting
 - gRPC for the communication between server <-> client
 - Makes extensive use of Azure Cosmos DB as the database (https://docs.microsoft.com/en-us/azure/cosmos-db)
-- Azure blobs are used, but currently just for the locking mechanism
+- Azure blobs are used for locking and storing files
 
 # Development
 - Latest dotnet core version (https://dotnet.microsoft.com/download)
 - Currently requires access to a Windows machine/vm to be able to run the Cosmos emulator (https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator)
 - Either Rider or Visual Studio (prefer Rider :))
 
-## Adding new `.protos`
-- Add new file in the Vera.WebApi project in the Protos folder
-- Make sure the new `.protos` file is added to the project file
-
 ## Registering a new service
-- Invoke the `.MapGrpcService<>(..)` on the `endpoints` in the `Startup.cs` in the Vera.WebApi project
+- Invoke the `.MapGrpcService<>(..)` on the `endpoints` in the `Startup.cs` in the Vera.Host project
 
 ## Conventions
 - Use lowercase strings for logging, error messages, etc.
