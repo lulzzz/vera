@@ -13,9 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Vera.Portugal\Vera.Portugal.csproj" />
+    <ProjectReference Include="..\..\src\Vera.Portugal\Vera.Portugal.csproj" />
     <ProjectReference Include="..\Vera.Tests\Vera.Tests.csproj" />
-    <ProjectReference Include="..\Vera\Vera.csproj" />
   </ItemGroup>
 
 </Project>
