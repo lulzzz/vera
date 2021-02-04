@@ -88,8 +88,7 @@ namespace Vera.WebApi.Services
 
             return new RenderThermalReply
             {
-                // TODO(kevin): rename to token?
-                TrailId = $"{invoice.Id}:{trail.Id}",
+                Token = $"{invoice.Id}:{trail.Id}",
                 Type = request.Type,
                 Content = await ByteString.FromStreamAsync(ms)
             };
@@ -97,7 +96,7 @@ namespace Vera.WebApi.Services
 
         public override async Task<Empty> UpdatePrintResult(UpdatePrintResultRequest request, ServerCallContext context)
         {
-            var parts = request.TrailId.Split(':');
+            var parts = request.Token.Split(':');
 
             if (parts.Length != 2)
             {

@@ -1,9 +1,10 @@
 using System.Threading.Tasks;
+using Vera.Models;
 
 namespace Vera.Signing
 {
     public interface IPackageSigner
     {
-        Task<PackageSignResult> Sign(Package package);
+        Task<Signature> Sign(Package package);
     }
 }

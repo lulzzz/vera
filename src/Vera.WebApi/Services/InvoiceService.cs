@@ -43,21 +43,21 @@ namespace Vera.WebApi.Services
             // TODO: validate invoice, very, very, very strict
             // TODO(kevin): PT - invoices > 1000 euros require a customer
             // TODO(kevin): NF525 - requires signature of original invoice on the returned line
+            var invoice = request.Invoice.Unpack();
 
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
             var processor = new InvoiceProcessor(_invoiceStore, _locker, factory);
-
-            var result = await processor.Process(request.Invoice.Unpack());
+            await processor.Process(invoice);
 
             return new CreateInvoiceReply
             {
-                Number = result.Number,
-                Sequence = result.Sequence,
+                Number = invoice.Number,
+                Sequence = invoice.Sequence,
                 Signature = new Grpc.Signature
                 {
-                    Input = ByteString.CopyFromUtf8(result.Input),
-                    Output = ByteString.CopyFrom(result.Output)
+                    Input = ByteString.CopyFromUtf8(invoice.Signature.Input),
+                    Output = ByteString.CopyFrom(invoice.Signature.Output)
                 }
             };
         }

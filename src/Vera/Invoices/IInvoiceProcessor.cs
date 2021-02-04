@@ -41,7 +41,7 @@ namespace Vera.Invoices
         /// 4. Signing the invoice and assigning it
         /// 5. Storing the invoice
         /// </summary>
-        Task<InvoiceResult> Process(Invoice invoice);
+        Task Process(Invoice invoice);
     }
 
     public sealed class InvoiceProcessor : IInvoiceProcessor
@@ -59,15 +59,15 @@ namespace Vera.Invoices
             _invoiceTotalsCalculator = new InvoiceTotalsCalculator();
         }
 
-        public async Task<InvoiceResult> Process(Invoice invoice)
+        public async Task Process(Invoice invoice)
         {
             var invoiceBucketGenerator = _factory.CreateInvoiceBucketGenerator();
 
-            // Prefix with accountId to make sure the bucket is unique per account
             var bucket = invoiceBucketGenerator.Generate(invoice);
 
-            // Lock on the unique sequence of the invoice
-            await using (await _locker.Lock(bucket, TimeSpan.FromMinutes(1)))
+            // Lock on the unique sequence of the invoice so no other invoice can enter
+            // the bucket to ensure the sequence stays in-order
+            await using (await _locker.Lock(bucket, TimeSpan.FromSeconds(15)))
             {
                 var invoiceNumberGenerator = _factory.CreateInvoiceNumberGenerator();
                 var packageSigner = _factory.CreatePackageSigner();
@@ -75,37 +75,12 @@ namespace Vera.Invoices
                 // Get last stored invoice based on the bucket for the invoice
                 var last = await _store.Last(invoice.AccountId, bucket);
 
-                invoice.Sequence = last?.Sequence + 1 ?? 1;
-
-                // Generate number for this invoice
-                var number = await invoiceNumberGenerator.Generate(invoice);
-
-                invoice.Number = number;
-
-                var result = await packageSigner.Sign(new Package(invoice, last)
-                {
-                    Number = number
-                });
-
-                invoice.Signature = new Signature
-                {
-                    Input = result.Input,
-                    Output = result.Output,
-
-                    // TODO(kevin): map/get the version of the certificate
-                };
-
                 invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
+                invoice.Sequence = last?.Sequence + 1 ?? 1;
+                invoice.Number = await invoiceNumberGenerator.Generate(invoice);
+                invoice.Signature = await packageSigner.Sign(new Package(invoice, last));
 
                 await _store.Store(invoice, bucket);
-
-                return new InvoiceResult
-                {
-                    Sequence = invoice.Sequence,
-                    Number = number,
-                    Input = result.Input,
-                    Output = result.Output
-                };
             }
         }
     }

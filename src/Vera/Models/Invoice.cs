@@ -89,11 +89,6 @@ namespace Vera.Models
         public Totals Totals { get; set; }
 
         /// <summary>
-        /// Number of times the invoice has been printed with success.
-        /// </summary>
-        public int Prints { get; set; }
-
-        /// <summary>
         /// Identifiers of the orders from which this invoice is made up.
         /// </summary>
         public ICollection<string> OrderReferences { get; set; } = new List<string>();

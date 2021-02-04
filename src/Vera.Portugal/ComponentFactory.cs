@@ -35,7 +35,7 @@ namespace Vera.Portugal
 
         public IPackageSigner CreatePackageSigner()
         {
-            return new PackageSigner(_rsa);
+            return new PackageSigner(_rsa, _configuration.PrivateKeyVersion);
         }
 
         public IThermalReceiptGenerator CreateThermalReceiptGenerator()

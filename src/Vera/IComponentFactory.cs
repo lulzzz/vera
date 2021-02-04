@@ -14,10 +14,12 @@ namespace Vera
     public interface IComponentFactory
     {
         IConfigurationValidator CreateConfigurationValidator();
+
         IInvoiceBucketGenerator CreateInvoiceBucketGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
         IPackageSigner CreatePackageSigner();
         IThermalReceiptGenerator CreateThermalReceiptGenerator();
+
         IAuditWriter CreateAuditWriter();
     }
 }

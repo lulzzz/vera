@@ -23,7 +23,7 @@ message RenderThermalRequest {
 }
 
 message RenderThermalReply {
-    string trailId = 1;
+    string token = 1;
 
     // Type of the output as requested in the RenderThermalRequest
     ReceiptOutputType type = 2;
@@ -34,7 +34,7 @@ message RenderThermalReply {
 
 message UpdatePrintResultRequest {
     string accountId = 1;
-    string trailId = 2;
+    string token = 2;
     bool success = 3;
 }
 

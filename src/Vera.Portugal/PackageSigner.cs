@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Vera.Models;
 using Vera.Signing;
 
 namespace Vera.Portugal
@@ -10,13 +11,15 @@ namespace Vera.Portugal
     public sealed class PackageSigner : IPackageSigner
     {
         private readonly RSA _rsa;
+        private readonly int _privateKeyVersion;
 
-        public PackageSigner(RSA rsa)
+        public PackageSigner(RSA rsa, int privateKeyVersion)
         {
             _rsa = rsa ?? throw new NullReferenceException(nameof(rsa));
+            _privateKeyVersion = privateKeyVersion;
         }
 
-        public Task<PackageSignResult> Sign(Package package)
+        public Task<Signature> Sign(Package package)
         {
             const char separator = ';';
 
@@ -48,7 +51,12 @@ namespace Vera.Portugal
                 RSASignaturePadding.Pkcs1
             );
 
-            return Task.FromResult(new PackageSignResult(signature, result));
+            return Task.FromResult(new Signature
+            {
+                Input = signature,
+                Output = result,
+                Version = _privateKeyVersion
+            });
         }
     }
 }

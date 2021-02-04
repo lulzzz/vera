@@ -24,14 +24,12 @@ namespace Vera.Portugal.Tests
             var expectedSignature = "1999-10-20;1999-10-20T13:31:22;t123/1;123.23;" +
                                     Convert.ToBase64String(package.PreviousSignature);
 
-            var signer = new PackageSigner(RSA.Create());
+            var signer = new PackageSigner(RSA.Create(), 1);
             var result = await signer.Sign(package);
-
-            Assert.NotNull(result.Input);
-            Assert.NotNull(result.Output);
 
             Assert.Equal(expectedSignature, result.Input);
             Assert.Equal(256, result.Output.Length);
+            Assert.Equal(1, result.Version);
         }
     }
 }
