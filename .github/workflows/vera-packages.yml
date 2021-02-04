@@ -19,12 +19,12 @@ jobs:
     - name: Package Vera.Documents
       run: dotnet pack --configuration Release src/Vera.Documents
     - name: Publish Vera.Documents
-      run: dotnet nuget push src/Vera.Documents/out/*.nupkg -k ${GITHUB_TOKEN} -s https://nuget.pkg.github.com/new-black/index.json --skip-duplicate --no-symbols 
+      run: dotnet nuget push src/Vera.Documents/out/*.nupkg -k ${GITHUB_TOKEN} -s https://nuget.pkg.github.com/new-black/index.json --skip-duplicate --no-symbols true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Package Vera.Grpc
       run: dotnet pack --configuration Release src/Vera.Grpc
     - name: Publish Vera.Grpc
-      run: dotnet nuget push src/Vera.Grpc/out/*.nupkg -k ${GITHUB_TOKEN} -s https://nuget.pkg.github.com/new-black/index.json --skip-duplicate --no-symbols 
+      run: dotnet nuget push src/Vera.Grpc/out/*.nupkg -k ${GITHUB_TOKEN} -s https://nuget.pkg.github.com/new-black/index.json --skip-duplicate --no-symbols true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      
