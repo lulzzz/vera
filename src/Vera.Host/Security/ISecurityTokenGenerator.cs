@@ -1,7 +1,6 @@
 using Vera.Models;
-using Vera.Security;
 
-namespace Vera.WebApi.Security
+namespace Vera.Host.Security
 {
     public interface ISecurityTokenGenerator
     {

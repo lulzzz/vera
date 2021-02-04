@@ -5,7 +5,7 @@ using Vera.Grpc.Shared;
 using Vera.Models;
 using Vera.Services;
 
-namespace Vera.WebApi.Services
+namespace Vera.Host.Services
 {
     public class RegisterService : Grpc.RegisterService.RegisterServiceBase
     {

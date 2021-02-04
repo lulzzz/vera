@@ -2,12 +2,12 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Grpc;
+using Vera.Host.Security;
 using Vera.Models;
 using Vera.Security;
 using Vera.Stores;
-using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Services
+namespace Vera.Host.Services
 {
     public class LoginService : Grpc.LoginService.LoginServiceBase
     {

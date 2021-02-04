@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Vera.Models;
 
-namespace Vera.WebApi.Security
+namespace Vera.Host.Security
 {
     public class JwtSecurityTokenGenerator : ISecurityTokenGenerator
     {

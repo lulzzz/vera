@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
 using Vera.Bootstrap;
-using Vera.WebApi;
+using Vera.Host;
 
 namespace Vera.Integration.Tests
 {

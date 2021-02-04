@@ -1,8 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
@@ -10,10 +7,10 @@ using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
+using Vera.Host.Security;
 using Vera.Stores;
-using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Services
+namespace Vera.Host.Services
 {
     [Authorize]
     public class AccountService : Grpc.AccountService.AccountServiceBase

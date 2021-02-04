@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
@@ -8,12 +6,11 @@ using Vera.Bootstrap;
 using Vera.Concurrency;
 using Vera.Grpc;
 using Vera.Grpc.Models;
+using Vera.Host.Security;
 using Vera.Invoices;
-using Vera.Models;
 using Vera.Stores;
-using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Services
+namespace Vera.Host.Services
 {
     [Authorize]
     public class InvoiceService : Grpc.InvoiceService.InvoiceServiceBase

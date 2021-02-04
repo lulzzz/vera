@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 using Vera.Audits;
 using Vera.Bootstrap;
 using Vera.Grpc;
+using Vera.Host.Security;
 using Vera.Stores;
-using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Services
+namespace Vera.Host.Services
 {
     [Authorize]
     public class AuditService : Grpc.AuditService.AuditServiceBase

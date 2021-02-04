@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Vera.WebApi
+namespace Vera.Host
 {
     public interface IBackgroundTaskQueue
     {

@@ -1,15 +1,12 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 using Vera.Bootstrap;
 
-namespace Vera.WebApi
+namespace Vera.Host
 {
     public class Program
     {
@@ -47,7 +44,7 @@ namespace Vera.WebApi
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return Host.CreateDefaultBuilder(args)
+            return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(wb => wb.UseStartup<Startup>())
                 .UseSerilog()
                 .UseVera()

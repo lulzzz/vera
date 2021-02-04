@@ -5,7 +5,7 @@ using Grpc.Core;
 using Vera.Models;
 using Vera.Stores;
 
-namespace Vera.WebApi.Security
+namespace Vera.Host.Security
 {
     public static class ServerCallContextExtensions
     {

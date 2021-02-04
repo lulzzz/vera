@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera", "src\Vera\Vera.cspro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal", "src\Vera.Portugal\Vera.Portugal.csproj", "{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.WebApi", "src\Vera.WebApi\Vera.WebApi.csproj", "{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Host", "src\Vera.Host\Vera.Host.csproj", "{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Bootstrap", "src\Vera.Bootstrap\Vera.Bootstrap.csproj", "{47A25F25-30E4-4A33-8552-C11F63400948}"
 EndProject

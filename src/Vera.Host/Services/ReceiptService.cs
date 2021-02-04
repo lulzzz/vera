@@ -10,11 +10,11 @@ using Vera.Bootstrap;
 using Vera.Documents.Visitors;
 using Vera.Grpc;
 using Vera.Grpc.Shared;
+using Vera.Host.Security;
 using Vera.Stores;
 using Vera.Thermal;
-using Vera.WebApi.Security;
 
-namespace Vera.WebApi.Services
+namespace Vera.Host.Services
 {
     [Authorize]
     public class ReceiptService : Grpc.ReceiptService.ReceiptServiceBase

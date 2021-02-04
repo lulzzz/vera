@@ -7,10 +7,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Vera.WebApi.Security;
-using Vera.WebApi.Services;
+using Vera.Host.Security;
+using Vera.Host.Services;
 
-namespace Vera.WebApi
+namespace Vera.Host
 {
     public class Startup
     {

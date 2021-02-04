@@ -1,4 +1,4 @@
-namespace Vera.WebApi.Security
+namespace Vera.Host.Security
 {
     public static class ClaimTypes
     {
