@@ -45,3 +45,36 @@ Latin for true. We want this product to be the one and only source for all the a
   - audits
     - Container for: audits
 
+# Deployment
+
+## Configuration (environment variables)
+
+### Cosmos
+- `VERA__COSMOS__CONNECTIONSTRING` (required)
+  - Connection string to use to connect to the Cosmos instance
+- `VERA__COSMOS__DATABASE`
+  - Name of the database to use in the Cosmos
+  - Defaults to "vera"
+- `VERA__COSMOS__CONTAINER__INVOICES`
+  - Name of the container to use for the invoices
+  - Defaults to "invoices"
+- `VERA__COSMOS__CONTAINER__COMPANIES`
+  - Name of the container to use for the companies, accounts and users
+  - Defaults to "companies"
+- `VERA__COSMOS__CONTAINER__AUDITS`
+  - Name of the container to use for the audits
+  - Defaults to "audits"
+- `VERA__COSMOS__CONTAINER__TRAILS`
+  - Name of the container to use for trails like printing
+  - Defaults to "trails"
+
+### Blobs
+- `VERA__BLOB__CONNECTIONSTRING`
+  - Connection string to use to connect to the Azure blob storage
+  - If this is not configured, Vera will fallback to temporary storage (you don't want this in production)
+
+### JWT
+- `VERA__JWT__ISSUER`
+  - Issuer to set in the JWT
+- `VERA__JWT__KEY`
+  - Symmetric key to use to sign the JWT with (base64 format)
