@@ -23,7 +23,7 @@ namespace Vera.Invoices
                     _ => throw new ArgumentOutOfRangeException(nameof(line.Taxes.Category), "Unknown tax category")
                 };
 
-                entry.Base += line.Net;
+                entry.Base += line.Gross;
                 entry.Value += line.Gross - line.Net;
 
                 totals.Net += line.Net;

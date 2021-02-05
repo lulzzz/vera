@@ -70,8 +70,8 @@ namespace Vera.Tests.Shared
                         },
                         Quantity = 1,
                         UnitPrice = 1.99m / 1.21m,
-                        Gross = 1.99m / 1.21m,
-                        Net = 1.99m,
+                        Gross = 1.99m,
+                        Net = 1.99m / 1.21m,
                         Taxes = new Taxes
                         {
                             Category = TaxesCategory.High,
