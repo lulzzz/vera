@@ -1,7 +1,7 @@
 ﻿{
   "$schema": "http://json.schemastore.org/launchsettings.json",
   "profiles": {
-    "Vera.WebApi": {
+    "Vera.Host": {
       "commandName": "Project",
       "applicationUrl": "https://localhost:5001;http://localhost:5000",
       "environmentVariables": {
