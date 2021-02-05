@@ -206,8 +206,6 @@ namespace Vera.Portugal
 
         private static void ApplyInvoices(IEnumerable<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
         {
-            var calculator = new InvoiceTotalsCalculator();
-
             var sourceDocumentsSalesInvoices = auditFile.SourceDocuments.SalesInvoices;
 
             sourceDocumentsSalesInvoices.Invoice = invoices.Select(invoice =>
@@ -287,10 +285,13 @@ namespace Vera.Portugal
             sourceDocumentsSalesInvoices.TotalCredit = Round(totalCreditExTax, 2);
         }
 
-        private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(Invoice invoice, string taxCountryRegion,
-            Vera.Models.InvoiceLine line, int index)
+        private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(
+            Invoice invoice,
+            string taxCountryRegion,
+            InvoiceLine line,
+            int index)
         {
-            var settlement = Round((line.Settlements?.Sum(s => s.Amount) ?? 0), 2);
+            var settlement = Round(line.Settlements?.Sum(s => s.Amount) ?? 0, 2);
 
             return new SourceDocumentsSalesInvoicesInvoiceLine
             {
@@ -361,7 +362,7 @@ namespace Vera.Portugal
             return systemID;
         }
 
-        private static string GetHashControl(Vera.Models.Invoice invoice)
+        private static string GetHashControl(Invoice invoice)
         {
             var hashControl = invoice.Signature.Version;
 

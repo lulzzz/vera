@@ -145,9 +145,9 @@ namespace Vera.Grpc.Models
 
         public static Payment Pack(this Vera.Models.Payment payment)
         {
-            // TODO: too much difference between models
             return new()
             {
+                SystemId = payment.SystemId,
                 Amount = payment.Amount,
                 Category = payment.Category switch
                 {
@@ -155,13 +155,12 @@ namespace Vera.Grpc.Models
                     PaymentCategory.Debit => Payment.Types.Category.Debit,
                     PaymentCategory.Credit => Payment.Types.Category.Credit,
                     PaymentCategory.Cash => Payment.Types.Category.Cash,
-                    PaymentCategory.Change => Payment.Types.Category.Other, // TODO(kevin): correct value?
+                    PaymentCategory.Change => Payment.Types.Category.Change,
                     PaymentCategory.Voucher => Payment.Types.Category.Voucher,
                     PaymentCategory.Online => Payment.Types.Category.Online,
                     _ => throw new ArgumentOutOfRangeException()
                 },
                 Description = payment.Description,
-                Reference = payment.SystemId,
                 Timestamp = payment.Date.ToTimestamp()
             };
         }

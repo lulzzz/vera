@@ -18,8 +18,6 @@ namespace Vera.Models
         /// </summary>
         public DateTime Date { get; set; }
 
-        public int Sequence { get; set; }
-
         /// <summary>
         /// Indicates if the print was executed successfully according to the client.
         /// </summary>

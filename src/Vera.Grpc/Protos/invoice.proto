@@ -129,25 +129,23 @@ message Payment {
         DEBIT = 1;
         CREDIT = 2;
         CASH = 3;
-        VOUCHER = 4;
-        ONLINE = 5;
+        CHANGE = 4;
+        VOUCHER = 5;
+        ONLINE = 6;
     }
 
-    string reference = 1;
+    string systemId = 1;
 
-    // Code to identify this payment
-    string code = 2;
-    
     // Timestamp of the transaction
-    google.protobuf.Timestamp timestamp = 3;
+    google.protobuf.Timestamp timestamp = 2;
     
     // Description of the payment, e.g "Mastercard"
-    string description = 4;
+    string description = 3;
     
     // Amount that was paid
-    vera.grpc.shared.DecimalValue amount = 5;
+    vera.grpc.shared.DecimalValue amount = 4;
     
-    Category category = 6;
+    Category category = 5;
 }
 
 message Supplier {
