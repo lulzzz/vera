@@ -22,7 +22,7 @@ namespace Vera.Bootstrap
 
                 // Stores
                 collection.AddSingleton<IBlobStore, TemporaryBlobStore>();
-                collection.AddSingleton<ILocker, NullLocker>();
+                collection.AddSingleton<ILocker, InMemoryLocker>();
 
                 // Services
                 collection.AddTransient<IUserRegisterService, UserRegisterService>();

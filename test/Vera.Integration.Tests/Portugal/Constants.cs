@@ -1,20 +1,11 @@
-using System.Threading.Tasks;
-using Vera.Grpc;
+using System.Collections.Generic;
+using Bogus;
 
 namespace Vera.Integration.Tests.Portugal
 {
-    public class PortugalSetup
+    public static class Constants
     {
-        private readonly Setup _setup;
-
-        public PortugalSetup(Setup setup)
-        {
-            _setup = setup;
-        }
-
-        public async Task ConfigureAccount(string accountId)
-        {
-            const string pk = @"-----BEGIN RSA PRIVATE KEY-----
+        private const string Pk = @"-----BEGIN RSA PRIVATE KEY-----
 MIICXQIBAAKBgQC96HMXSV2MuX4VmVbj5y0oZeCZzjXDaZLvi0U+S1sAt/VfTRT7
 cOgHm2VbLo+o5nx24UbIxH0osATZBUTYZCEiwRnSDp0cyse1MmbsfmCd9KYWWyc7
 I9I63Jn0lwkCJWp+hU2SMrumRpKqJ0Lza+T4S5matp0wikQr/RZorNjN4QIDAQAB
@@ -29,20 +20,21 @@ G+hF21DP+lyncvizVZ1Kkf/DfqxPBcZT6pFnuO1weumUTwWAQ6oB4lz4ddnAGsfR
 DJfosgBbn3Jkxh2TdcsCQQDhjs8VIbJITJtCvsfmi0SykOyuDvFZlEWqy/io12ge
 tq4HEcmINDkh3fy0/V5XRqzAmGlH6dgxPMgEdddzdRrl
 -----END RSA PRIVATE KEY-----";
-
-            await _setup.AccountClient.CreateOrUpdateConfigurationAsync(new AccountConfigurationRequest
+        
+        public static AccountContext Account => new()
+        {
+            CompanyName = "Pelican Theory",
+            AccountName = "Store",
+            Certification = "PT",
+            Configuration =
             {
-                Id = accountId,
-                Fields =
-                {
-                    {"PrivateKey", pk},
-                    {"PrivateKeyVersion", "1"},
-                    {"ProductCompanyTaxId", "123 123 123"},
-                    {"SocialCapital", "1234"},
-                    {"CertificateNumber", "9999"},
-                    {"CertificateName", "PELICANTHEORY - UNIPESSOAL LDA"}
-                }
-            }, _setup.CreateAuthorizedMetadata());
-        }
+                {"PrivateKey", Pk},
+                {"PrivateKeyVersion", "1"},
+                {"ProductCompanyTaxId", "123 123 123"},
+                {"SocialCapital", "1234"},
+                {"CertificateNumber", "9999"},
+                {"CertificateName", "PELICANTHEORY - UNIPESSOAL LDA"}
+            }
+        };
     }
 }

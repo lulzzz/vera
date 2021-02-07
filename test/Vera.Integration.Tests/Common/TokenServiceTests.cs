@@ -8,39 +8,25 @@ namespace Vera.Integration.Tests.Common
 {
     public class TokenServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
-        private readonly GrpcChannel _channel;
-        private readonly Faker _faker;
+        private readonly Setup _setup;
 
         public TokenServiceTests(ApiWebApplicationFactory fixture)
         {
-            var client = fixture.CreateClient();
-
-            _channel = GrpcChannel.ForAddress(client.BaseAddress!, new GrpcChannelOptions
-            {
-                HttpClient = client
-            });
-
-            _faker = new Faker();
+            _setup = fixture.CreateSetup();
         }
 
         [Fact]
         public async Task Should_be_able_to_request_token()
         {
-            var setup = new Setup(_channel, _faker);
-
-            await setup.CreateLogin();
-
-            var account = await setup.CreateAccount();
+            var login = await _setup.CreateLoginIfNotExists("token");
 
             var tokenRequest = new TokenRequest
             {
-                Username = _faker.Internet.UserName()
+                Username = new Faker().Internet.UserName()
             };
 
-            var tokenService = new TokenService.TokenServiceClient(_channel);
-            using var tokenReply = tokenService.GenerateAsync(tokenRequest, setup.CreateAuthorizedMetadata());
-
-            var result = await tokenReply.ResponseAsync;
+            var result =
+                await _setup.TokenClient.GenerateAsync(tokenRequest, _setup.CreateAuthorizedMetadata(login.Token));
 
             Assert.NotNull(result.Token);
             Assert.NotNull(result.RefreshToken);

@@ -10,39 +10,28 @@ namespace Vera.Integration.Tests.Common
 {
     public class AccountTests : IClassFixture<ApiWebApplicationFactory>
     {
-        private readonly GrpcChannel _channel;
-        private readonly Faker _faker;
         private readonly Setup _setup;
 
         public AccountTests(ApiWebApplicationFactory fixture)
         {
-            var client = fixture.CreateClient();
-
-            _channel = GrpcChannel.ForAddress(client.BaseAddress!, new GrpcChannelOptions
-            {
-                HttpClient = client
-            });
-
-            _faker = new Faker();
-            _setup = new Setup(_channel, _faker);
+            _setup = fixture.CreateSetup();
         }
 
         [Fact]
         public async Task Should_be_able_to_create_accounts()
         {
-            await _setup.CreateLogin();
+            var faker = new Faker();
 
-            var metadata = _setup.CreateAuthorizedMetadata();
-
-            var accountToCreate = new CreateAccountRequest
+            var accountContext = new AccountContext
             {
-                Name = _faker.Company.CompanyName(),
+                CompanyName = faker.Company.CompanyName(),
+                AccountName = faker.Company.CompanyName(),
                 Certification = "LALA"
             };
-
-            await _setup.AccountClient.CreateAsync(accountToCreate, metadata);
-
-            using var listCall = _setup.AccountClient.ListAsync(new Empty(), metadata);
+            
+            var client = await _setup.CreateClient(accountContext);
+            
+            using var listCall = client.Account.ListAsync(new Empty(), client.AuthorizedMetadata);
             var result = await listCall.ResponseAsync;
             var accounts = result.Accounts;
 
@@ -51,36 +40,33 @@ namespace Vera.Integration.Tests.Common
 
             var account = accounts.First();
 
-            Assert.Equal(accountToCreate.Name, account.Name);
+            Assert.Equal(accountContext.AccountName, account.Name);
         }
 
         [Fact]
         public async Task Should_be_able_to_update_account()
         {
-            await _setup.CreateLogin();
-
-            var metadata = _setup.CreateAuthorizedMetadata();
-
-            var accountToCreate = new CreateAccountRequest
+            var accountContext = new AccountContext
             {
-                Name = _faker.Company.CompanyName(),
+                CompanyName = "test-update-account",
+                AccountName = "test-update-account",
                 Certification = "LALA"
             };
 
-            var createAccountReply = await _setup.AccountClient.CreateAsync(accountToCreate, metadata);
-
-            var newName = _faker.Company.CompanyName();
+            var client = await _setup.CreateClient(accountContext);
+            
+            var newName = new Faker().Company.CompanyName();
 
             await _setup.AccountClient.UpdateAsync(new UpdateAccountRequest
             {
-                Id = createAccountReply.Id,
+                Id = client.AccountId,
                 Name =  newName
-            }, metadata);
+            }, client.AuthorizedMetadata);
 
             var getAccountReply = await _setup.AccountClient.GetAsync(new GetAccountRequest
             {
-                Id = createAccountReply.Id
-            }, metadata);
+                Id = client.AccountId
+            }, client.AuthorizedMetadata);
 
             Assert.Equal(newName, getAccountReply.Name);
         }

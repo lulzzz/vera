@@ -59,7 +59,7 @@ namespace Vera.Tests
                 new NullLogger<InvoiceProcessor>(),
                 store.Object,
                 chainStore.Object,
-                new NullLocker()
+                new InMemoryLocker()
             );
 
             var invoiceGenerator = new InvoiceGenerator(new Faker());

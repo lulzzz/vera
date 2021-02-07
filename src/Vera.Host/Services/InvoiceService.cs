@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
@@ -45,7 +46,7 @@ namespace Vera.Host.Services
             
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var invoice = request.Invoice.Unpack();
-
+            
             await _invoiceProcessor.Process(factory, invoice);
 
             return new CreateInvoiceReply

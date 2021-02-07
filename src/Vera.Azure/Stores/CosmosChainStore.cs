@@ -17,13 +17,14 @@ namespace Vera.Azure.Stores
         public async Task<IChainable> Last(ChainContext context)
         {
             var partitionKeyValue = context.AccountId + ";" + context.Bucket;
-            
+
             var definition = new QueryDefinition("select top 1 * from c where c.Next = null");
 
             var iterator = _container.GetItemQueryIterator<ChainDocument>(definition,
                 requestOptions: new QueryRequestOptions
                 {
-                    PartitionKey = new PartitionKey(partitionKeyValue)
+                    PartitionKey = new PartitionKey(partitionKeyValue),
+                    MaxItemCount = 1
                 });
 
             var response = await iterator.ReadNextAsync();

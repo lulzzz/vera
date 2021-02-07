@@ -34,14 +34,16 @@ namespace Vera.Azure.Stores
 
         public Task Update(PrintTrail trail)
         {
+            var document = ToDocument(trail);
+            
             return _container.ReplaceItemAsync(
-                trail,
-                trail.Id.ToString(),
-                new PartitionKey(trail.InvoiceId.ToString())
+                document,
+                document.Id.ToString(),
+                new PartitionKey(document.PartitionKey)
             );
         }
 
-        public async Task<PrintTrail> Get(Guid trailId, Guid invoiceId)
+        public async Task<PrintTrail> Get(Guid invoiceId, Guid trailId)
         {
             var response = await _container.ReadItemAsync<Document<PrintTrail>>(
                 trailId.ToString(),

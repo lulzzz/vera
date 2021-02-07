@@ -2,10 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Bogus;
 using Google.Protobuf.WellKnownTypes;
-using Grpc.Net.Client;
 using Vera.Grpc;
 using Vera.Grpc.Models;
-using Vera.Integration.Tests.Common;
 using Vera.Tests.Shared;
 using Xunit;
 
@@ -13,57 +11,37 @@ namespace Vera.Integration.Tests.Portugal
 {
     public class AuditServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
-        private readonly GrpcChannel _channel;
-        private readonly Faker _faker;
+        private readonly Setup _setup;
 
         public AuditServiceTests(ApiWebApplicationFactory fixture)
         {
-            var client = fixture.CreateClient();
-
-            _channel = GrpcChannel.ForAddress(client.BaseAddress!, new GrpcChannelOptions
-            {
-                HttpClient = client
-            });
-
-            _faker = new Faker();
+            _setup = fixture.CreateSetup();
         }
 
         [Fact]
         public async Task Should_be_able_to_archive_an_audit()
         {
-            var setup = new Setup(_channel, _faker);
-            var token = await setup.CreateLogin();
-            var account = await setup.CreateAccount();
+            var client = await _setup.CreateClient(Constants.Account);
 
-            var portugalSetup = new PortugalSetup(setup);
-            await portugalSetup.ConfigureAccount(account);
-
-            var invoiceGenerator = new InvoiceGenerator(_faker);
-            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(account);
+            var invoiceGenerator = new InvoiceGenerator(new Faker());
+            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(client.AccountId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
             };
 
-            var invoiceService = new InvoiceService.InvoiceServiceClient(_channel);
-            using var createInvoiceCall = invoiceService.CreateAsync(createInvoiceRequest, setup.CreateAuthorizedMetadata());
+            await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
             var createAuditRequest = new CreateAuditRequest
             {
-                AccountId = account,
+                AccountId = client.AccountId,
                 SupplierSystemId = invoice.Supplier.SystemId,
                 StartDate = DateTime.UtcNow.AddDays(-1).ToTimestamp(),
                 EndDate = DateTime.UtcNow.AddDays(1).ToTimestamp()
             };
 
-            var auditService = new AuditService.AuditServiceClient(_channel);
-            using var createAuditCall = auditService.CreateAsync(
-                createAuditRequest,
-                setup.CreateAuthorizedMetadata()
-            );
-
-            var createAuditReply = await createAuditCall.ResponseAsync;
+            var createAuditReply = await client.Audit.CreateAsync(createAuditRequest, client.AuthorizedMetadata);
 
             Assert.NotNull(createAuditReply.AuditId);
 
@@ -75,11 +53,11 @@ namespace Vera.Integration.Tests.Portugal
 
                 var getAuditRequest = new GetAuditRequest
                 {
-                    AccountId = account,
+                    AccountId = client.AccountId,
                     AuditId = createAuditReply.AuditId
                 };
 
-                using var getAuditCall = auditService.GetAsync(getAuditRequest, setup.CreateAuthorizedMetadata());
+                using var getAuditCall = client.Audit.GetAsync(getAuditRequest, client.AuthorizedMetadata);
 
                 reply = await getAuditCall.ResponseAsync;
 
@@ -88,6 +66,8 @@ namespace Vera.Integration.Tests.Portugal
                     break;
                 }
             }
+            
+            // TODO(kevin): get the file and check contents?
 
             Assert.False(string.IsNullOrEmpty(reply.Location));
         }

@@ -27,7 +27,7 @@ namespace Vera.Integration.Tests.Common
         {
             var faker = new Faker();
 
-            var registerRequest = new Grpc.RegisterRequest
+            var registerRequest = new RegisterRequest
             {
                 Username = faker.Internet.UserName(),
                 Password = faker.Internet.Password(),
@@ -35,19 +35,15 @@ namespace Vera.Integration.Tests.Common
             };
 
             var registerClient = new RegisterService.RegisterServiceClient(_channel);
-            using var registerCall = registerClient.RegisterAsync(registerRequest);
-
-            var registerResult = await registerCall.ResponseAsync;
+            await registerClient.RegisterAsync(registerRequest);
 
             var loginClient = new LoginService.LoginServiceClient(_channel);
-            using var loginCall = loginClient.LoginAsync(new LoginRequest
+            var loginResult = await loginClient.LoginAsync(new LoginRequest
             {
                 Username = registerRequest.Username,
                 Password = registerRequest.Password,
                 CompanyName = registerRequest.CompanyName
             });
-
-            var loginResult = await loginCall.ResponseAsync;
 
             Assert.NotNull(loginResult.Token);
             Assert.NotNull(loginResult.RefreshToken);

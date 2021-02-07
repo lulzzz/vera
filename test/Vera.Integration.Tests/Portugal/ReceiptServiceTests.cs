@@ -11,59 +11,70 @@ namespace Vera.Integration.Tests.Portugal
 {
     public class ReceiptServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
-        private readonly GrpcChannel _channel;
-        private readonly Faker _faker;
+        private readonly Setup _setup;
 
         public ReceiptServiceTests(ApiWebApplicationFactory fixture)
         {
-            var client = fixture.CreateClient();
-
-            _channel = GrpcChannel.ForAddress(client.BaseAddress!, new GrpcChannelOptions
-            {
-                HttpClient = client
-            });
-
-            _faker = new Faker();
+            _setup = fixture.CreateSetup();
         }
 
         [Fact]
         public async Task Should_be_able_to_generate_a_receipt()
         {
-            var setup = new Setup(_channel, _faker);
-            var token = await setup.CreateLogin();
-            var account = await setup.CreateAccount();
+            var client = await _setup.CreateClient(Constants.Account);
 
-            var portugalSetup = new PortugalSetup(setup);
-            await portugalSetup.ConfigureAccount(account);
-
-            var invoiceGenerator = new InvoiceGenerator(_faker);
-            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(account);
+            var invoiceGenerator = new InvoiceGenerator(new Faker());
+            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(client.AccountId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
             };
 
-            var invoiceService = new InvoiceService.InvoiceServiceClient(_channel);
-            using var createInvoiceCall = invoiceService.CreateAsync(createInvoiceRequest, setup.CreateAuthorizedMetadata());
+            var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
-            var createInvoiceReply = await createInvoiceCall.ResponseAsync;
-
-            var receiptService = new ReceiptService.ReceiptServiceClient(_channel);
-            using var renderReceiptCall = receiptService.RenderThermalAsync(new RenderThermalRequest
+            var renderReceiptReply = await client.Receipt.RenderThermalAsync(new RenderThermalRequest
             {
-                AccountId = account,
+                AccountId = client.AccountId,
                 InvoiceNumber = createInvoiceReply.Number,
                 Type = ReceiptOutputType.Json
-            }, setup.CreateAuthorizedMetadata());
-
-            var renderReceiptReply = await renderReceiptCall.ResponseAsync;
+            }, client.AuthorizedMetadata);
 
             Assert.Equal(ReceiptOutputType.Json, renderReceiptReply.Type);
             Assert.NotNull(renderReceiptReply.Content);
 
             // TODO(kevin): verify receipt content - important stuff that needs to be on there
             var receiptContent = renderReceiptReply.Content.ToStringUtf8();
+        }
+
+        [Fact]
+        public async Task Should_be_able_to_mark_receipt_as_printed()
+        {
+            var client = await _setup.CreateClient(Constants.Account);
+
+            var invoiceGenerator = new InvoiceGenerator(new Faker());
+            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(client.AccountId);
+
+            var createInvoiceRequest = new CreateInvoiceRequest
+            {
+                Invoice = invoice.Pack()
+            };
+
+            var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+
+            var renderReceiptReply = await client.Receipt.RenderThermalAsync(new RenderThermalRequest
+            {
+                AccountId = client.AccountId,
+                InvoiceNumber = createInvoiceReply.Number,
+                Type = ReceiptOutputType.Json
+            }, client.AuthorizedMetadata);
+
+            await client.Receipt.UpdatePrintResultAsync(new UpdatePrintResultRequest
+            {
+                AccountId = client.AccountId,
+                Token = renderReceiptReply.Token,
+                Success = true,
+            }, client.AuthorizedMetadata);
         }
     }
 }

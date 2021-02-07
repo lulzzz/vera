@@ -97,9 +97,16 @@ namespace Vera.Azure
                     .GetSection(CosmosContainerOptions.Section)
                     .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
 
-                if (string.IsNullOrEmpty(cosmosOptions.ConnectionString) || string.IsNullOrEmpty(cosmosOptions.Database))
+                if (string.IsNullOrEmpty(cosmosOptions.ConnectionString))
                 {
+                    Log.Error("cannot register cosmos stores because connection string is missing");
                     return;
+                }
+
+                if (string.IsNullOrEmpty(cosmosOptions.Database))
+                {
+                    Log.Error("cannot register cosmos stores because database is missing");
+                    return;                    
                 }
 
                 var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
@@ -110,7 +117,7 @@ namespace Vera.Azure
                     .WithApplicationName("vera")
                     .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
                     .Build();
-
+                
                 collection.AddSingleton(cosmosClient);
 
                 collection.AddSingleton<IInvoiceStore>(_ => new CosmosInvoiceStore(
