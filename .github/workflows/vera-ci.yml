@@ -1,0 +1,25 @@
+name: Run unit tests
+on: [push]
+
+jobs:
+  build:
+   runs-on: ubuntu-latest
+   steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '5.0.102'
+    - name: Run tests
+      run: dotnet test --nologo -v q --filter FullyQualifiedName!~Integration
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+      - run: |
+          docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vera:${{ github.sha }}
+          docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vera:${{ github.sha }}
+
