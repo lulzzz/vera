@@ -6,14 +6,18 @@ Latin for true. We want this product to be the one and only source for all the a
   - Where the core magic happens of Vera. All the generic steps e.d are defined in here
 - Vera.Bootstrap
   - The "glue" between the core of Vera and all the specific certification implementations
-- Vera.Host
-  - Use the components of Vera to expose a gRPC API to allow other parties to make use of the
-    internal certification capabilities that Vera offers
 - Vera.Documents
   - Houses the components that can be shared with other C# projects on how to interpret documents
+- Vera.Azure
+  - All of the Azure specific implementations of the components that are used
+- Vera.Grpc
+  - Grpc definitions of the services, also packaged to be used by external parties to integrate with Vera
 - Vera.[Country] (replace Country with Portugal, Norway, etc)
   - These projects house the specific implementations that are required to make Vera comply with
     the regulations of that country
+- Vera.Host
+  - Use the components of Vera to expose a gRPC API to allow other parties to make use of the
+    internal certification capabilities that Vera offers
 
 # Technologies used
 - ASP.NET core for hosting
@@ -34,16 +38,21 @@ Latin for true. We want this product to be the one and only source for all the a
 - `if` can go on 1 line if it's just 1 line
 
 ## Cosmos model
-- Containers
-  - companies
-    - Container for: companies, accounts and user
-    - Partitioned on the id of the company
-  - invoices
-    - Container for: invoices
-    - Partitioned on the "bucket" that the invoice belongs to, its chain essentially
-    - Also partioned on account + invoice number to allow efficient fetching on the invoice number
-  - audits
-    - Container for: audits
+- companies
+ - Container for: `Company`, `Account` and `User`
+ - All of these are partitioned on the id of the `Company`, separated by the `Type` property
+- invoices
+ - Container for: `Invoice`
+ - Partioned on id of the account that created the invoice plus the invoice' number
+- audits
+ - Container for: `Audit`
+ - Partitioned on the id of the account
+- trails
+ - Container for: `PrintAuditTrail`
+ - Partitioned on the id of the invoice
+- chains
+ - Container for: `ChainDocument`
+ - Partitioned on the "bucket" which is defined by the caller, for invoices this is defined by its "bucket"
 
 # Deployment
 
