@@ -4,7 +4,7 @@ COPY src/ src/
 COPY Directory.Build.props .
 COPY global.json .
 COPY vera.sln .
-RUN dotnet publish -c Release -o /app --no-self-contained src/Vera.Host/Vera.Host.csproj
+RUN dotnet publish -c Release -o /app --no-self-contained --nologo -v q src/Vera.Host/Vera.Host.csproj
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 WORKDIR /app
