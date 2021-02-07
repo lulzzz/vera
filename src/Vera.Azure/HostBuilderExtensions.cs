@@ -10,7 +10,6 @@ using Vera.Azure.Concurrency;
 using Vera.Azure.Stores;
 using Vera.Concurrency;
 using Vera.Stores;
-using Vera.Stores.Cosmos;
 
 namespace Vera.Azure
 {

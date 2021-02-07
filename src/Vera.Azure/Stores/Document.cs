@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Vera.Stores.Cosmos
+namespace Vera.Azure.Stores
 {
     /// <summary>
     /// Generic wrapper for models so Cosmos' partition is abstracted away from the client.

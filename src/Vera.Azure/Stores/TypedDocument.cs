@@ -1,6 +1,6 @@
 using System;
 
-namespace Vera.Stores.Cosmos
+namespace Vera.Azure.Stores
 {
     public class TypedDocument<T> : Document<T> where T : class
     {

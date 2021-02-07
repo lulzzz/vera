@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Vera.Models;
 
-namespace Vera.Stores.Cosmos
+namespace Vera.Azure.Stores
 {
     // TODO(kevin): inherit from Document<T>?
     public class ChainDocument

@@ -1,8 +1,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Vera.Stores;
 
-namespace Vera.Stores.Cosmos
+namespace Vera.Azure.Stores
 {
     public class CosmosChainStore : IChainStore
     {
