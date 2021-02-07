@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vera.Audits;
 using Vera.Models;
-using Vera.Stores.Cosmos;
 
 namespace Vera.Stores
 {

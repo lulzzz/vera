@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using Vera.Azure;
 using Vera.Bootstrap;
 
 namespace Vera.Host
@@ -48,8 +49,7 @@ namespace Vera.Host
                 .ConfigureWebHostDefaults(wb => wb.UseStartup<Startup>())
                 .UseSerilog()
                 .UseVera()
-                .UseCosmosStores()
-                .UseAzureBlobs();
+                .UseAzure();
         }
     }
 }

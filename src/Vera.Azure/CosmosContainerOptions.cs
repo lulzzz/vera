@@ -1,4 +1,4 @@
-namespace Vera.Bootstrap
+namespace Vera.Azure
 {
     public class CosmosContainerOptions
     {

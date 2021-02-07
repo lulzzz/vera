@@ -3,8 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
+using Vera.Stores;
 
-namespace Vera.Stores.Azure
+namespace Vera.Azure.Stores
 {
     public class AzureBlobStore : IBlobStore
     {

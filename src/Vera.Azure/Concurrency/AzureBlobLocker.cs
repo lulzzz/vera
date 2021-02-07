@@ -4,8 +4,9 @@ using System.Threading.Tasks;
 using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Specialized;
+using Vera.Concurrency;
 
-namespace Vera.Concurrency
+namespace Vera.Azure.Concurrency
 {
     public sealed class AzureBlobLocker : ILocker
     {

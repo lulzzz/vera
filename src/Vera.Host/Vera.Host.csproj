@@ -11,6 +11,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Vera.Azure\Vera.Azure.csproj" />
       <ProjectReference Include="..\Vera.Bootstrap\Vera.Bootstrap.csproj" />
       <ProjectReference Include="..\Vera.Grpc\Vera.Grpc.csproj" />
       <ProjectReference Include="..\Vera\Vera.csproj" />

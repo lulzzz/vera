@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 using Vera.Concurrency;
 using Vera.Models;
@@ -70,7 +69,7 @@ namespace Vera.Invoices
                 {
                     await last.Append(invoice.Signature);
                 }
-                catch (CosmosException chainException)
+                catch (Exception chainException)
                 {
                     // Failed to append to the chain, means we have to
                     // rollback the invoice because it's not stored in a chain
@@ -81,7 +80,7 @@ namespace Vera.Invoices
                         await _invoiceStore.Delete(invoice);
                         _logger.LogInformation("successfully removed invoice, chain has been restored");
                     }
-                    catch (CosmosException invoiceException)
+                    catch (Exception invoiceException)
                     {
                         // TODO(kevin): this means the chain is now in an invalid state
                         // ^ how do we recover from this?

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Hosting;
+using Vera.Azure;
 using Vera.Bootstrap;
 using Vera.Host;
 

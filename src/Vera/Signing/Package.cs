@@ -1,7 +1,5 @@
 using System;
-using System.Linq;
 using Vera.Models;
-using Vera.Stores.Cosmos;
 
 namespace Vera.Signing
 {
