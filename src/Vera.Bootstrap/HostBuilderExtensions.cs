@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Vera.Concurrency;
+using Vera.Invoices;
 using Vera.Portugal;
 using Vera.Security;
 using Vera.Services;
@@ -36,6 +37,7 @@ namespace Vera.Bootstrap
 
                 // Services
                 collection.AddTransient<IUserRegisterService, UserRegisterService>();
+                collection.AddTransient<IInvoiceProcessor, InvoiceProcessor>();
             });
 
             // Registration of all the certification implementations
@@ -80,12 +82,16 @@ namespace Vera.Bootstrap
                     cosmosContainerOptions.Companies,
                     cosmosContainerOptions.Invoices,
                     cosmosContainerOptions.Audits,
-                    cosmosContainerOptions.Trails
+                    cosmosContainerOptions.Trails,
+                    cosmosContainerOptions.Chains
                 };
 
                 foreach (var container in containers)
                 {
-                    db.CreateContainerIfNotExistsAsync(container, partitionKeyPath)
+                    // TODO(kevin): add unique key constraints
+                    // TODO(kevin): add indexing policies
+                    db.DefineContainer(container, partitionKeyPath)
+                        .CreateIfNotExistsAsync()
                         .GetAwaiter()
                         .GetResult();
                 }
@@ -130,28 +136,25 @@ namespace Vera.Bootstrap
                 collection.AddSingleton(cosmosClient);
 
                 collection.AddSingleton<IInvoiceStore>(_ => new CosmosInvoiceStore(
-                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Invoices)
-                ));
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Invoices)));
 
                 collection.AddSingleton<ICompanyStore>(_ => new CosmosCompanyStore(
-                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
-                ));
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
 
                 collection.AddSingleton<IAccountStore>(_ => new CosmosAccountStore(
-                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
-                ));
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
 
                 collection.AddSingleton<IUserStore>(_ => new CosmosUserStore(
-                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)
-                ));
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
 
                 collection.AddSingleton<IAuditStore>(_ => new CosmosAuditStore(
-                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Audits)
-                ));
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Audits)));
 
                 collection.AddSingleton<IPrintAuditTrailStore>(_ => new CosmosPrintAuditTrailStore(
-                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Trails)
-                ));
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Trails)));
+
+                collection.AddSingleton<IChainStore>(_ => new CosmosChainStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Chains)));
             });
         }
 

@@ -1,6 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Bogus;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Vera.Concurrency;
 using Vera.Invoices;
@@ -21,6 +23,8 @@ namespace Vera.Tests
             const string expectedNumber = "my-invoice-no";
 
             var store = new Mock<IInvoiceStore>();
+            var chainStore = new Mock<IChainStore>();
+            var last = new Mock<IChainable>();
             var factory = new Mock<IComponentFactory>();
 
             var bucketGenerator = new Mock<IInvoiceBucketGenerator>();
@@ -45,10 +49,17 @@ namespace Vera.Tests
             signer.Setup(x => x.Sign(It.IsAny<Package>()))
                 .ReturnsAsync(new Signature());
 
+            last.SetupGet(x => x.NextSequence)
+                .Returns(1);
+            
+            chainStore.Setup(x => x.Last(It.IsAny<ChainContext>()))
+                .ReturnsAsync(last.Object);
+
             var processor = new InvoiceProcessor(
+                new NullLogger<InvoiceProcessor>(),
                 store.Object,
-                new NullLocker(),
-                factory.Object
+                chainStore.Object,
+                new NullLocker()
             );
 
             var invoiceGenerator = new InvoiceGenerator(new Faker());
@@ -57,19 +68,19 @@ namespace Vera.Tests
             // Should be set after processing the invoice
             Assert.Null(invoice.Totals);
 
-            await processor.Process(invoice);
+            await processor.Process(factory.Object, invoice);
 
             // TODO: assert totals
             Assert.NotNull(invoice.Totals);
 
             Assert.Equal(expectedNumber, invoice.Number);
 
-            Assert.Equal(1, invoice.Sequence);
+            Assert.Equal(last.Object.NextSequence, invoice.Sequence);
 
             // TODO: assert signature
             Assert.NotNull(invoice.Signature);
 
-            store.Verify(x => x.Store(It.Is<Invoice>(i => i == invoice), expectedBucket));
+            // store.Verify(x => x.Store(It.Is<Invoice>(i => i == invoice), expectedBucket));
         }
     }
 }

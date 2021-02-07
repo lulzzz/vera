@@ -22,15 +22,9 @@ namespace Vera.Host.Security
         public static async Task<Account> ResolveAccount(this ServerCallContext context, IAccountStore store, string accountId)
         {
             var companyId = context.GetCompanyId();
-
             var account = await store.Get(companyId, Guid.Parse(accountId));
 
-            if (account == null)
-            {
-                throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthenticated"));
-            }
-
-            return account;
+            return account ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthenticated"));
         }
 
         public static Guid GetCompanyId(this ServerCallContext context)

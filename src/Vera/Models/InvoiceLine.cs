@@ -29,6 +29,8 @@ namespace Vera.Models
         /// </summary>
         public Product? Product { get; set; }
 
+        public InvoiceLineType Type { get; set; }
+        
         public CreditReference? CreditReference { get; set; }
 
         /// <summary>
@@ -50,6 +52,12 @@ namespace Vera.Models
         /// Settlements specific to this line.
         /// </summary>
         public ICollection<Settlement> Settlements { get; set; } = new List<Settlement>();
+    }
+    
+    public enum InvoiceLineType
+    {
+        Goods = 1,
+        Services = 2
     }
 
     public class CreditReference

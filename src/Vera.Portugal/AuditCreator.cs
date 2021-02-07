@@ -2,11 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vera.Audits;
-using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Models;
 using Invoice = Vera.Models.Invoice;
-using ProductTypes = Vera.Models.ProductTypes;
 
 namespace Vera.Portugal
 {
@@ -159,24 +157,25 @@ namespace Vera.Portugal
         {
             var products = invoices
                 .SelectMany(l => l.Lines)
-                .Select(l => l.Product)
-                .GroupBy(p => p.SystemId);
+                .Where(l => l.Product != null)
+                .Select(l => (l.Product, l.Type))
+                .GroupBy(x => x.Product.Code);
 
             auditFile.MasterFiles.Product = products.Select(g =>
             {
-                var p = g.First();
+                var (product, type) = g.First();
 
                 return new Models.Product
                 {
-                    ProductCode = p.Code,
-                    ProductNumberCode = p.Barcode,
-                    ProductType = p.Type switch
+                    ProductCode = product.Code,
+                    ProductNumberCode = product.Barcode,
+                    ProductType = type switch
                     {
-                        ProductTypes.Service => ProductType.S,
-                        ProductTypes.Goods => ProductType.P,
+                        InvoiceLineType.Goods => ProductType.P,
+                        InvoiceLineType.Services => ProductType.S,
                         _ => ProductType.O
                     },
-                    ProductDescription = p.Description
+                    ProductDescription = product.Description
                 };
             }).ToArray();
         }

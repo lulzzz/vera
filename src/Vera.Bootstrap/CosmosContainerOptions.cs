@@ -26,5 +26,11 @@ namespace Vera.Bootstrap
         /// Name of the trails container.
         /// </summary>
         public string Trails { get; set; } = "trails";
+
+        /// <summary>
+        /// Name of the chains container. Generic container for chaining all sorts
+        /// of documents.
+        /// </summary>
+        public string Chains { get; set; } = "chains";
     }
 }

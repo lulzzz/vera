@@ -10,43 +10,22 @@ namespace Vera.Stores.Cosmos
 {
     public sealed class CosmosInvoiceStore : IInvoiceStore
     {
-        private readonly CosmosChain<Invoice> _chain;
         private readonly Container _container;
 
         public CosmosInvoiceStore(Container container)
         {
-            _chain = new CosmosChain<Invoice>(container);
             _container = container;
         }
 
-        public async Task Store(Invoice invoice, string bucket)
+        public async Task Store(Invoice invoice)
         {
-            await _chain.Append(invoice, PartitionKeyByBucket(invoice.AccountId, bucket));
-
-            // Also create document to look up by number efficiently
             var byNumber = new Document<Invoice>(
                 i => i.Id,
                 i => PartitionKeyByNumber(i.AccountId, i.Number),
                 invoice
             );
-
-            var byId = new Document<Invoice>(
-                i => i.Id,
-                i => i.Id.ToString(),
-                invoice
-            );
-
-            // TODO(kevin): can store reference with id/partitionKey as well
-            // but that would require 2 reads, not sure what's better here
-            // also need to keep these documents in sync now (change feed?)
+            
             await _container.CreateItemAsync(byNumber, new PartitionKey(byNumber.PartitionKey));
-        }
-
-        public async Task<Invoice> Last(Guid accountId, string bucket)
-        {
-            var tail = await _chain.Tail(new PartitionKey(PartitionKeyByBucket(accountId, bucket)));
-
-            return tail?.Value;
         }
 
         public async Task<Invoice> GetByNumber(Guid accountId, string number)
@@ -90,6 +69,16 @@ where i.AccountId = @accountId
             }
 
             return invoices;
+        }
+
+        public async Task Delete(Invoice invoice)
+        {
+            var response = await _container.DeleteItemStreamAsync(
+                invoice.Id.ToString(),
+                new PartitionKey(PartitionKeyByNumber(invoice.AccountId, invoice.Number))
+            );
+
+            response.EnsureSuccessStatusCode();
         }
 
         private static string PartitionKeyByBucket(Guid accountId, string bucket) => $"{accountId}#B#{bucket}";

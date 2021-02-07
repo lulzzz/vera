@@ -118,22 +118,18 @@ namespace Vera.Grpc.Models
                 Description = line.Description,
                 Gross = line.Gross,
                 Net = line.Net,
-                Product = line.Product == null ? null : new Product()
+                Product = line.Product == null ? null : new Product
                 {
                     Code = line.Product.Code,
-                    Description = line.Product.Description,
-                    Group = line.Product.Type switch
-                    {
-                        ProductTypes.Service => Product.Types.Group.Other,
-                        ProductTypes.Goods => Product.Types.Group.Other,
-                        _ => throw new ArgumentOutOfRangeException()
-                    }
+                    Description = line.Product.Description
                 },
                 Quantity = line.Quantity,
-                // TODO: map
-                Tax = new TaxValue(),
-                // TODO: map
-                Type = InvoiceLine.Types.Type.Goods,
+                Tax = line.Taxes.Pack(),
+                Type = line.Type switch {
+                    InvoiceLineType.Goods => InvoiceLine.Types.Type.Goods,
+                    InvoiceLineType.Services => InvoiceLine.Types.Type.Services,
+                    _ => throw new ArgumentOutOfRangeException()
+                },
                 Unit = line.UnitOfMeasure ?? string.Empty,
                 UnitPrice = line.UnitPrice
             };
@@ -141,6 +137,26 @@ namespace Vera.Grpc.Models
             result.Settlements.AddRange(line.Settlements.Select(Pack));
 
             return result;
+        }
+        
+        public static TaxValue Pack(this Taxes taxes)
+        {
+            return new()
+            {
+                Code = taxes.Code,
+                Rate = taxes.Rate,
+                Category = taxes.Category switch
+                {
+                    TaxesCategory.High => TaxValue.Types.Category.High,
+                    TaxesCategory.Low => TaxValue.Types.Category.Low,
+                    TaxesCategory.Zero => TaxValue.Types.Category.Zero,
+                    TaxesCategory.Exempt => TaxValue.Types.Category.Exempt,
+                    TaxesCategory.Intermediate => TaxValue.Types.Category.Intermediate,
+                    _ => throw new ArgumentOutOfRangeException()
+                },
+                ExemptionCode = taxes.ExemptionCode ?? string.Empty,
+                ExemptionReason = taxes.ExemptionReason ?? string.Empty
+            };
         }
 
         public static Payment Pack(this Vera.Models.Payment payment)
@@ -205,9 +221,6 @@ namespace Vera.Grpc.Models
 
         private static Vera.Models.InvoiceLine Unpack(InvoiceLine line)
         {
-            // TODO(kevin): validate that when exempt is given that a reason and/or code is also available
-            // TODO(kevin): check if this is a requirement or optional (may depend on certifications?)
-
             var result = new Vera.Models.InvoiceLine
             {
                 Description = line.Description,
@@ -237,18 +250,14 @@ namespace Vera.Grpc.Models
 
             if (line.Product != null)
             {
-                var productType = line.Product.Group switch
-                {
-                    Product.Types.Group.Other => ProductTypes.Goods,
-                    _ => throw new ArgumentOutOfRangeException(nameof(line.Product.Group), line.Product.Group,
-                        "unknown product group")
-                };
-
+                var product = line.Product;
+                
                 result.Product = new Vera.Models.Product
                 {
-                    Code = line.Product.Code,
-                    Description = line.Product.Description,
-                    Type = productType,
+                    SystemId = product.SystemId,
+                    Code = product.Code,
+                    Barcode = product.Barcode,
+                    Description = product.Description
                 };
             }
 

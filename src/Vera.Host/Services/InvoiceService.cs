@@ -17,19 +17,19 @@ namespace Vera.Host.Services
     {
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
-        private readonly ILocker _locker;
+        private readonly IInvoiceProcessor _invoiceProcessor;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
         public InvoiceService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
-            ILocker locker,
+            IInvoiceProcessor invoiceProcessor,
             IAccountComponentFactoryCollection accountComponentFactoryCollection
         )
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
-            _locker = locker;
+            _invoiceProcessor = invoiceProcessor;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
@@ -40,18 +40,19 @@ namespace Vera.Host.Services
             // TODO: validate invoice, very, very, very strict
             // TODO(kevin): PT - invoices > 1000 euros require a customer
             // TODO(kevin): NF525 - requires signature of original invoice on the returned line
+            // TODO(kevin): validate that when exempt is given that a reason and/or code is also available
+            // TODO(kevin): check if this is a requirement or optional (may depend on certifications?)
+            
+            var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var invoice = request.Invoice.Unpack();
 
-            var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
-
-            var processor = new InvoiceProcessor(_invoiceStore, _locker, factory);
-            await processor.Process(invoice);
+            await _invoiceProcessor.Process(factory, invoice);
 
             return new CreateInvoiceReply
             {
                 Number = invoice.Number,
                 Sequence = invoice.Sequence,
-                Signature = new Grpc.Signature
+                Signature = new Signature
                 {
                     Input = ByteString.CopyFromUtf8(invoice.Signature.Input),
                     Output = ByteString.CopyFrom(invoice.Signature.Output)

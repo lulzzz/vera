@@ -10,6 +10,8 @@ using Xunit;
 
 namespace Vera.Integration.Tests.Portugal
 {
+    // TODO(kevin): test that multiple entries for same chain generate unique sequence
+    
     public class InvoiceServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
         private readonly GrpcChannel _channel;

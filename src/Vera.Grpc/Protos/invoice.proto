@@ -187,18 +187,16 @@ message Employee {
 }
 
 message Product {
-    enum Group {
-        OTHER = 0;
-    }
-
+    string systemId = 1; 
+    
     // Article code of the product as used by the merchant
-    string code = 1;
+    string code = 2;
+    
+    // Barcode of the product
+    string barcode = 3;
 
     // Description of the product
-    string description = 2;
-
-    // Indicates in what kind of group the product belongs
-    Group group = 3;
+    string description = 4;
 }
 
 message TaxValue {

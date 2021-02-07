@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Vera.Models;
+using Vera.Stores.Cosmos;
 
 namespace Vera.Signing
 {
@@ -8,13 +9,13 @@ namespace Vera.Signing
     {
         public Package() { }
 
-        public Package(Invoice invoice, Invoice previous)
+        public Package(Invoice invoice, Signature? previous)
         {
             Timestamp = invoice.Date;
             Number = invoice.Number;
             Net = invoice.Totals.Net;
             Gross = invoice.Totals.Gross;
-            PreviousSignature = previous?.Signature.Output;
+            PreviousSignature = previous?.Output;
         }
 
         /// <summary>
