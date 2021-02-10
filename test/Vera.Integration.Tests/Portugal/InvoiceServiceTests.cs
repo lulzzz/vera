@@ -46,18 +46,23 @@ namespace Vera.Integration.Tests.Portugal
             var firstInvoice = _invoiceGenerator.CreateWithCustomerAndSingleProduct(client.AccountId);
             var nextInvoice = _invoiceGenerator.CreateWithCustomerAndSingleProduct(client.AccountId);
 
-            var firstInvoiceReply = await client.Invoice.CreateAsync(new CreateInvoiceRequest
+            var firstInvoiceReply = client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
                 Invoice = firstInvoice.Pack()
             }, client.AuthorizedMetadata);
 
-            var nextInvoiceReply = await client.Invoice.CreateAsync(new CreateInvoiceRequest
+            var nextInvoiceReply = client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
                 Invoice = nextInvoice.Pack()
             }, client.AuthorizedMetadata);
 
-            Assert.True(firstInvoiceReply.Sequence < nextInvoiceReply.Sequence,
-                $"{firstInvoiceReply.Sequence} < {nextInvoiceReply.Sequence}");
+            await Task.WhenAll(firstInvoiceReply.ResponseAsync, nextInvoiceReply.ResponseAsync);
+
+            var first = firstInvoiceReply.ResponseAsync.Result;
+            var next = nextInvoiceReply.ResponseAsync.Result;
+            
+            // TODO(kevin): generates same sequence if run with other portugal test
+            Assert.True(first.Sequence < next.Sequence, $"{first.Sequence} < {next.Sequence}");
         }
         
         // TODO(kevin): write tests that generate different invoices and verify that the number matches the expected format

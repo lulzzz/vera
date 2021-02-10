@@ -23,6 +23,11 @@ namespace Vera.Portugal
             return new ConfigurationValidator();
         }
 
+        public IInvoiceValidator CreateInvoiceValidator()
+        {
+            return new InvoiceValidator();
+        }
+
         public IInvoiceBucketGenerator CreateInvoiceBucketGenerator()
         {
             return new InvoiceBucketGenerator();

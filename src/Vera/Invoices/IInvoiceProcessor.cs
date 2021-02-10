@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Vera.Concurrency;
@@ -45,6 +47,14 @@ namespace Vera.Invoices
 
         public async Task Process(IComponentFactory factory, Invoice invoice)
         {
+            invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
+            
+            var validationResults = factory.CreateInvoiceValidator().Validate(invoice);
+            if (validationResults.Any())
+            {
+                throw new ValidationException(validationResults.First().ErrorMessage);
+            }
+            
             var bucket = factory.CreateInvoiceBucketGenerator().Generate(invoice);
 
             // Lock on the unique sequence of the invoice so no other invoice can enter
@@ -58,7 +68,6 @@ namespace Vera.Invoices
                 // Get last stored invoice based on the bucket for the invoice
                 var last = await _chainStore.Last(chainContext);
 
-                invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
                 invoice.Sequence = last.NextSequence;
                 invoice.Number = await factory.CreateInvoiceNumberGenerator().Generate(invoice);
                 invoice.Signature = await packageSigner.Sign(new Package(invoice, last.Signature));

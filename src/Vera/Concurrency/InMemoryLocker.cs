@@ -9,18 +9,19 @@ namespace Vera.Concurrency
     public sealed class InMemoryLocker : ILocker
     {
         private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks;
+        private readonly SemaphoreSlim _semaphore;
 
         public InMemoryLocker()
         {
             _locks = new ConcurrentDictionary<string, SemaphoreSlim>();
+            _semaphore = new SemaphoreSlim(1, 1);
         }
         
         public async Task<IAsyncDisposable> Lock(string resource, TimeSpan timeout)
         {
-            var mutex = _locks.GetOrAdd(resource, _ => new SemaphoreSlim(1, 1));
-            await mutex.WaitAsync(timeout);
+            await _semaphore.WaitAsync(timeout);
 
-            return new InMemoryLockDisposable(mutex);
+            return new InMemoryLockDisposable(_semaphore);
         }
 
         private class InMemoryLockDisposable : IAsyncDisposable

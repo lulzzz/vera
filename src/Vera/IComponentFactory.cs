@@ -14,7 +14,9 @@ namespace Vera
     public interface IComponentFactory
     {
         IConfigurationValidator CreateConfigurationValidator();
-
+        
+        // TODO(kevin): chop these up in to it's own factory to reduce scope?
+        IInvoiceValidator CreateInvoiceValidator();
         IInvoiceBucketGenerator CreateInvoiceBucketGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
         IPackageSigner CreatePackageSigner();
