@@ -86,7 +86,7 @@ namespace Vera.Models
         /// <summary>
         /// Summary of the totals on the invoice.
         /// </summary>
-        public Totals Totals { get; set; }
+        public Totals Totals { get; set; } = new();
 
         /// <summary>
         /// Identifiers of the orders from which this invoice is made up.
