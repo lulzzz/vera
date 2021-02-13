@@ -39,12 +39,9 @@ namespace Vera.Portugal.Tests
         {
             var input = new Invoice
             {
-                Lines = new List<InvoiceLine>
+                Totals = new Totals
                 {
-                    new()
-                    {
-                        Gross = 1001m
-                    }
+                    Gross = InvoiceTypeHelper.FaturaInvoiceLimit + 1m
                 }
             };
 

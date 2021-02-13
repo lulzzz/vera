@@ -8,4 +8,9 @@ namespace Vera.Invoices
     {
         ICollection<ValidationResult> Validate(Invoice invoice);
     }
+
+    public class NullInvoiceValidator : IInvoiceValidator
+    {
+        public ICollection<ValidationResult> Validate(Invoice invoice) => new List<ValidationResult>();
+    }
 }

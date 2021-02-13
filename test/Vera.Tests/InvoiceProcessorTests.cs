@@ -40,6 +40,9 @@ namespace Vera.Tests
             factory.Setup(f => f.CreatePackageSigner())
                 .Returns(signer.Object);
 
+            factory.Setup(f => f.CreateInvoiceValidator())
+                .Returns(new NullInvoiceValidator());
+            
             bucketGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
                 .Returns(expectedBucket);
 
@@ -65,16 +68,9 @@ namespace Vera.Tests
             var invoiceGenerator = new InvoiceGenerator(new Faker());
             var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(Guid.Empty.ToString());
 
-            // Should be set after processing the invoice
-            Assert.Null(invoice.Totals);
-
             await processor.Process(factory.Object, invoice);
 
-            // TODO: assert totals
-            Assert.NotNull(invoice.Totals);
-
             Assert.Equal(expectedNumber, invoice.Number);
-
             Assert.Equal(last.Object.NextSequence, invoice.Sequence);
 
             // TODO: assert signature
