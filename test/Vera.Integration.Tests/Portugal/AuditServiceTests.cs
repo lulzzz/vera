@@ -46,7 +46,7 @@ namespace Vera.Integration.Tests.Portugal
             Assert.NotNull(createAuditReply.AuditId);
 
             var reply = new GetAuditReply();
-            for (var i = 0; i < 5; i++)
+            for (var i = 0; i < 10; i++)
             {
                 // Wait a little before the audit is finished
                 await Task.Delay(100);

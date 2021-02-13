@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,15 +6,13 @@ namespace Vera.Concurrency
 {
     public sealed class InMemoryLocker : ILocker
     {
-        private readonly ConcurrentDictionary<string, SemaphoreSlim> _locks;
         private readonly SemaphoreSlim _semaphore;
 
         public InMemoryLocker()
         {
-            _locks = new ConcurrentDictionary<string, SemaphoreSlim>();
             _semaphore = new SemaphoreSlim(1, 1);
         }
-        
+
         public async Task<IAsyncDisposable> Lock(string resource, TimeSpan timeout)
         {
             await _semaphore.WaitAsync(timeout);
@@ -26,16 +22,16 @@ namespace Vera.Concurrency
 
         private class InMemoryLockDisposable : IAsyncDisposable
         {
-            private readonly SemaphoreSlim _mutex;
+            private readonly SemaphoreSlim _semaphore;
 
-            public InMemoryLockDisposable(SemaphoreSlim mutex)
+            public InMemoryLockDisposable(SemaphoreSlim semaphore)
             {
-                _mutex = mutex;
+                _semaphore = semaphore;
             }
 
             public ValueTask DisposeAsync()
             {
-                _mutex.Release();
+                _semaphore.Release();
                 return new ValueTask();
             }
         }

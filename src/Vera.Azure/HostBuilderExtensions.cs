@@ -1,4 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
@@ -15,8 +20,9 @@ namespace Vera.Azure
 {
     public static class HostBuilderExtensions
     {
-        private static volatile object _lock = new();
-        
+        private static readonly Mutex Mutex = new();
+        private static volatile bool _created;
+
         // TODO(kevin): do not like this, but also don't know a better way for this do-once on startup kind of work
         public static IHost ConfigureCosmos(this IHost host)
         {
@@ -34,39 +40,54 @@ namespace Vera.Azure
 
             var client = scope.ServiceProvider.GetRequiredService<CosmosClient>();
 
+            if (_created)
+            {
+                return host;
+            }
+            
             // Locking here for the integration tests to prevent concurrency issues
             // when creating the database and containers. Integration test spins up
             // multiple instances of the app, every test get its own app that runs this
             // piece of code
-            lock (_lock)
+            Mutex.WaitOne();
+
+            if (_created)
             {
-                var response = client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database)
+                Mutex.ReleaseMutex();
+                return host;
+            }
+
+            var throughput = ThroughputProperties.CreateManualThroughput(400);
+
+            var response = client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database, throughput)
+                .GetAwaiter()
+                .GetResult();
+
+            const string partitionKeyPath = "/PartitionKey";
+
+            var containers = new[]
+            {
+                cosmosContainerOptions.Companies,
+                cosmosContainerOptions.Invoices,
+                cosmosContainerOptions.Audits,
+                cosmosContainerOptions.Trails,
+                cosmosContainerOptions.Chains
+            };
+
+            var db = response.Database;
+
+            foreach (var container in containers)
+            {
+                db
+                    .DefineContainer(container, partitionKeyPath)
+                    .CreateIfNotExistsAsync()
                     .GetAwaiter()
                     .GetResult();
-
-                var db = response.Database;
-
-                const string partitionKeyPath = "/PartitionKey";
-
-                var containers = new[]
-                {
-                    cosmosContainerOptions.Companies,
-                    cosmosContainerOptions.Invoices,
-                    cosmosContainerOptions.Audits,
-                    cosmosContainerOptions.Trails,
-                    cosmosContainerOptions.Chains
-                };
-
-                foreach (var container in containers)
-                {
-                    // TODO(kevin): add unique key constraints
-                    // TODO(kevin): add indexing policies
-                    db.DefineContainer(container, partitionKeyPath)
-                        .CreateIfNotExistsAsync()
-                        .GetAwaiter()
-                        .GetResult();
-                }
             }
+
+            _created = true;
+
+            Mutex.ReleaseMutex();
 
             return host;
         }
@@ -77,7 +98,7 @@ namespace Vera.Azure
                 .UseCosmosStores()
                 .UseAzureBlobs();
         }
-        
+
         /// <summary>
         /// Use Cosmos as the main backing store for the entities.
         /// </summary>
@@ -106,18 +127,18 @@ namespace Vera.Azure
                 if (string.IsNullOrEmpty(cosmosOptions.Database))
                 {
                     Log.Error("cannot register cosmos stores because database is missing");
-                    return;                    
+                    return;
                 }
 
                 var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
-                    // TODO(kevin): enable once this is supported in the SDK
+                    // TODO(kevin): enable once this is supported in the SDK (3.17.0)
                     // .WithContentResponseOnWrite(false)
                     .WithRequestTimeout(TimeSpan.FromSeconds(5))
                     .WithConnectionModeDirect()
                     .WithApplicationName("vera")
                     .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
                     .Build();
-                
+
                 collection.AddSingleton(cosmosClient);
 
                 collection.AddSingleton<IInvoiceStore>(_ => new CosmosInvoiceStore(

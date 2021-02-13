@@ -47,7 +47,7 @@ namespace Vera.Models
         /// <summary>
         /// Signature details of the invoice.
         /// </summary>
-        public Signature Signature { get; set; }
+        public Signature Signature { get; set; } = new();
 
         /// <summary>
         /// Supplier is the seller of the goods/services on the invoice.

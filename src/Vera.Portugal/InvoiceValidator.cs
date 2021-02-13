@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 using Vera.Invoices;
 using Vera.Models;
 
@@ -7,36 +8,87 @@ namespace Vera.Portugal
 {
     public class InvoiceValidator : IInvoiceValidator
     {
+        private readonly Regex _postalCodeFormat = new(@"\d{4}\-\d{3}", RegexOptions.Compiled);
+
         public ICollection<ValidationResult> Validate(Invoice invoice)
         {
             var results = new List<ValidationResult>();
-            
-            ValidateFaturaInvoiceLimit(invoice, results);
+
+            results.AddRange(ValidateFaturaInvoiceLimit(invoice));
+
             ValidateMixedQuantities(invoice, results);
             ValidateTaxExemption(invoice, results);
+
+            // TODO(kevin): validate that a return line has a reference to the original line
 
             return results;
         }
 
-        private static void ValidateFaturaInvoiceLimit(Invoice invoice, ICollection<ValidationResult> results)
+        private IEnumerable<ValidationResult> ValidateFaturaInvoiceLimit(Invoice invoice)
         {
-            if (invoice.Totals.Gross <= InvoiceTypeHelper.FaturaInvoiceLimit) return;
-            
+            if (invoice.Totals.Gross <= InvoiceTypeHelper.FaturaInvoiceLimit) yield break;
+
             if (invoice.Customer == null)
             {
-                results.Add(new ValidationResult(
+                yield return new ValidationResult(
                     $"gross > {InvoiceTypeHelper.FaturaInvoiceLimit}, customer is required",
-                    new[] {nameof(invoice.Customer)}
-                ));
+                    new[] {"Customer"}
+                );
+
+                yield break;
             }
 
             // TODO(kevin): move billing to the root level of the invoice
             if (invoice.Customer?.BillingAddress == null)
             {
-                results.Add(new ValidationResult(
+                yield return new ValidationResult(
                     $"gross > {InvoiceTypeHelper.FaturaInvoiceLimit}, billing address is required",
-                    new[] {nameof(invoice.Customer.BillingAddress)}
-                ));
+                    new[] {"BillingAddress"}
+                );
+
+                yield break;
+            }
+
+            var billingAddress = invoice.Customer.BillingAddress;
+
+            if (string.IsNullOrEmpty(billingAddress.Street))
+            {
+                yield return new ValidationResult(
+                    "street is required",
+                    new[] {"BillingAddress.Street"}
+                );
+            }
+
+            if (string.IsNullOrEmpty(billingAddress.City))
+            {
+                yield return new ValidationResult(
+                    "city is required",
+                    new[] {"BillingAddress.City"}
+                );
+            }
+
+            if (string.IsNullOrEmpty(billingAddress.PostalCode) ||
+                !_postalCodeFormat.IsMatch(billingAddress.PostalCode))
+            {
+                yield return new ValidationResult(
+                    "invalid postal code format",
+                    new[] {"BillingAddress.PostalCode"}
+                );
+            }
+
+            if (string.IsNullOrEmpty(billingAddress.Country))
+            {
+                yield return new ValidationResult(
+                    "country is required",
+                    new[]{"BillingAddress.Country"}
+                );
+            }
+            else if (billingAddress.Country.Length != 2)
+            {
+                yield return new ValidationResult(
+                    "country is invalid format, expected ISO-3166 alpha-2",
+                    new[] {"BillingAddress.Country"}
+                );
             }
         }
 
@@ -50,7 +102,7 @@ namespace Vera.Portugal
                 hasNegativeLines |= line.Quantity < 0;
 
                 if (!hasPositiveLines || !hasNegativeLines) continue;
-                
+
                 results.Add(new ValidationResult(
                     "not allowed to have mixed quantities",
                     new[] {nameof(invoice.Lines)}
@@ -59,7 +111,7 @@ namespace Vera.Portugal
                 break;
             }
         }
-        
+
         private static void ValidateTaxExemption(Invoice invoice, ICollection<ValidationResult> results)
         {
             foreach (var line in invoice.Lines)
@@ -69,7 +121,7 @@ namespace Vera.Portugal
                 {
                     results.Add(new ValidationResult(
                         $"line '{line.Description}' is exempted from tax, but the reason is missing",
-                        new[] { nameof(line.Taxes.ExemptionReason) }
+                        new[] {nameof(line.Taxes.ExemptionReason)}
                     ));
                 }
             }

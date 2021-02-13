@@ -22,8 +22,71 @@ namespace Vera.Portugal.Tests
 
             var results = RunValidator(invoice);
 
-            Assert.NotEmpty(results);
             Assert.Contains(results, x => x.MemberNames.Contains("Customer"));
+        }
+
+        [Fact]
+        public void Should_require_specific_fields_on_billing_address()
+        {
+            var tests = new[]
+            {
+                new
+                {
+                    Expected = new[] { "Street", "City", "PostalCode", "Country" },
+                    Address = new Address
+                    {
+                    },
+                },
+                new
+                {
+                    Expected = new[] { "City", "PostalCode", "Country" },
+                    Address = new Address
+                    {
+                        Street = "Some street"
+                    },
+                },
+                new
+                {
+                    Expected = new[] { "PostalCode", "Country" },
+                    Address = new Address
+                    {
+                        Street = "Some street",
+                        City = "Some city"
+                    },
+                },
+                new
+                {
+                    Expected = new[] { "Country" },
+                    Address = new Address
+                    {
+                        Street = "Some street",
+                        City = "Some city",
+                        PostalCode = "1234-100"
+                    },
+                },
+            };
+            
+            var invoice = new Invoice
+            {
+                Customer = new Customer(),
+                Totals = new Totals
+                {
+                    Gross = InvoiceTypeHelper.FaturaInvoiceLimit + 1m
+                }
+            };
+
+            foreach (var test in tests)
+            {
+                invoice.Customer.BillingAddress = test.Address;
+
+                var results = RunValidator(invoice);
+                var allMemberNames = results.SelectMany(x => x.MemberNames).ToList();
+
+                foreach (var expected in test.Expected)
+                {
+                    Assert.Contains($"BillingAddress.{expected}", allMemberNames);
+                }
+            }
         }
 
         [Fact]

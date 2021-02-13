@@ -8,7 +8,7 @@ namespace Vera.Models
         public string PostalCode { get; set; }
 
         /// <summary>
-        /// ISO 3166-1
+        /// ISO 3166-1 alpha-2.
         /// </summary>
         public string Country { get; set; }
 

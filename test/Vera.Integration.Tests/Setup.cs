@@ -59,27 +59,32 @@ namespace Vera.Integration.Tests
         public async Task<SetupClient> CreateClient(AccountContext context)
         {
             await Semaphore.WaitAsync();
-            
-            var loginEntry = await CreateLoginIfNotExists(context.CompanyName);
-            var (account, exists) = await CreateAccountIfNotExists(context, loginEntry.Token);
 
-            Semaphore.Release();
-
-            var client = new SetupClient(this, _channel, loginEntry.Token, account);
-
-            if (!exists && context.Configuration.Any())
+            try
             {
-                var accountConfigurationRequest = new AccountConfigurationRequest
+                var loginEntry = await CreateLoginIfNotExists(context.CompanyName);
+                var (account, exists) = await CreateAccountIfNotExists(context, loginEntry.Token);
+
+                var client = new SetupClient(this, _channel, loginEntry.Token, account);
+
+                if (!exists && context.Configuration.Any())
                 {
-                    Id = account,
-                    Fields = { context.Configuration }
-                };
+                    var accountConfigurationRequest = new AccountConfigurationRequest
+                    {
+                        Id = account,
+                        Fields = {context.Configuration}
+                    };
 
-                await client.Account.CreateOrUpdateConfigurationAsync(accountConfigurationRequest,
-                    client.AuthorizedMetadata);
+                    await client.Account.CreateOrUpdateConfigurationAsync(accountConfigurationRequest,
+                        client.AuthorizedMetadata);
+                }
+
+                return client;
             }
-
-            return client;
+            finally
+            {
+                Semaphore.Release();    
+            }
         }
 
         public async Task<LoginEntry> CreateLoginIfNotExists(string companyName)
