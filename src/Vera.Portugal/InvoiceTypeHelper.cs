@@ -27,7 +27,7 @@ namespace Vera.Portugal
                 // FS => NIF available, below 1000 euros and in-store transaction
                 // FT => above the 1000 euros
 
-                if (invoice.Customer != null && invoice.ShipTo != null)
+                if (invoice.Customer != null && invoice.Customer.ShippingAddress != null)
                 {
                     // Endless aisle invoice' goods are delivered at a later point in time
                     // so by definition this is of type FT: we have a customer, address and delivery is not right now

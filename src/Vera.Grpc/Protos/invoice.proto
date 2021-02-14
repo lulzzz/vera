@@ -8,6 +8,7 @@ package vera.grpc;
 service InvoiceService {
     rpc Create(CreateInvoiceRequest) returns (CreateInvoiceReply);
     rpc GetByNumber(GetInvoiceByNumberRequest) returns (GetInvoiceReply);
+    rpc Validate(ValidateInvoiceRequest) returns (ValidateInvoiceReply);
 }
 
 message CreateInvoiceRequest {
@@ -32,6 +33,15 @@ message GetInvoiceByNumberRequest {
 message GetInvoiceReply {
     // TODO(kevin): extend this to return the full invoice?
     string number = 1;
+}
+
+message ValidateInvoiceRequest {
+    string accountId = 1;
+    Invoice invoice = 2;
+}
+
+message ValidateInvoiceReply {
+    map<string, string> results = 1;
 }
 
 // Signature captures the in-/output of the signing of the invoice
@@ -71,12 +81,9 @@ message Invoice {
     Customer customer = 10;
     Employee employee = 11;
 
-    vera.grpc.shared.Address billingAddress = 12;
-    vera.grpc.shared.Address shippingAddress = 13;
-
-    repeated InvoiceLine lines = 14;
-    repeated Settlement settlements = 15;
-    repeated Payment payments = 16;
+    repeated InvoiceLine lines = 13;
+    repeated Settlement settlements = 14;
+    repeated Payment payments = 15;
 }
 
 message InvoiceLine {

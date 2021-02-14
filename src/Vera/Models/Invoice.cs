@@ -66,11 +66,6 @@ namespace Vera.Models
         public Customer? Customer { get; set; }
 
         /// <summary>
-        /// Address that the invoice goods/services should be delivered to.
-        /// </summary>
-        public Address? ShipTo { get; set; }
-
-        /// <summary>
         /// Identifier of the cash register that created the invoice.
         /// </summary>
         public string TerminalId { get; set; }

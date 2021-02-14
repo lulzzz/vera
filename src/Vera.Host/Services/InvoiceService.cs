@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
@@ -39,10 +41,7 @@ namespace Vera.Host.Services
             var account = await context.ResolveAccount(_accountStore, request.Invoice.Account);
 
             // TODO: validate invoice, very, very, very strict
-            // TODO(kevin): PT - invoices > 1000 euros require a customer
             // TODO(kevin): NF525 - requires signature of original invoice on the returned line
-            // TODO(kevin): validate that when exempt is given that a reason and/or code is also available
-            // TODO(kevin): check if this is a requirement or optional (may depend on certifications?)
             
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var invoice = request.Invoice.Unpack();
@@ -70,6 +69,23 @@ namespace Vera.Host.Services
             {
                 Number = invoice.Number
             };
+        }
+
+        public override async Task<ValidateInvoiceReply> Validate(ValidateInvoiceRequest request, ServerCallContext context)
+        {
+            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
+            var invoice = request.Invoice.Unpack();
+
+            var results = factory.CreateInvoiceValidator().Validate(invoice);
+
+            var reply = new ValidateInvoiceReply();
+            foreach (var result in results)
+            {
+                reply.Results[result.MemberNames.First()] = result.ErrorMessage;
+            }
+
+            return reply;
         }
     }
 }

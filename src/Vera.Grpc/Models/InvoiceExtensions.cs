@@ -30,7 +30,7 @@ namespace Vera.Grpc.Models
                     SystemId = invoice.Employee.SystemId,
                     FirstName = invoice.Employee.FirstName,
                     LastName = invoice.Employee.LastName
-                }
+                },
             };
 
             if (invoice.Customer != null)
@@ -49,7 +49,6 @@ namespace Vera.Grpc.Models
                 };
             }
 
-            result.ShipTo = invoice.ShippingAddress.Unpack();
             result.Lines = invoice.Lines.Select(Unpack).ToList();
             result.Payments = invoice.Payments.Select(Unpack).ToList();
             result.Settlements = invoice.Settlements.Select(Unpack).ToList();
@@ -83,7 +82,6 @@ namespace Vera.Grpc.Models
                     FirstName = invoice.Employee.FirstName,
                     LastName = invoice.Employee.LastName
                 }
-                // TODO: billing/shipping for this invoice from customer?
             };
 
             result.Lines.AddRange(invoice.Lines.Select(Pack));

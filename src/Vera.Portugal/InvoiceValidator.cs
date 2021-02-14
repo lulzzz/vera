@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Vera.Invoices;
 using Vera.Models;
@@ -15,11 +16,9 @@ namespace Vera.Portugal
             var results = new List<ValidationResult>();
 
             results.AddRange(ValidateFaturaInvoiceLimit(invoice));
-
-            ValidateMixedQuantities(invoice, results);
-            ValidateTaxExemption(invoice, results);
-
-            // TODO(kevin): validate that a return line has a reference to the original line
+            results.AddRange(ValidateMixedQuantities(invoice));
+            results.AddRange(ValidateTaxExemption(invoice));
+            results.AddRange(ValidateCreditReference(invoice));
 
             return results;
         }
@@ -92,7 +91,7 @@ namespace Vera.Portugal
             }
         }
 
-        private static void ValidateMixedQuantities(Invoice invoice, ICollection<ValidationResult> results)
+        private static IEnumerable<ValidationResult> ValidateMixedQuantities(Invoice invoice)
         {
             var hasPositiveLines = false;
             var hasNegativeLines = false;
@@ -103,28 +102,35 @@ namespace Vera.Portugal
 
                 if (!hasPositiveLines || !hasNegativeLines) continue;
 
-                results.Add(new ValidationResult(
+                yield return new ValidationResult(
                     "not allowed to have mixed quantities",
                     new[] {nameof(invoice.Lines)}
-                ));
+                );
 
                 break;
             }
         }
 
-        private static void ValidateTaxExemption(Invoice invoice, ICollection<ValidationResult> results)
+        private static IEnumerable<ValidationResult> ValidateTaxExemption(Invoice invoice)
         {
-            foreach (var line in invoice.Lines)
-            {
-                var taxes = line.Taxes;
-                if (taxes.Category == TaxesCategory.Exempt && string.IsNullOrWhiteSpace(taxes.ExemptionReason))
-                {
-                    results.Add(new ValidationResult(
-                        $"line '{line.Description}' is exempted from tax, but the reason is missing",
-                        new[] {nameof(line.Taxes.ExemptionReason)}
-                    ));
-                }
-            }
+            return
+                from line in invoice.Lines
+                let taxes = line.Taxes
+                where taxes.Category == TaxesCategory.Exempt && string.IsNullOrWhiteSpace(taxes.ExemptionReason)
+                select new ValidationResult(
+                    $"line '{line.Description}' is exempted from tax, but the reason is missing",
+                    new[] {nameof(line.Taxes.ExemptionReason)});
+        }
+
+        private static IEnumerable<ValidationResult> ValidateCreditReference(Invoice invoice)
+        {
+            return
+                from line in invoice.Lines
+                where line.Quantity <= 0
+                where string.IsNullOrEmpty(line.CreditReference?.Number)
+                select new ValidationResult(
+                    $"line '{line.Description}' is credited, but the credit reference is missing",
+                    new[] {nameof(line.CreditReference)});
         }
     }
 }

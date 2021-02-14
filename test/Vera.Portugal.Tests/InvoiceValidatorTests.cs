@@ -158,7 +158,33 @@ namespace Vera.Portugal.Tests
             }
         }
 
-        private static ICollection<ValidationResult> RunValidator(Invoice invoice)
+        [Fact]
+        public void Should_require_credit_reference()
+        {
+            var invoice = new Invoice
+            {
+                Lines = new List<InvoiceLine>
+                {
+                    new()
+                    {
+                        Description = "without credit reference",
+                        Quantity = -1,
+                        CreditReference = null,
+                        Taxes = new()
+                        {
+                            Category = TaxesCategory.High,
+                            Rate = 1.23m
+                        }
+                    }
+                }
+            };
+
+            var results = RunValidator(invoice);
+
+            Assert.Contains(results, x => x.MemberNames.Contains("CreditReference"));
+        }
+
+        private static IEnumerable<ValidationResult> RunValidator(Invoice invoice)
         {
             var validator = new InvoiceValidator();
             var results = validator.Validate(invoice);

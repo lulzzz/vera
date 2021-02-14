@@ -13,7 +13,7 @@ namespace Vera.Tests.Shared
             _faker = faker;
         }
 
-        public Invoice CreateWithCustomerAndSingleProduct(string account)
+        public Invoice CreateAnonymousWithSingleProduct(string account)
         {
             // TODO(kevin): convert to builder pattern
 
@@ -23,15 +23,15 @@ namespace Vera.Tests.Shared
                 SystemId = "1",
                 TerminalId = "616.1337",
                 Remark = "hello world",
-                Customer = new Customer
-                {
-                    SystemId = "1",
-                    Email = _faker.Person.Email,
-                    FirstName = _faker.Person.FirstName,
-                    LastName = _faker.Person.LastName,
-                    BillingAddress = CreateAddress(),
-                    ShippingAddress = CreateAddress(),
-                },
+                // Customer = new Customer
+                // {
+                //     SystemId = "1",
+                //     Email = _faker.Person.Email,
+                //     FirstName = _faker.Person.FirstName,
+                //     LastName = _faker.Person.LastName,
+                //     BillingAddress = CreateAddress(),
+                //     ShippingAddress = CreateAddress(),
+                // },
                 Employee = new Employee
                 {
                     SystemId = "1",

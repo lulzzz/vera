@@ -24,7 +24,7 @@ namespace Vera.Integration.Tests.Portugal
             var client = await _setup.CreateClient(Constants.Account);
 
             var invoiceGenerator = new InvoiceGenerator(new Faker());
-            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(client.AccountId);
+            var invoice = invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -53,7 +53,7 @@ namespace Vera.Integration.Tests.Portugal
             var client = await _setup.CreateClient(Constants.Account);
 
             var invoiceGenerator = new InvoiceGenerator(new Faker());
-            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(client.AccountId);
+            var invoice = invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {

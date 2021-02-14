@@ -25,8 +25,10 @@ namespace Vera.Portugal.Tests
         {
             var input = new Invoice
             {
-                Customer = new(),
-                ShipTo =  new()
+                Customer = new()
+                {
+                    ShippingAddress = new()
+                }
             };
 
             var output = InvoiceTypeHelper.DetermineType(input);

@@ -66,7 +66,7 @@ namespace Vera.Tests
             );
 
             var invoiceGenerator = new InvoiceGenerator(new Faker());
-            var invoice = invoiceGenerator.CreateWithCustomerAndSingleProduct(Guid.Empty.ToString());
+            var invoice = invoiceGenerator.CreateAnonymousWithSingleProduct(Guid.Empty.ToString());
 
             await processor.Process(factory.Object, invoice);
 
