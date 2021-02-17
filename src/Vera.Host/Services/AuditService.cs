@@ -57,7 +57,7 @@ namespace Vera.Host.Services
                 _invoiceStore,
                 _blobStore,
                 _auditStore,
-                factory
+                factory.CreateAuditWriter()
             );
 
             _backgroundTaskQueue.Queue(_ => archiver.Archive(account, audit));

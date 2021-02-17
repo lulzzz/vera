@@ -14,16 +14,21 @@ namespace Vera.Host
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _env;
 
-        public IConfiguration Configuration { get; }
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
+        {
+            _configuration = configuration;
+            _env = env;
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var jwtIssuer = _configuration["VERA:JWT:ISSUER"];
+            var jwtKey = new SymmetricSecurityKey(Convert.FromBase64String(_configuration["VERA:JWT:KEY"]));
+            
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -33,33 +38,32 @@ namespace Vera.Host
                     {
                         ValidateLifetime = true,
                         ValidateIssuerSigningKey = true,
-                        ValidIssuer = Configuration["VERA:JWT:ISSUER"],
-                        ValidAudience = Configuration["VERA:JWT:ISSUER"],
-                        IssuerSigningKey =
-                            new SymmetricSecurityKey(Convert.FromBase64String(Configuration["VERA:JWT:KEY"]))
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtIssuer,
+                        IssuerSigningKey = jwtKey
                     };
                 });
 
             services.AddControllers();
+            
             services.AddGrpc(o =>
             {
-                // TODO(kevin): only in development mode
-                o.EnableDetailedErrors = true;
+                o.EnableDetailedErrors = _env.IsDevelopment();
             });
 
-            services.AddTransient<ISecurityTokenGenerator>(p => new JwtSecurityTokenGenerator(Configuration));
-
+            services.AddSingleton<ISecurityTokenGenerator>(new JwtSecurityTokenGenerator(jwtIssuer, jwtIssuer, jwtKey));
+            
             services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
             services.AddHostedService<QueueHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app)
         {
             // Used for the ESC POS encoding. See EscPosVisitor
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-            if (env.IsDevelopment())
+            if (_env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }

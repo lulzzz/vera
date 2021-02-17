@@ -30,7 +30,6 @@ namespace Vera.Tests
             var invoiceStore = new Mock<IInvoiceStore>();
             var blobStore = new Mock<IBlobStore>();
             var auditStore = new Mock<IAuditStore>();
-            var factory = new Mock<IComponentFactory>();
             var writer = new Mock<IAuditWriter>();
 
             invoiceStore
@@ -40,10 +39,6 @@ namespace Vera.Tests
                     new()
                 });
 
-            factory
-                .Setup(f => f.CreateAuditWriter())
-                .Returns(writer.Object);
-
             writer
                 .Setup(w => w.ResolveName(It.IsAny<AuditCriteria>(), It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(() => "abc.xml");
@@ -52,7 +47,7 @@ namespace Vera.Tests
                 invoiceStore.Object,
                 blobStore.Object,
                 auditStore.Object,
-                factory.Object
+                writer.Object
             );
 
             var account = new Account();

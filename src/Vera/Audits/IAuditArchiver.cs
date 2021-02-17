@@ -19,19 +19,19 @@ namespace Vera.Audits
         private readonly IInvoiceStore _invoiceStore;
         private readonly IBlobStore _blobStore;
         private readonly IAuditStore _auditStore;
-        private readonly IComponentFactory _componentFactory;
+        private readonly IAuditWriter _auditWriter;
 
         public AuditArchiver(
             IInvoiceStore invoiceStore,
             IBlobStore blobStore,
             IAuditStore auditStore,
-            IComponentFactory componentFactory
+            IAuditWriter auditWriter
         )
         {
             _invoiceStore = invoiceStore;
             _blobStore = blobStore;
             _auditStore = auditStore;
-            _componentFactory = componentFactory;
+            _auditWriter = auditWriter;
         }
 
         public async Task Archive(Account account, Audit audit)
@@ -62,8 +62,6 @@ namespace Vera.Audits
 
         private async Task FillArchive(Account account, Audit audit, ZipArchive archive)
         {
-            var writer = _componentFactory.CreateAuditWriter();
-
             var sequence = 1;
             var ranges = GetDateRanges(audit).ToList();
 
@@ -87,10 +85,10 @@ namespace Vera.Audits
 
                 // TODO(kevin): fetch print trail?
 
-                var entryName = await writer.ResolveName(criteria, sequence++, ranges.Count);
+                var entryName = await _auditWriter.ResolveName(criteria, sequence++, ranges.Count);
 
                 await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();
-                await writer.Write(context, criteria, stream);
+                await _auditWriter.Write(context, criteria, stream);
             }
         }
 
