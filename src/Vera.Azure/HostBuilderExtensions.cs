@@ -131,12 +131,11 @@ namespace Vera.Azure
                 }
 
                 var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
-                    // TODO(kevin): enable once this is supported in the SDK (3.17.0)
-                    // .WithContentResponseOnWrite(false)
-                    .WithRequestTimeout(TimeSpan.FromSeconds(5))
+                    .WithContentResponseOnWrite(false)
                     .WithConnectionModeDirect()
-                    .WithApplicationName("vera")
+                    .WithRequestTimeout(TimeSpan.FromSeconds(5))
                     .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
+                    .WithApplicationName("vera")
                     .Build();
 
                 collection.AddSingleton(cosmosClient);
