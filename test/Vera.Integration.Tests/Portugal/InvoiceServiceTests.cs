@@ -88,6 +88,12 @@ namespace Vera.Integration.Tests.Portugal
             invoice.Lines.Add(new Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",
+                Product = new()
+                {
+                    Code = "1234",
+                    Description = "trigger mixed quantities",
+                    Type = ProductType.Goods
+                },
                 Quantity = -1,
                 Taxes = new Taxes
                 {
@@ -95,7 +101,6 @@ namespace Vera.Integration.Tests.Portugal
                     Rate = 1.23m,
                     Code = "IVA"
                 },
-                Type = InvoiceLineType.Services
             });
 
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest

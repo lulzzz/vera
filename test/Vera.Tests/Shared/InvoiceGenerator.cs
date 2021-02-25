@@ -65,9 +65,9 @@ namespace Vera.Tests.Shared
                         Product = new Product
                         {
                             Code = "COCA",
-                            Description = "Coca cola"
+                            Description = "Coca cola",
+                            Type = ProductType.Goods
                         },
-                        Type = InvoiceLineType.Goods,
                         Quantity = 1,
                         UnitPrice = 1.99m / 1.21m,
                         Gross = 1.99m,

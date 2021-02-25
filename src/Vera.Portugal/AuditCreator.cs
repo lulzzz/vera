@@ -5,6 +5,7 @@ using Vera.Audits;
 using Vera.Models;
 using Vera.Portugal.Models;
 using Invoice = Vera.Models.Invoice;
+using ProductType = Vera.Portugal.Models.ProductType;
 
 namespace Vera.Portugal
 {
@@ -158,21 +159,21 @@ namespace Vera.Portugal
             var products = invoices
                 .SelectMany(l => l.Lines)
                 .Where(l => l.Product != null)
-                .Select(l => (l.Product, l.Type))
-                .GroupBy(x => x.Product.Code);
+                .Select(l => l.Product)
+                .GroupBy(x => x.Code);
 
             auditFile.MasterFiles.Product = products.Select(g =>
             {
-                var (product, type) = g.First();
-
+                var product = g.First();
+                
                 return new Models.Product
                 {
                     ProductCode = product.Code,
                     ProductNumberCode = product.Barcode,
-                    ProductType = type switch
+                    ProductType = product.Type switch
                     {
-                        InvoiceLineType.Goods => ProductType.P,
-                        InvoiceLineType.Services => ProductType.S,
+                        // TODO(kevin): missing "S" for service?
+                        Vera.Models.ProductType.Goods => ProductType.P,
                         _ => ProductType.O
                     },
                     ProductDescription = product.Description

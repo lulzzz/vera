@@ -87,11 +87,6 @@ message Invoice {
 }
 
 message InvoiceLine {
-    enum Type {
-        GOODS = 0;
-        SERVICES = 1;
-    }
-
     // Associated product that was sold
     Product product = 1;
 
@@ -103,21 +98,19 @@ message InvoiceLine {
 
     // Unit of measure
     string unit = 4;
-    
-    Type type = 5;
 
     // Gross price per unit
-    vera.grpc.shared.DecimalValue unitPrice = 6;
+    vera.grpc.shared.DecimalValue unitPrice = 5;
     
     // Total excluding taxes and any discounts
-    vera.grpc.shared.DecimalValue gross = 7;
+    vera.grpc.shared.DecimalValue gross = 6;
 
     // Total including taxes and discounts
-    vera.grpc.shared.DecimalValue net = 8;
+    vera.grpc.shared.DecimalValue net = 7;
 
-    TaxValue tax = 9;
+    TaxValue tax = 8;
 
-    repeated Settlement settlements = 10;
+    repeated Settlement settlements = 9;
 }
 
 message Settlement {
@@ -194,6 +187,17 @@ message Employee {
 }
 
 message Product {
+    enum Type {
+        // Generic fallback value. Please use the most specific value for the product.
+        OTHER = 0;
+        
+        // Generic fallback for goods. Please use the most specific value for the product.
+        GOODS = 1;
+        
+        // Gift card product. Used to purchase stuff at a later point in time.
+        GIFT_CARD = 2;
+    }
+
     string systemId = 1; 
     
     // Article code of the product as used by the merchant
@@ -204,6 +208,9 @@ message Product {
 
     // Description of the product
     string description = 4;
+    
+    // Type of the product. Some type of products like gift cards require special handling
+    Type type = 5;
 }
 
 message TaxValue {

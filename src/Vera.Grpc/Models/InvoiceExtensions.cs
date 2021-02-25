@@ -123,11 +123,6 @@ namespace Vera.Grpc.Models
                 },
                 Quantity = line.Quantity,
                 Tax = line.Taxes.Pack(),
-                Type = line.Type switch {
-                    InvoiceLineType.Goods => InvoiceLine.Types.Type.Goods,
-                    InvoiceLineType.Services => InvoiceLine.Types.Type.Services,
-                    _ => throw new ArgumentOutOfRangeException()
-                },
                 Unit = line.UnitOfMeasure ?? string.Empty,
                 UnitPrice = line.UnitPrice
             };
