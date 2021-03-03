@@ -26,7 +26,6 @@ namespace Vera.Host
 
                 await CreateHostBuilder(args)
                     .Build()
-                    .ConfigureCosmos()
                     .RunAsync();
 
                 return 0;
