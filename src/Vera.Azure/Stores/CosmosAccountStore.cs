@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Vera.Models;
@@ -37,14 +38,21 @@ namespace Vera.Azure.Stores
             );
         }
 
-        public async Task<Account> Get(Guid companyId, Guid accountId)
+        public async Task<Account?> Get(Guid companyId, Guid accountId)
         {
-            var document = await _container.ReadItemAsync<TypedDocument<Account>>(
-                accountId.ToString(),
-                new PartitionKey(companyId.ToString())
-            );
+            try
+            {
+                var document = await _container.ReadItemAsync<TypedDocument<Account>>(
+                    accountId.ToString(),
+                    new PartitionKey(companyId.ToString())
+                );
 
-            return document.Resource.Value;
+                return document.Resource.Value;
+            }
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
         }
 
         public async Task<ICollection<Account>> GetByCompany(Guid companyId)
