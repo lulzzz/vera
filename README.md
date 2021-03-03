@@ -39,20 +39,20 @@ Latin for true. We want this product to be the one and only source for all the a
 
 ## Cosmos model
 - companies
- - Container for: `Company`, `Account` and `User`
- - All of these are partitioned on the id of the `Company`, separated by the `Type` property
+  - Container for: `Company`, `Account` and `User`
+  - All of these are partitioned on the id of the `Company`, separated by the `Type` property
 - invoices
- - Container for: `Invoice`
- - Partioned on id of the account that created the invoice plus the invoice' number
+  - Container for: `Invoice`
+  - Partioned on id of the account that created the invoice plus the invoice' number
 - audits
- - Container for: `Audit`
- - Partitioned on the id of the account
+  - Container for: `Audit`
+  - Partitioned on the id of the account
 - trails
- - Container for: `PrintAuditTrail`
- - Partitioned on the id of the invoice
+  - Container for: `PrintAuditTrail`
+  - Partitioned on the id of the invoice
 - chains
- - Container for: `ChainDocument`
- - Partitioned on the "bucket" which is defined by the caller, for invoices this is defined by its "bucket"
+  - Container for: `ChainDocument`
+  - Partitioned on the "bucket" which is defined by the caller, for invoices this is defined by its "bucket"
 
 # Deployment
 
