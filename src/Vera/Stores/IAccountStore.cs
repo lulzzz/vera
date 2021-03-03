@@ -9,7 +9,7 @@ namespace Vera.Stores
     {
         Task Store(Account account);
         Task Update(Account account);
-        Task<Account> Get(Guid companyId, Guid accountId);
+        Task<Account?> Get(Guid companyId, Guid accountId);
         Task<ICollection<Account>> GetByCompany(Guid companyId);
     }
 }
