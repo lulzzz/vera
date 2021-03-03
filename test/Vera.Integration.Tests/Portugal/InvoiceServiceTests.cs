@@ -74,6 +74,9 @@ namespace Vera.Integration.Tests.Portugal
             var firstInvoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId);
             var nextInvoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId);
 
+            // Make sure both invoices are from the same supplier so they land in the same chain
+            firstInvoice.Supplier.SystemId = nextInvoice.Supplier.SystemId = 1.ToString();
+
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
                 Invoice = firstInvoice.Pack()

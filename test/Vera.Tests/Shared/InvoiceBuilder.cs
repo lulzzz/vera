@@ -70,6 +70,7 @@ namespace Vera.Tests.Shared
             {
                 SystemId = _faker.Random.Number(1, int.MaxValue).ToString(),
                 Type = ProductType.Goods,
+                Code = _faker.Commerce.Ean13(),
                 Description = _faker.Commerce.Product()
             }, TaxesCategory.High, amount, taxRate);
         }

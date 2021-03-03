@@ -14,12 +14,16 @@ namespace Vera.Tests.Shared
 
         public Invoice CreateEmptyAnonymous(Guid accountId)
         {
-            return _builder
+            var invoice =  _builder
                 .Reset()
                 .WithTerminal("1.1")
                 .WithEmployee()
                 .WithSupplier()
                 .Build();
+
+            invoice.AccountId = accountId;
+            
+            return invoice;
         }
         
         public Invoice CreateAnonymousSingleProductPaidWithCash(Guid accountId)
