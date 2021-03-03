@@ -28,7 +28,7 @@ namespace Vera.Portugal.Tests
             // TODO(kevin): use invoice generator to generate test cases
             // TODO(kevin): test that receipt contains correct values
 
-            var invoiceGenerator = new InvoiceGenerator(new Faker());
+            var invoiceGenerator = new InvoiceBuilder(new Faker());
 
             var invoice = new Invoice
             {

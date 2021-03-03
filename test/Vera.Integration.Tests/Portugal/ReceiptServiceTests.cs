@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Bogus;
 using Grpc.Net.Client;
@@ -23,8 +24,8 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoiceGenerator = new InvoiceGenerator(new Faker());
-            var invoice = invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
+            var invoiceDirector = new InvoiceDirector(new InvoiceBuilder(new Faker()));
+            var invoice = invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -52,8 +53,8 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoiceGenerator = new InvoiceGenerator(new Faker());
-            var invoice = invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
+            var invoiceDirector = new InvoiceDirector(new InvoiceBuilder(new Faker()));
+            var invoice = invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+using System;
 using System.Threading.Tasks;
 using Bogus;
 using Vera.Grpc;
@@ -6,18 +6,21 @@ using Vera.Grpc.Models;
 using Vera.Models;
 using Vera.Tests.Shared;
 using Xunit;
+using Product = Vera.Models.Product;
 
 namespace Vera.Integration.Tests.Portugal
 {
     public class InvoiceServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
         private readonly Setup _setup;
-        private readonly InvoiceGenerator _invoiceGenerator;
+        private readonly InvoiceBuilder _invoiceBuilder;
+        private readonly InvoiceDirector _invoiceDirector;
 
         public InvoiceServiceTests(ApiWebApplicationFactory fixture)
         {
             _setup = fixture.CreateSetup();
-            _invoiceGenerator = new InvoiceGenerator(new Faker());
+            _invoiceBuilder = new InvoiceBuilder(new Faker());
+            _invoiceDirector = new InvoiceDirector(_invoiceBuilder);
         }
 
         [Fact]
@@ -25,7 +28,7 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
             
-            var invoice = _invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
+            var invoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -40,12 +43,36 @@ namespace Vera.Integration.Tests.Portugal
         }
 
         [Fact]
+        public async Task Should_be_able_to_create_an_invoice_with_multiple_payments()
+        {
+            var client = await _setup.CreateClient(Constants.Account);
+            
+            _invoiceDirector.CreateEmptyAnonymous(Guid.Parse(client.AccountId));
+
+            var invoice = _invoiceBuilder
+                .WithPayment(50m, PaymentCategory.Debit)
+                .WithPayment(50m, PaymentCategory.Cash)
+                .WithAmount(100m, 1.23m)
+                .Build();
+            
+            var createInvoiceRequest = new CreateInvoiceRequest
+            {
+                Invoice = invoice.Pack()
+            };
+
+            var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+
+            Assert.Contains("FR", createInvoiceReply.Number);
+        }
+
+        [Fact]
         public async Task Should_have_an_ascending_sequence()
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var firstInvoice = _invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
-            var nextInvoice = _invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
+            var accountId = Guid.Parse(client.AccountId);
+            var firstInvoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId);
+            var nextInvoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId);
 
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
@@ -68,7 +95,7 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoice = _invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
+            var invoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
 
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
@@ -84,7 +111,7 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoice = _invoiceGenerator.CreateAnonymousWithSingleProduct(client.AccountId);
+            var invoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
             invoice.Lines.Add(new Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",

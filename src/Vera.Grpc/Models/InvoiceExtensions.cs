@@ -65,9 +65,9 @@ namespace Vera.Grpc.Models
                 Period = invoice.FiscalPeriod,
                 PeriodYear = invoice.FiscalYear,
                 Timestamp = invoice.Date.ToTimestamp(),
-                SystemId = invoice.SystemId,
-                TerminalId = invoice.TerminalId,
-                Remark = invoice.Remark,
+                SystemId = invoice.SystemId ?? string.Empty,
+                TerminalId = invoice.TerminalId ?? string.Empty,
+                Remark = invoice.Remark ?? string.Empty,
                 Supplier = new Supplier
                 {
                     Name = invoice.Supplier.Name,
