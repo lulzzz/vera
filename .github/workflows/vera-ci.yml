@@ -13,14 +13,17 @@ jobs:
         dotnet-version: '5.0.102'
     - name: Run unit tests
       run: dotnet test --nologo -v q --filter FullyQualifiedName!~Integration
-    - name: Login to Azure container registry
-      uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
-        username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_PASSWORD }}
-    - name: Build and push image
+    - name: Build image
       run: |
         docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vera:${{ github.sha }}
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vera:${{ github.sha }}
+    # - name: Login to Azure container registry
+    #   uses: azure/docker-login@v1
+    #   with:
+    #     login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+    #     username: ${{ secrets.REGISTRY_USERNAME }}
+    #     password: ${{ secrets.REGISTRY_PASSWORD }}
+    # - name: Build and push image
+    #   run: |
+    #     docker build . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/vera:${{ github.sha }}
+    #     docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/vera:${{ github.sha }}
 
