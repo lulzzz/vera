@@ -73,7 +73,6 @@ namespace Vera.Host
             }
 
             app.UseRouting();
-
             app.UseAuthentication();
             app.UseAuthorization();
 
