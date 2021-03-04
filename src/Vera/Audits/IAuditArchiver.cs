@@ -53,7 +53,11 @@ namespace Vera.Audits
             await streamToZip.FlushAsync();
             streamToZip.Position = 0;
 
-            var location = await _blobStore.Store(account.Id, streamToZip);
+            var location = await _blobStore.Store(account.Id, new Blob
+            {
+                Content = streamToZip,
+                MimeType = "application/zip"
+            });
 
             audit.Location = location;
 

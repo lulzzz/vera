@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Vera.Host\Vera.Host.csproj" />
     <ProjectReference Include="..\..\src\Vera\Vera.csproj" />
   </ItemGroup>
 
