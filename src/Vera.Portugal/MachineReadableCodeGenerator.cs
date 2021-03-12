@@ -1,5 +1,3 @@
-using System.Linq;
-using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Models;
 using Vera.Signing;

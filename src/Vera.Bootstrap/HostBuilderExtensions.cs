@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Vera.Austria;
 using Vera.Concurrency;
 using Vera.Invoices;
 using Vera.Portugal;

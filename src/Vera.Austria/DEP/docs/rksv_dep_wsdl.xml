@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="https://www.e-tresor.at/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" targetNamespace="https://www.e-tresor.at/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="https://www.e-tresor.at/">
+      <s:element name="Add">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="0" maxOccurs="1" name="entry" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="signedEntry" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="NetworkCredential">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SecurePassword" type="tns:SecureString" />
+          <s:element minOccurs="0" maxOccurs="1" name="Domain" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SecureString" />
+      <s:element name="AddResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AddResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Result">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Data" />
+          <s:element minOccurs="0" maxOccurs="1" name="DataType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ResultState" type="tns:State" />
+        </s:sequence>
+      </s:complexType>
+      <s:simpleType name="State">
+        <s:restriction base="s:string">
+          <s:enumeration value="Unprocessed" />
+          <s:enumeration value="AuthenticationError" />
+          <s:enumeration value="FunctionError" />
+          <s:enumeration value="InternalError" />
+          <s:enumeration value="MaintenanceActive" />
+          <s:enumeration value="Success" />
+          <s:enumeration value="NotFound" />
+          <s:enumeration value="FileAlreadyExists" />
+          <s:enumeration value="RequiredParameterNotSet" />
+          <s:enumeration value="RegisterIdMismatch" />
+          <s:enumeration value="ReceiptNumberAlreadyExists" />
+          <s:enumeration value="InvalidDEPFileFormat" />
+          <s:enumeration value="UpgradeInactive" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="UploadDEPFile">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="0" maxOccurs="1" name="fileName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="fileData" type="s:base64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UploadDEPFileResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UploadDEPFileResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DownloadDEPFile">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="0" maxOccurs="1" name="fileName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DownloadDEPFileResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DownloadDEPFileResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteDEPFile">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="0" maxOccurs="1" name="fileName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteDEPFileResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DeleteDEPFileResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Export">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="1" maxOccurs="1" name="startDate" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="endDate" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ExportResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ExportResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Register">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="0" maxOccurs="1" name="partnerNr" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="partnerEmail" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RegisterResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="RegisterResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SaveRKSVMetaData">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="1" maxOccurs="1" name="metaData" type="tns:RKSVMetaData" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="RKSVMetaData">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="RegisterId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Base64AESKey" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Algorithmus" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Certificate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CertificateSerialNumberHEX" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CompanyIdentifier" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ZDAID" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SaveRKSVMetaDataResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SaveRKSVMetaDataResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadRKSVMetaData">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="0" maxOccurs="1" name="registerId" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ReadRKSVMetaDataResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ReadRKSVMetaDataResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteAllDEPEntriesForRegisterId">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="credential" type="tns:NetworkCredential" />
+            <s:element minOccurs="0" maxOccurs="1" name="registerId" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteAllDEPEntriesForRegisterIdResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="DeleteAllDEPEntriesForRegisterIdResult" type="tns:Result" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="AddSoapIn">
+    <wsdl:part name="parameters" element="tns:Add" />
+  </wsdl:message>
+  <wsdl:message name="AddSoapOut">
+    <wsdl:part name="parameters" element="tns:AddResponse" />
+  </wsdl:message>
+  <wsdl:message name="UploadDEPFileSoapIn">
+    <wsdl:part name="parameters" element="tns:UploadDEPFile" />
+  </wsdl:message>
+  <wsdl:message name="UploadDEPFileSoapOut">
+    <wsdl:part name="parameters" element="tns:UploadDEPFileResponse" />
+  </wsdl:message>
+  <wsdl:message name="DownloadDEPFileSoapIn">
+    <wsdl:part name="parameters" element="tns:DownloadDEPFile" />
+  </wsdl:message>
+  <wsdl:message name="DownloadDEPFileSoapOut">
+    <wsdl:part name="parameters" element="tns:DownloadDEPFileResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteDEPFileSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteDEPFile" />
+  </wsdl:message>
+  <wsdl:message name="DeleteDEPFileSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteDEPFileResponse" />
+  </wsdl:message>
+  <wsdl:message name="ExportSoapIn">
+    <wsdl:part name="parameters" element="tns:Export" />
+  </wsdl:message>
+  <wsdl:message name="ExportSoapOut">
+    <wsdl:part name="parameters" element="tns:ExportResponse" />
+  </wsdl:message>
+  <wsdl:message name="RegisterSoapIn">
+    <wsdl:part name="parameters" element="tns:Register" />
+  </wsdl:message>
+  <wsdl:message name="RegisterSoapOut">
+    <wsdl:part name="parameters" element="tns:RegisterResponse" />
+  </wsdl:message>
+  <wsdl:message name="SaveRKSVMetaDataSoapIn">
+    <wsdl:part name="parameters" element="tns:SaveRKSVMetaData" />
+  </wsdl:message>
+  <wsdl:message name="SaveRKSVMetaDataSoapOut">
+    <wsdl:part name="parameters" element="tns:SaveRKSVMetaDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="ReadRKSVMetaDataSoapIn">
+    <wsdl:part name="parameters" element="tns:ReadRKSVMetaData" />
+  </wsdl:message>
+  <wsdl:message name="ReadRKSVMetaDataSoapOut">
+    <wsdl:part name="parameters" element="tns:ReadRKSVMetaDataResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteAllDEPEntriesForRegisterIdSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteAllDEPEntriesForRegisterId" />
+  </wsdl:message>
+  <wsdl:message name="DeleteAllDEPEntriesForRegisterIdSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteAllDEPEntriesForRegisterIdResponse" />
+  </wsdl:message>
+  <wsdl:portType name="rksv_depSoap">
+    <wsdl:operation name="Add">
+      <wsdl:input message="tns:AddSoapIn" />
+      <wsdl:output message="tns:AddSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadDEPFile">
+      <wsdl:input message="tns:UploadDEPFileSoapIn" />
+      <wsdl:output message="tns:UploadDEPFileSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DownloadDEPFile">
+      <wsdl:input message="tns:DownloadDEPFileSoapIn" />
+      <wsdl:output message="tns:DownloadDEPFileSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDEPFile">
+      <wsdl:input message="tns:DeleteDEPFileSoapIn" />
+      <wsdl:output message="tns:DeleteDEPFileSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Export">
+      <wsdl:input message="tns:ExportSoapIn" />
+      <wsdl:output message="tns:ExportSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Register">
+      <wsdl:input message="tns:RegisterSoapIn" />
+      <wsdl:output message="tns:RegisterSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SaveRKSVMetaData">
+      <wsdl:input message="tns:SaveRKSVMetaDataSoapIn" />
+      <wsdl:output message="tns:SaveRKSVMetaDataSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ReadRKSVMetaData">
+      <wsdl:input message="tns:ReadRKSVMetaDataSoapIn" />
+      <wsdl:output message="tns:ReadRKSVMetaDataSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAllDEPEntriesForRegisterId">
+      <wsdl:input message="tns:DeleteAllDEPEntriesForRegisterIdSoapIn" />
+      <wsdl:output message="tns:DeleteAllDEPEntriesForRegisterIdSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="rksv_depSoap" type="tns:rksv_depSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Add">
+      <soap:operation soapAction="https://www.e-tresor.at/Add" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadDEPFile">
+      <soap:operation soapAction="https://www.e-tresor.at/UploadDEPFile" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DownloadDEPFile">
+      <soap:operation soapAction="https://www.e-tresor.at/DownloadDEPFile" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDEPFile">
+      <soap:operation soapAction="https://www.e-tresor.at/DeleteDEPFile" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Export">
+      <soap:operation soapAction="https://www.e-tresor.at/Export" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Register">
+      <soap:operation soapAction="https://www.e-tresor.at/Register" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveRKSVMetaData">
+      <soap:operation soapAction="https://www.e-tresor.at/SaveRKSVMetaData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadRKSVMetaData">
+      <soap:operation soapAction="https://www.e-tresor.at/ReadRKSVMetaData" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAllDEPEntriesForRegisterId">
+      <soap:operation soapAction="https://www.e-tresor.at/DeleteAllDEPEntriesForRegisterId" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="rksv_depSoap12" type="tns:rksv_depSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="Add">
+      <soap12:operation soapAction="https://www.e-tresor.at/Add" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadDEPFile">
+      <soap12:operation soapAction="https://www.e-tresor.at/UploadDEPFile" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DownloadDEPFile">
+      <soap12:operation soapAction="https://www.e-tresor.at/DownloadDEPFile" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteDEPFile">
+      <soap12:operation soapAction="https://www.e-tresor.at/DeleteDEPFile" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Export">
+      <soap12:operation soapAction="https://www.e-tresor.at/Export" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Register">
+      <soap12:operation soapAction="https://www.e-tresor.at/Register" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SaveRKSVMetaData">
+      <soap12:operation soapAction="https://www.e-tresor.at/SaveRKSVMetaData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ReadRKSVMetaData">
+      <soap12:operation soapAction="https://www.e-tresor.at/ReadRKSVMetaData" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteAllDEPEntriesForRegisterId">
+      <soap12:operation soapAction="https://www.e-tresor.at/DeleteAllDEPEntriesForRegisterId" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="rksv_dep">
+    <wsdl:port name="rksv_depSoap" binding="tns:rksv_depSoap">
+      <soap:address location="https://www.e-tresor.at/api.et/rksv_dep.asmx" />
+    </wsdl:port>
+    <wsdl:port name="rksv_depSoap12" binding="tns:rksv_depSoap12">
+      <soap12:address location="https://www.e-tresor.at/api.et/rksv_dep.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

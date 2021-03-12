@@ -1,33 +1,35 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31025.194
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera", "src\Vera\Vera.csproj", "{D8516F43-5432-48F1-BFF7-28A7FB3197CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera", "src\Vera\Vera.csproj", "{D8516F43-5432-48F1-BFF7-28A7FB3197CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal", "src\Vera.Portugal\Vera.Portugal.csproj", "{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Portugal", "src\Vera.Portugal\Vera.Portugal.csproj", "{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Host", "src\Vera.Host\Vera.Host.csproj", "{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Host", "src\Vera.Host\Vera.Host.csproj", "{D6D57358-2BB2-41D8-8D3D-303BFF4D3F90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Bootstrap", "src\Vera.Bootstrap\Vera.Bootstrap.csproj", "{47A25F25-30E4-4A33-8552-C11F63400948}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Bootstrap", "src\Vera.Bootstrap\Vera.Bootstrap.csproj", "{47A25F25-30E4-4A33-8552-C11F63400948}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Documents", "src\Vera.Documents\Vera.Documents.csproj", "{8FEF3141-9C48-46E3-B2BA-770779D25F30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Documents", "src\Vera.Documents\Vera.Documents.csproj", "{8FEF3141-9C48-46E3-B2BA-770779D25F30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Grpc", "src\Vera.Grpc\Vera.Grpc.csproj", "{49048E16-BA4D-4797-9237-BDB4BC9B0F79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Grpc", "src\Vera.Grpc\Vera.Grpc.csproj", "{49048E16-BA4D-4797-9237-BDB4BC9B0F79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Tests", "test\Vera.Tests\Vera.Tests.csproj", "{1FDCC99B-5DC6-4B74-9DC4-62827C253ED0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Tests", "test\Vera.Tests\Vera.Tests.csproj", "{1FDCC99B-5DC6-4B74-9DC4-62827C253ED0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Integration.Tests", "test\Vera.Integration.Tests\Vera.Integration.Tests.csproj", "{E873801B-BA38-49B2-8524-A7780DD9BEEB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Integration.Tests", "test\Vera.Integration.Tests\Vera.Integration.Tests.csproj", "{E873801B-BA38-49B2-8524-A7780DD9BEEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Portugal.Tests", "test\Vera.Portugal.Tests\Vera.Portugal.Tests.csproj", "{B096B69A-8394-4702-817B-C14A09CFF552}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Portugal.Tests", "test\Vera.Portugal.Tests\Vera.Portugal.Tests.csproj", "{B096B69A-8394-4702-817B-C14A09CFF552}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{0CE85BF5-EDAE-41CA-B2BF-E092E2D501D8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Certifications", "Certifications", "{22252C0D-4232-48D1-89B2-DB2B3DC91BC1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Azure", "src\Vera.Azure\Vera.Azure.csproj", "{0ABA28C1-4CCD-4503-8AF9-A8C68A7E0C1B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Azure", "src\Vera.Azure\Vera.Azure.csproj", "{0ABA28C1-4CCD-4503-8AF9-A8C68A7E0C1B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vera.Austria", "src\Vera.Austria\Vera.Austria.csproj", "{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -38,12 +40,19 @@ Global
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
-	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Debug|x64.Build.0 = Debug|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Debug|x86.Build.0 = Debug|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Release|x64.ActiveCfg = Release|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Release|x64.Build.0 = Release|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Release|x86.ActiveCfg = Release|Any CPU
+		{D8516F43-5432-48F1-BFF7-28A7FB3197CD}.Release|x86.Build.0 = Release|Any CPU
 		{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -152,16 +161,35 @@ Global
 		{0ABA28C1-4CCD-4503-8AF9-A8C68A7E0C1B}.Release|x64.Build.0 = Release|Any CPU
 		{0ABA28C1-4CCD-4503-8AF9-A8C68A7E0C1B}.Release|x86.ActiveCfg = Release|Any CPU
 		{0ABA28C1-4CCD-4503-8AF9-A8C68A7E0C1B}.Release|x86.Build.0 = Release|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Debug|x64.Build.0 = Debug|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Debug|x86.Build.0 = Debug|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Release|x64.ActiveCfg = Release|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Release|x64.Build.0 = Release|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Release|x86.ActiveCfg = Release|Any CPU
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{1FDCC99B-5DC6-4B74-9DC4-62827C253ED0} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
-		{E873801B-BA38-49B2-8524-A7780DD9BEEB} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
-		{B096B69A-8394-4702-817B-C14A09CFF552} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
 		{D8516F43-5432-48F1-BFF7-28A7FB3197CD} = {0CE85BF5-EDAE-41CA-B2BF-E092E2D501D8}
+		{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA} = {22252C0D-4232-48D1-89B2-DB2B3DC91BC1}
 		{47A25F25-30E4-4A33-8552-C11F63400948} = {0CE85BF5-EDAE-41CA-B2BF-E092E2D501D8}
 		{8FEF3141-9C48-46E3-B2BA-770779D25F30} = {0CE85BF5-EDAE-41CA-B2BF-E092E2D501D8}
 		{49048E16-BA4D-4797-9237-BDB4BC9B0F79} = {0CE85BF5-EDAE-41CA-B2BF-E092E2D501D8}
-		{24CFDCA3-8173-4C13-A1A3-91DA15F6E8FA} = {22252C0D-4232-48D1-89B2-DB2B3DC91BC1}
+		{1FDCC99B-5DC6-4B74-9DC4-62827C253ED0} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
+		{E873801B-BA38-49B2-8524-A7780DD9BEEB} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
+		{B096B69A-8394-4702-817B-C14A09CFF552} = {D7651BB0-4DE9-408F-8850-E8F74EB7B5FF}
 		{0ABA28C1-4CCD-4503-8AF9-A8C68A7E0C1B} = {0CE85BF5-EDAE-41CA-B2BF-E092E2D501D8}
+		{84327A6D-7B51-41E2-9E6D-D945DC6FB5D7} = {22252C0D-4232-48D1-89B2-DB2B3DC91BC1}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6F26DF9E-8732-40FF-87B0-6882B44562D2}
 	EndGlobalSection
 EndGlobal

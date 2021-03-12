@@ -48,13 +48,13 @@ namespace Vera.Invoices
         public async Task Process(IComponentFactory factory, Invoice invoice)
         {
             invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
-            
+
             var validationResults = factory.CreateInvoiceValidator().Validate(invoice);
             if (validationResults.Any())
             {
                 throw new ValidationException(validationResults.First().ErrorMessage);
             }
-            
+
             var bucket = factory.CreateInvoiceBucketGenerator().Generate(invoice);
 
             // Lock on the unique sequence of the invoice so no other invoice can enter
@@ -64,7 +64,7 @@ namespace Vera.Invoices
                 var packageSigner = factory.CreatePackageSigner();
 
                 var chainContext = new ChainContext(invoice.AccountId, bucket);
-                
+
                 // Get last stored invoice based on the bucket for the invoice
                 var last = await _chainStore.Last(chainContext);
 
@@ -82,7 +82,8 @@ namespace Vera.Invoices
                 {
                     // Failed to append to the chain, means we have to
                     // rollback the invoice because it's not stored in a chain
-                    _logger.LogError(chainException, $"failed to append to chain {chainContext}, deleting created invoice {invoice.Id}");
+                    _logger.LogError(chainException,
+                        $"failed to append to chain {chainContext}, deleting created invoice {invoice.Id}");
 
                     try
                     {
@@ -93,7 +94,8 @@ namespace Vera.Invoices
                     {
                         // TODO(kevin): this means the chain is now in an invalid state
                         // ^ how do we recover from this?
-                        _logger.LogError(invoiceException, "failed to delete invoice after appending to the chain failed");
+                        _logger.LogError(invoiceException,
+                            "failed to delete invoice after appending to the chain failed");
                     }
                 }
             }

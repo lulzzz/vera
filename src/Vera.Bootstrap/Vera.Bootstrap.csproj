@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <ItemGroup>
+      <ProjectReference Include="..\Vera.Austria\Vera.Austria.csproj" />
       <ProjectReference Include="..\Vera.Portugal\Vera.Portugal.csproj" />
       <ProjectReference Include="..\Vera\Vera.csproj" />
     </ItemGroup>
