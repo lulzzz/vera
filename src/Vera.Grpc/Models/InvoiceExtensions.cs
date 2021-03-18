@@ -114,8 +114,6 @@ namespace Vera.Grpc.Models
             var result = new InvoiceLine
             {
                 Description = line.Description,
-                Gross = line.Gross,
-                Net = line.Net,
                 Product = line.Product == null ? null : new Product
                 {
                     Code = line.Product.Code,
@@ -129,6 +127,12 @@ namespace Vera.Grpc.Models
 
             result.Settlements.AddRange(line.Settlements.Select(Pack));
 
+            result.CreditReference = line.CreditReference == null ? null : new CreditReference
+            {
+                Number = line.CreditReference.Number,
+                Reason = line.CreditReference.Reason
+            };
+            
             return result;
         }
         
@@ -217,8 +221,6 @@ namespace Vera.Grpc.Models
             var result = new Vera.Models.InvoiceLine
             {
                 Description = line.Description,
-                Gross = line.Gross,
-                Net = line.Net,
                 Quantity = line.Quantity,
                 UnitPrice = line.UnitPrice,
                 UnitOfMeasure = line.Unit,
@@ -258,6 +260,12 @@ namespace Vera.Grpc.Models
             {
                 result.Settlements = line.Settlements.Select(Unpack).ToList();
             }
+
+            result.CreditReference = line.CreditReference == null ? null : new Vera.Models.CreditReference
+            {
+                Number = line.CreditReference.Number,
+                Reason = line.CreditReference.Reason
+            };
 
             return result;
         }

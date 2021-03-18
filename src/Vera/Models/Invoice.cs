@@ -32,8 +32,6 @@ namespace Vera.Models
         /// </summary>
         public string Number { get; set; }
 
-        public string ReturnedInvoiceNumber { get; set; }
-
         /// <summary>
         /// Indicates if the invoice was created manually.
         /// </summary>

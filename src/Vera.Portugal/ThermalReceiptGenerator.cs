@@ -98,9 +98,10 @@ namespace Vera.Portugal
             yield return new LineThermalNode();
             yield return new SpacingThermalNode(1);
 
-            if (!string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber))
+            var creditReference = invoice.Lines.Select(l => l.CreditReference).FirstOrDefault();
+            if (creditReference != null)
             {
-                yield return new TextThermalNode($"Fatura de referencia: {invoice.ReturnedInvoiceNumber}");
+                yield return new TextThermalNode($"Fatura de referencia: {creditReference.Number}");
             }
 
             if (invoice.Manual)
@@ -111,7 +112,7 @@ namespace Vera.Portugal
             string printNumberPrefix;
 
             var prints = context.Prints.Count;
-            if (string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber)) {
+            if (creditReference == null) {
                 printNumberPrefix = context.Original ? "ORIGINAL" : $"DUPLICADO #{prints}";
             } else {
                 printNumberPrefix = $"DUPLICADO REIMPRESSAO #{prints}";

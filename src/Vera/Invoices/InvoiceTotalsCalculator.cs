@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Vera.Models;
 
 namespace Vera.Invoices
@@ -23,11 +24,20 @@ namespace Vera.Invoices
                     _ => throw new ArgumentOutOfRangeException(nameof(line.Taxes.Category), "Unknown tax category")
                 };
 
+                line.Gross = line.UnitPrice * line.Quantity;
+                line.Net = line.Gross / line.Taxes.Rate;
+
                 entry.Base += line.Net;
                 entry.Value += line.Gross - line.Net;
 
                 totals.Net += line.Net;
                 totals.Gross += line.Gross;
+
+                if (line.Settlements != null)
+                {
+                    var lineSettlement = line.Settlements.Any() ? line.Settlements.Sum(s => s.Amount) : 0m;
+                    totals.Net += lineSettlement / line.Taxes.Rate;
+                }
             }
 
             return totals;

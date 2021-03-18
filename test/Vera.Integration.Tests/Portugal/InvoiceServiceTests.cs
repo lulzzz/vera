@@ -6,7 +6,6 @@ using Vera.Grpc.Models;
 using Vera.Models;
 using Vera.Tests.Shared;
 using Xunit;
-using Product = Vera.Models.Product;
 
 namespace Vera.Integration.Tests.Portugal
 {
@@ -40,29 +39,6 @@ namespace Vera.Integration.Tests.Portugal
             // TODO(kevin): need more of these scenarios
             Assert.Equal($"itFR {invoice.Supplier.SystemId}/{createInvoiceReply.Sequence}", createInvoiceReply.Number);
             Assert.True(createInvoiceReply.Sequence > 0);
-        }
-
-        [Fact]
-        public async Task Should_be_able_to_create_an_invoice_with_multiple_payments()
-        {
-            var client = await _setup.CreateClient(Constants.Account);
-            
-            _invoiceDirector.CreateEmptyAnonymous(Guid.Parse(client.AccountId));
-
-            var invoice = _invoiceBuilder
-                .WithPayment(50m, PaymentCategory.Debit)
-                .WithPayment(50m, PaymentCategory.Cash)
-                .WithAmount(100m, 1.23m)
-                .Build();
-            
-            var createInvoiceRequest = new CreateInvoiceRequest
-            {
-                Invoice = invoice.Pack()
-            };
-
-            var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
-
-            Assert.Contains("FR", createInvoiceReply.Number);
         }
 
         [Fact]

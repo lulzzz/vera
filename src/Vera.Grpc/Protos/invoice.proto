@@ -101,16 +101,12 @@ message InvoiceLine {
 
     // Gross price per unit
     vera.grpc.shared.DecimalValue unitPrice = 5;
-    
-    // Total excluding taxes and any discounts
-    vera.grpc.shared.DecimalValue gross = 6;
-
-    // Total including taxes and discounts
-    vera.grpc.shared.DecimalValue net = 7;
 
     TaxValue tax = 8;
 
     repeated Settlement settlements = 9;
+
+    CreditReference creditReference = 10;
 }
 
 message Settlement {
@@ -237,4 +233,9 @@ message TaxValue {
 
     string exemptionCode = 4;
     string exemptionReason = 5;
+}
+
+message CreditReference {
+    string number = 1;
+    string reason = 2;
 }
