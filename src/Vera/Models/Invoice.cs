@@ -41,6 +41,8 @@ namespace Vera.Models
         /// Unique sequence number of the invoice in the chain that it belongs to.
         /// </summary>
         public int Sequence { get; set; }
+        
+        public string ReturnedInvoiceNumber { get; set; }
 
         /// <summary>
         /// Signature details of the invoice.

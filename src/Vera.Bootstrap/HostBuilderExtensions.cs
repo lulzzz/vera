@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Vera.Austria;
 using Vera.Concurrency;
 using Vera.Invoices;
+using Vera.Norway;
 using Vera.Portugal;
 using Vera.Security;
 using Vera.Services;
@@ -28,6 +29,7 @@ namespace Vera.Bootstrap
                 // Services
                 collection.AddTransient<IUserRegisterService, UserRegisterService>();
                 collection.AddTransient<IInvoiceProcessor, InvoiceProcessor>();
+                collection.AddTransient<IDateProvider, RealLifeDateProvider>();
             });
 
             // Registration of all the certification implementations
