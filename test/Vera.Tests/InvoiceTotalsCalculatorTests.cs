@@ -18,9 +18,9 @@ namespace Vera.Tests
                 {
                     new()
                     {
-                        Gross = 12.99m,
-                        Net = 12.99m / 1.23m,
-                        Taxes = new ()
+                        Quantity = 1,
+                        UnitPrice = 12.99m / 1.23m,
+                        Taxes = new Taxes()
                         {
                             Rate = 1.23m,
                             Category = TaxesCategory.High

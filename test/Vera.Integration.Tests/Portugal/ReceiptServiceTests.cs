@@ -24,12 +24,13 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoiceDirector = new InvoiceDirector(new InvoiceBuilder(new Faker()));
-            var invoice = invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId));
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = invoice.Pack()
+                Invoice = builder.Result.Pack()
             };
 
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
@@ -53,12 +54,13 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoiceDirector = new InvoiceDirector(new InvoiceBuilder(new Faker()));
-            var invoice = invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId));
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = invoice.Pack()
+                Invoice = builder.Result.Pack()
             };
 
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);

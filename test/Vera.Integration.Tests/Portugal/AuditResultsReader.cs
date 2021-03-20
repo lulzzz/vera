@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Vera.Models;
 using Vera.Portugal.Models;
 
 namespace Vera.Integration.Tests.Portugal
@@ -95,20 +93,5 @@ namespace Vera.Integration.Tests.Portugal
         public decimal NetTotal { get; set; }
         public int InvoiceLinesCount { get; set; }
         public int ProductsCount { get; set; }
-
-        public static string GetPaymentType(PaymentCategory paymentCategory)
-        {
-            return paymentCategory switch
-            {
-                PaymentCategory.Cash => "NU",
-                PaymentCategory.Debit => "CD",
-                PaymentCategory.Credit => "CC",
-                PaymentCategory.Voucher => "CO",
-                PaymentCategory.Other => throw new NotImplementedException(),
-                PaymentCategory.Change => throw new NotImplementedException(),
-                PaymentCategory.Online => throw new NotImplementedException(),
-                _ => throw new NotImplementedException()
-            };
-        }
     }
 }

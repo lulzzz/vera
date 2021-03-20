@@ -32,12 +32,12 @@ namespace Vera.Models
         public CreditReference? CreditReference { get; set; }
 
         /// <summary>
-        /// Total amount including taxes.
+        /// Total amount including taxes and discounts.
         /// </summary>
         public decimal Gross { get; set; }
         
         /// <summary>
-        /// Total amount excluding taxes. 
+        /// Total amount excluding taxes, but including any discounts. 
         /// </summary>
         public decimal Net { get; set; }
 

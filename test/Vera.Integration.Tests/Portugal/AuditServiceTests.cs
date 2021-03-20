@@ -16,15 +16,11 @@ namespace Vera.Integration.Tests.Portugal
         private readonly Setup _setup;
         private readonly ApiWebApplicationFactory _fixture;
         private AuditResultsReader _invoiceResolver;
-        private readonly InvoiceBuilder _invoiceBuilder;
-        private readonly InvoiceDirector _invoiceDirector;
 
         public AuditServiceTests(ApiWebApplicationFactory fixture)
         {
             _fixture = fixture;
             _setup = fixture.CreateSetup();
-            _invoiceBuilder = new InvoiceBuilder(new Faker());
-            _invoiceDirector = new InvoiceDirector(_invoiceBuilder);
         }
 
         [Fact]
@@ -32,8 +28,11 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoiceDirector = new InvoiceDirector(new InvoiceBuilder(new Faker()));
-            var invoice = invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId));
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+
+            var invoice = builder.Result;
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -65,6 +64,8 @@ namespace Vera.Integration.Tests.Portugal
         [Fact]
         public async Task Should_validate_total_products_added()
         {
+            const string supplierSystemId = nameof(Should_validate_total_products_added);
+            
             var client = await _setup.CreateClient(Constants.Account);
             var httpClient = _fixture.CreateClient();
 
@@ -77,12 +78,14 @@ namespace Vera.Integration.Tests.Portugal
                 Description = "an alcoholic drink",
                 Type = ProductType.Goods
             };
+            
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplierSystemId);
+            director.ConstructAnonymousWithSingleProductPaidWithCash(product1);
 
-            var accountId = Guid.Parse(client.AccountId);
-            var invoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId, product1);
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = invoice.Pack()
+                Invoice = builder.Result.Pack()
             };
 
             await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
@@ -93,28 +96,30 @@ namespace Vera.Integration.Tests.Portugal
                 Description = "staple food",
                 Type = ProductType.Goods
             };
+            
+            director.ConstructAnonymousWithSingleProductPaidWithCash(product2);
 
-            var invoice2 = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId, product2);
             var createInvoiceRequest2 = new CreateInvoiceRequest
             {
-                Invoice = invoice2.Pack()
+                Invoice = builder.Result.Pack()
             };
 
             await client.Invoice.CreateAsync(createInvoiceRequest2, client.AuthorizedMetadata);
             
-            var invoice3 = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId, product2);
+            director.ConstructAnonymousWithSingleProductPaidWithCash(product2);
+            
             var createInvoiceRequest3 = new CreateInvoiceRequest
             {
-                Invoice = invoice3.Pack()
+                Invoice = builder.Result.Pack()
             };
 
             await client.Invoice.CreateAsync(createInvoiceRequest3, client.AuthorizedMetadata);
 
 
-            var getAuditReply = await client.GenerateAuditFile(invoice.Supplier.SystemId);
+            var getAuditReply = await client.GenerateAuditFile(supplierSystemId);
             var auditProducts = await _invoiceResolver.GetProductsAsync(client.AccountId, getAuditReply.Location);
 
-            Assert.True(auditProducts.Count() == 2);
+            Assert.Equal(2, auditProducts.Count());
         }
 
     }

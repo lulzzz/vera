@@ -65,8 +65,11 @@ namespace Vera.Tests
                 new InMemoryLocker()
             );
 
-            var invoiceDirector = new InvoiceDirector(new InvoiceBuilder(new Faker()));
-            var invoice = invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Empty);
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Empty, "1");
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+
+            var invoice = builder.Result;
 
             await processor.Process(factory.Object, invoice);
 

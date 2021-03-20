@@ -12,23 +12,23 @@ namespace Vera.Integration.Tests.Portugal
     public class InvoiceServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
         private readonly Setup _setup;
-        private readonly InvoiceBuilder _invoiceBuilder;
-        private readonly InvoiceDirector _invoiceDirector;
 
         public InvoiceServiceTests(ApiWebApplicationFactory fixture)
         {
             _setup = fixture.CreateSetup();
-            _invoiceBuilder = new InvoiceBuilder(new Faker());
-            _invoiceDirector = new InvoiceDirector(_invoiceBuilder);
         }
 
         [Fact]
         public async Task Should_be_able_to_create_an_invoice()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            
-            var invoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
 
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+
+            var invoice = builder.Result;
+            
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -36,7 +36,6 @@ namespace Vera.Integration.Tests.Portugal
 
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
-            // TODO(kevin): need more of these scenarios
             Assert.Equal($"itFR {invoice.Supplier.SystemId}/{createInvoiceReply.Sequence}", createInvoiceReply.Number);
             Assert.True(createInvoiceReply.Sequence > 0);
         }
@@ -45,41 +44,40 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_have_an_ascending_sequence()
         {
             var client = await _setup.CreateClient(Constants.Account);
+            
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
 
-            var accountId = Guid.Parse(client.AccountId);
-            var firstInvoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId);
-            var nextInvoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(accountId);
+            var invoice = builder.Result;
 
-            // Make sure both invoices are from the same supplier so they land in the same chain
-            firstInvoice.Supplier.SystemId = nextInvoice.Supplier.SystemId = 1.ToString();
-
+            // Create same transaction twice to verify sequence is incremented
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
-                Invoice = firstInvoice.Pack()
+                Invoice = invoice.Pack()
             }, client.AuthorizedMetadata);
 
             var next = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
-                Invoice = nextInvoice.Pack()
+                Invoice = invoice.Pack()
             }, client.AuthorizedMetadata);
 
             Assert.True(first.Sequence < next.Sequence, $"{first.Sequence} < {next.Sequence}");
         }
-        
-        // TODO(kevin): create test that directly attempts to create an invoice with validation errors
-        // TODO(kevin): write tests that generate different invoices and verify that the number matches the expected format
 
         [Fact]
         public async Task Should_be_able_to_run_validation()
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var invoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
-
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+            
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
                 AccountId = client.AccountId,
-                Invoice = invoice.Pack()
+                Invoice = builder.Result.Pack()
             }, client.AuthorizedMetadata);
             
             Assert.Empty(validationReply.Results);
@@ -89,8 +87,13 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_get_validation_results()
         {
             var client = await _setup.CreateClient(Constants.Account);
+            
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
 
-            var invoice = _invoiceDirector.CreateAnonymousSingleProductPaidWithCash(Guid.Parse(client.AccountId));
+            var invoice = builder.Result;
+            
             invoice.Lines.Add(new Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",

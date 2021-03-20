@@ -50,12 +50,14 @@ namespace Vera.Azure.Stores
 select value i
  from c[""Value""] i
 where i.AccountId = @accountId
+  and i.Supplier.SystemId = @supplierSystemId
   and i.Date >= @startDate
   and i.Date <= @endDate
 ");
 
             definition
                 .WithParameter("@accountId", criteria.AccountId)
+                .WithParameter("@supplierSystemId", criteria.SupplierSystemId)
                 .WithParameter("@startDate", criteria.StartDate)
                 .WithParameter("@endDate", criteria.EndDate);
 

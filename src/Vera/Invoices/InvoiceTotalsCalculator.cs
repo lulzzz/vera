@@ -4,7 +4,7 @@ using Vera.Models;
 
 namespace Vera.Invoices
 {
-    public class InvoiceTotalsCalculator
+    public class  InvoiceTotalsCalculator
     {
         // TODO(kevin): do the rounding to 2 decimals here already?
         public Totals Calculate(Invoice invoice)
@@ -24,8 +24,8 @@ namespace Vera.Invoices
                     _ => throw new ArgumentOutOfRangeException(nameof(line.Taxes.Category), "Unknown tax category")
                 };
 
-                line.Gross = line.UnitPrice * line.Quantity;
-                line.Net = line.Gross / line.Taxes.Rate;
+                line.Gross = line.UnitPrice * line.Quantity * line.Taxes.Rate;
+                line.Net = line.UnitPrice * line.Quantity;
 
                 entry.Base += line.Net;
                 entry.Value += line.Gross - line.Net;
@@ -35,8 +35,10 @@ namespace Vera.Invoices
 
                 if (line.Settlements != null)
                 {
-                    var lineSettlement = line.Settlements.Any() ? line.Settlements.Sum(s => s.Amount) : 0m;
-                    totals.Net += lineSettlement / line.Taxes.Rate;
+                    var totalSettlement = line.Settlements.Sum(x => x.Amount);
+                    
+                    totals.Gross += totalSettlement;
+                    totals.Net += totalSettlement / line.Taxes.Rate;
                 }
             }
 

@@ -10,17 +10,22 @@ namespace Vera.Tests.Shared
         private readonly Faker _faker;
         private Invoice _invoice;
 
-        public InvoiceBuilder(Faker faker)
+        public InvoiceBuilder()
         {
-            _faker = faker;
+            _faker = new Faker();
 
             Reset();
+        }
+
+        public InvoiceBuilder WithAccount(Guid accountId)
+        {
+            _invoice.AccountId = accountId;
+            return this;
         }
 
         public InvoiceBuilder WithTerminal(string terminal)
         {
             _invoice.TerminalId = terminal;
-
             return this;
         }
 
@@ -36,11 +41,11 @@ namespace Vera.Tests.Shared
             return this;
         }
 
-        public InvoiceBuilder WithSupplier()
+        public InvoiceBuilder WithSupplier(string supplierSystemId)
         {
             _invoice.Supplier = new Billable
             {
-                SystemId = _faker.Random.Number(1, int.MaxValue).ToString(),
+                SystemId = supplierSystemId,
                 Name = _faker.Company.CompanyName(),
                 Address = CreateAddress()
             };
@@ -62,25 +67,24 @@ namespace Vera.Tests.Shared
             return this;
         }
 
-        public InvoiceBuilder WithAmount(decimal amount, decimal taxRate, TaxesCategory taxCategory = TaxesCategory.High)
+        public InvoiceBuilder WithAmount(decimal amount, decimal taxRate)
         {
             _invoice.Lines.Clear();
 
-            return WithProductLine(new Product
+            return WithProductLine(1, amount, taxRate, TaxesCategory.High, new Product
             {
                 SystemId = _faker.Random.Number(1, int.MaxValue).ToString(),
                 Type = ProductType.Goods,
                 Code = _faker.Commerce.Ean13(),
                 Description = _faker.Commerce.Product()
-            }, taxCategory, amount, 1, taxRate);
+            });
         }
 
-        public InvoiceBuilder WithProductLine(
-            Product product,
-            TaxesCategory taxCategory,
+        public InvoiceBuilder WithProductLine(int quantity,
             decimal unitPrice,
-            int quantity,
-            decimal taxRate)
+            decimal taxRate,
+            TaxesCategory taxCategory,
+            Product product)
         {
             _invoice.Lines.Add(new InvoiceLine
             {
@@ -120,7 +124,7 @@ namespace Vera.Tests.Shared
                 },
                 Settlements = new List<Settlement>()
                 {
-                    new Settlement
+                    new()
                     {
                         Amount = settlementAmountInTax,
                         SystemId = Guid.NewGuid().ToString(),
@@ -205,5 +209,7 @@ namespace Vera.Tests.Shared
                 Street = _faker.Address.StreetName()
             };
         }
+
+        public Invoice Result => _invoice;
     }
 }
