@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using Vera.Documents.Nodes;
+using Vera.Extensions;
 using Vera.Models;
 using Vera.Thermal;
 
@@ -171,15 +172,15 @@ namespace Vera.Portugal
                     format, 
                     line.Quantity.ToString(),
                     line.Description,
-                    FormatTaxRate(line.Taxes.Rate),
-                    FormatCurrency(line.Gross)
+                    line.Taxes.Rate.FormatTaxRate(Culture),
+                    line.Gross.FormatCurrency(Culture)
                 );
 
                 yield return new TextThermalNode(sb.ToString());
 
                 if (line.Settlements.Any())
                 {
-                    var settlement = FormatCurrency(line.Settlements.Sum(s => s.Amount));
+                    var settlement = line.Settlements.Sum(s => s.Amount).FormatCurrency(Culture);
 
                     yield return new TextThermalNode($"DESCONTOS: {settlement}");
                 }
@@ -222,10 +223,10 @@ namespace Vera.Portugal
 
                 sb.AppendFormat(
                     format,
-                    FormatTaxRate(tax.Rate),
-                    FormatCurrency(tax.Base),
-                    FormatCurrency(tax.Value),
-                    FormatCurrency(tax.Value + tax.Base)
+                    tax.Rate.FormatTaxRate(Culture),
+                    tax.Base.FormatCurrency(Culture),
+                    tax.Value.FormatCurrency(Culture),
+                    (tax.Value + tax.Base).FormatCurrency(Culture)
                 );
 
                 yield return new TextThermalNode(sb.ToString());
@@ -235,9 +236,9 @@ namespace Vera.Portugal
               .AppendFormat(
                   format,
                     "SUBTOTAL",
-                    FormatCurrency(totals.Net),
-                    FormatCurrency(totals.Gross - totals.Net),
-                    FormatCurrency(totals.Gross)
+                    totals.Net.FormatCurrency(Culture),
+                    (totals.Gross - totals.Net).FormatCurrency(Culture),
+                    totals.Gross.FormatCurrency(Culture)
             );
 
             yield return new TextThermalNode(sb.ToString());
@@ -248,7 +249,7 @@ namespace Vera.Portugal
             var totals = context.Invoice.Totals;
             var prefix = totals.Gross >= 0 ? "TOTAL FATURA" : "TROCO";
 
-            yield return new TextThermalNode($"{prefix}: {FormatCurrency(totals.Gross)}")
+            yield return new TextThermalNode($"{prefix}: {totals.Gross.FormatCurrency(Culture)}")
             {
                 FontSize = FontSize.Large
             };
@@ -275,7 +276,7 @@ namespace Vera.Portugal
                 if (payment.Category == PaymentCategory.Credit || payment.Category == PaymentCategory.Debit)
                 {
                     // TOOD(kevin): not always Adyen, what to do?
-                    sb.AppendFormat(format, "PROCESSADO POR ADYEN", FormatCurrency(payment.Amount));
+                    sb.AppendFormat(format, "PROCESSADO POR ADYEN", payment.Amount.FormatCurrency(Culture));
 
                     yield return new TextThermalNode("COPIA CLIENTE");
                 }
@@ -284,7 +285,7 @@ namespace Vera.Portugal
                     sb.AppendFormat(
                         format, 
                         payment.Description,
-                        FormatCurrency(payment.Amount)
+                        payment.Amount.FormatCurrency(Culture)
                     );
                 }
 
@@ -300,7 +301,7 @@ namespace Vera.Portugal
                 sb.AppendFormat(
                     format,
                     "Troco",
-                    FormatCurrency(change.Amount)
+                    change.Amount.FormatCurrency(Culture)
                 );
 
                 yield return new TextThermalNode(sb.ToString());
@@ -365,8 +366,5 @@ namespace Vera.Portugal
 
             yield return new TextThermalNode($"LICENCIADO A: {_certificateName}");
         }
-
-        private static string FormatCurrency(decimal d) => Math.Abs(d).ToString("C", Culture);
-        private static string FormatTaxRate(decimal r) => (r - 1).ToString("P0", Culture);
     }
 }
