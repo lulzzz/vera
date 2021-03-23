@@ -4,6 +4,7 @@ using Bogus;
 using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Models;
+using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
 using Xunit;
 
@@ -74,11 +75,14 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
-            director.ConstructAnonymousWithSingleProductPaidWithCash();
+            var scenario = new SellProductScenario(ProductFactory.CreateRandomProduct())
+            {
+                AccountId = Guid.Parse(client.AccountId),
+                SupplierSystemId = client.SupplierSystemId
+            };
 
-            var invoice = builder.Result;
+            var result = scenario.Execute();
+            var invoice = result.Invoice;
             
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
@@ -94,21 +98,19 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
-            director.ConstructAnonymousWithSingleProductPaidWithCash();
+            var scenario = new SellProductScenario(ProductFactory.CreateRandomProduct())
+            {
+                AccountId = Guid.Parse(client.AccountId),
+                SupplierSystemId = client.SupplierSystemId
+            };
 
-            var invoice = builder.Result;
+            var result = scenario.Execute();
+            var invoice = result.Invoice;
             
             invoice.Lines.Add(new Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",
-                Product = new()
-                {
-                    Code = "1234",
-                    Description = "trigger mixed quantities",
-                    Type = ProductType.Goods
-                },
+                Product = ProductFactory.CreateRandomProduct(),
                 Quantity = -1,
                 Taxes = new Taxes
                 {
@@ -123,7 +125,7 @@ namespace Vera.Integration.Tests.Portugal
                 AccountId = client.AccountId,
                 Invoice = invoice.Pack()
             }, client.AuthorizedMetadata);
-
+ 
             Assert.Contains(validationReply.Results, x => x.Key == "Lines");
         }
 

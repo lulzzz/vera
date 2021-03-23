@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Vera.Models;
+using Vera.Tests.Shared;
 using Xunit;
 
 namespace Vera.Portugal.Tests
@@ -92,24 +94,13 @@ namespace Vera.Portugal.Tests
         [Fact]
         public void Should_not_allow_mixed_quantities()
         {
-            var invoice = new Invoice
-            {
-                Lines = new List<InvoiceLine>
-                {
-                    new()
-                    {
-                        Quantity = 1,
-                        Taxes = new Taxes()
-                    },
-                    new()
-                    {
-                        Quantity = -1,
-                        Taxes = new Taxes()
-                    }
-                }
-            };
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Empty, string.Empty);
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
 
-            var results = RunValidator(invoice);
+            builder.WithProductLine(-1, 1m, 1.21m, TaxesCategory.High, ProductFactory.CreateRandomProduct());
+
+            var results = RunValidator(builder.Result);
 
             Assert.Contains(results, x => x.MemberNames.Contains("Lines"));
         }
@@ -122,18 +113,21 @@ namespace Vera.Portugal.Tests
                 new Taxes()
                 {
                     Category = TaxesCategory.Exempt,
+                    Rate = 1m,
                     ExemptionCode = null,
                     ExemptionReason = null
                 },
                 new Taxes()
                 {
                     Category = TaxesCategory.Exempt,
+                    Rate = 1m,
                     ExemptionCode = null,
                     ExemptionReason = string.Empty
                 },
                 new Taxes()
                 {
                     Category = TaxesCategory.Exempt,
+                    Rate = 1m,
                     ExemptionCode = null,
                     ExemptionReason = " "
                 }
@@ -147,6 +141,8 @@ namespace Vera.Portugal.Tests
                     {
                         new()
                         {
+                            UnitPrice = 1m,
+                            Quantity = 1,
                             Taxes = test
                         }
                     }
@@ -170,6 +166,7 @@ namespace Vera.Portugal.Tests
                         Description = "without credit reference",
                         Quantity = -1,
                         CreditReference = null,
+                        UnitPrice = 1.99m,
                         Taxes = new()
                         {
                             Category = TaxesCategory.High,

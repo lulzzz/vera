@@ -53,7 +53,7 @@ namespace Vera.Host.Services
             IThermalVisitor visitor = request.Type switch
             {
                 ReceiptOutputType.Json => new JsonThermalVisitor(new JsonTextWriter(sw)),
-                ReceiptOutputType.Text => new StringThermalVisitor(sw),
+                ReceiptOutputType.Text => new TextThermalVisitor(sw),
                 ReceiptOutputType.Esc => new EscPosVisitor(ms),
                 _ => throw new ArgumentOutOfRangeException(nameof(request.Type), "unknown requested output type")
             };

@@ -1,17 +1,18 @@
 using System;
 using System.IO;
-using System.Text;
 using Vera.Documents.Nodes;
 
 namespace Vera.Documents.Visitors
 {
-    public class StringThermalVisitor : IThermalVisitor
+    public class TextThermalVisitor : IThermalVisitor
     {
         private readonly TextWriter _tw;
+        private readonly int _width;
 
-        public StringThermalVisitor(TextWriter tw)
+        public TextThermalVisitor(TextWriter tw, int width = 48)
         {
             _tw = tw;
+            _width = width;
         }
 
         public void Visit(DocumentThermalNode node)
@@ -24,17 +25,17 @@ namespace Vera.Documents.Visitors
 
         public void Visit(TextThermalNode node)
         {
-            Append("TEXT", node.Value);
+            Append(node.Value);
         }
 
         public void Visit(QRCodeThermalNode node)
         {
-            Append("QR", node.Data);
+            Append(node.Data);
         }
 
         public void Visit(ImageThermalNode node)
         {
-            Append("IMG", Convert.ToBase64String(node.Data));
+            Append(Convert.ToBase64String(node.Data));
         }
 
         public void Visit(ScopeThermalNode node)
@@ -47,7 +48,7 @@ namespace Vera.Documents.Visitors
 
         public void Visit(BarcodeThermalNode node)
         {
-            Append("BARCODE", $"{node.BarcodeType} {node.Value}");
+            Append($"{node.BarcodeType} {node.Value}");
         }
 
         public void Visit(SpacingThermalNode node)
@@ -60,14 +61,30 @@ namespace Vera.Documents.Visitors
 
         public void Visit(LineThermalNode node)
         {
-            Append("LINE", "--------");
+            Append(new string('=', _width));
         }
 
-        private void Append(string tag, string value)
+        private void Append(string value)
         {
-            _tw.WriteLine($"#{tag} ");
-            _tw.Write(value);
-            _tw.WriteLine();
+            if (value == null)
+            {
+                _tw.Write("NULL");
+                _tw.WriteLine();
+                
+                return;
+            }
+            
+            var left = value.Length;
+            
+            for (var i = 0; i < value.Length; i += _width)
+            {
+                var line = value.Substring(i, Math.Min(left, _width));
+                
+                _tw.Write(line);
+                _tw.WriteLine();
+
+                left -= line.Length;
+            }
         }
     }
 }

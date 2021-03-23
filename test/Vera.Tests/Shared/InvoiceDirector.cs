@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Vera.Models;
@@ -17,6 +18,13 @@ namespace Vera.Tests.Shared
             _accountId = accountId;
             _supplierSystemId = supplierSystemId;
         }
+        
+        public InvoiceDirector(InvoiceBuilder builder, string accountId, string supplierSystemId)
+        {
+            _builder = builder;
+            _accountId = Guid.Parse(accountId);
+            _supplierSystemId = supplierSystemId;
+        }
 
         public void ConstructAnonymousWithoutLines()
         {
@@ -25,178 +33,104 @@ namespace Vera.Tests.Shared
                 .WithAccount(_accountId)
                 .WithTerminal("1.1")
                 .WithEmployee()
-                .WithSupplier(_supplierSystemId);
+                .WithSupplier(_supplierSystemId)
+                .WithSignature(new Signature
+                {
+                    Input = "test",
+                    Output = Encoding.ASCII.GetBytes("test"),
+                    Version = 1
+                });
         }
 
         public void ConstructAnonymousWithSingleProductPaidWithCash()
         {
-            const decimal unitPrice = 1.99m;
-            
-            var product = new Product
-            {
-                Code = "COCA",
-                Description = "Coca cola",
-                Type = ProductType.Goods
-            };
-
-            ConstructAnonymousWithSingleProductPaidWithCash(product);
+            ConstructAnonymousWithSingleProductPaidWithCash(ProductFactory.CreateCocaCola());
         }
 
         public void ConstructAnonymousWithSingleProductPaidWithCash(Product product)
         {
             const decimal unitPrice = 1.99m;
+            const decimal taxRate = 1.21m;
             
             ConstructAnonymousWithoutLines();
 
             _builder
-                .WithPayment(unitPrice, PaymentCategory.Cash)
-                .WithProductLine(1, unitPrice, 1.21m, TaxesCategory.High, product);
+                .WithPayment(unitPrice * taxRate, PaymentCategory.Cash)
+                .WithProductLine(1, unitPrice, taxRate, TaxesCategory.High, product);
+        }
+        
+        public void ConstructAnonymousWithSingleProductPaidWithCategory(
+            decimal gross, 
+            int quantity, 
+            decimal taxRate, 
+            PaymentCategory paymentCategory
+        )
+        {
+            ConstructAnonymousWithoutLines();
+
+            var product = ProductFactory.CreateCocaCola();
+            
+            _builder
+                .WithPayment(gross, paymentCategory)
+                .WithProductLine(quantity, gross / taxRate, taxRate, TaxesCategory.High, product);
+        }
+        
+        public void ConstructWithTaxRates(
+            decimal grossPerLine, 
+            PaymentCategory paymentCategory, 
+            IDictionary<TaxesCategory, decimal> rates
+        )
+        {
+            ConstructAnonymousWithoutLines();
+
+            _builder.WithPayment(grossPerLine * rates.Count, paymentCategory);
+        
+            foreach (var rate in rates)
+            {
+                var product = ProductFactory.CreateRandomProduct();
+                _builder.WithProductLine(1, grossPerLine / rate.Value, rate.Value, rate.Key, product);
+            }
         }
 
-        // public Invoice CreateInvoice(Guid accountId, decimal unitPrice, int quantity, decimal taxRate, PaymentCategory paymentCategory)
-        // {
-        //     var product = new Product
-        //     {
-        //         Code = "COCA",
-        //         Description = "Coca cola",
-        //         Type = ProductType.Goods
-        //     };
-        //
-        //     var amountInTax = unitPrice * quantity * taxRate;
-        //
-        //     var invoice = _builder
-        //         .Reset()
-        //         .WithTerminal("1.1")
-        //         .WithEmployee()
-        //         .WithSupplier()
-        //         .WithPayment(amountInTax, paymentCategory)
-        //         .WithProductLine(quantity, unitPrice, taxRate, TaxesCategory.High, product)
-        //         .Build();
-        //
-        //     invoice.AccountId = accountId;
-        //
-        //     return invoice;
-        // }
-        //
-        // public Invoice CreatePurchaseMultipleProducts(Guid accountId, decimal unitPrice, PaymentCategory paymentCategory, decimal[] taxRates, decimal? discount = null, decimal? lineDiscount = null)
-        // {
-        //     var amountInTax = taxRates.Length * unitPrice;
-        //
-        //     var multipleProductsBuilder = _builder
-        //         .Reset()
-        //         .WithTerminal("1.1")
-        //         .WithEmployee()
-        //         .WithSupplier()
-        //         .WithPayment(amountInTax, paymentCategory);
-        //
-        //     foreach (var taxRate in taxRates)
-        //     {
-        //         var product = new Product
-        //         {
-        //             Code = "COCA",
-        //             Description = "Coca cola",
-        //             Type = ProductType.Goods
-        //         };
-        //         
-        //         if (lineDiscount.HasValue)
-        //         {
-        //             // should work like this, please adapt totals calculation (order discount cannot be applied at the moment)
-        //             var lineAmountInTax = unitPrice * taxRate;
-        //             multipleProductsBuilder.WithProductLineSettlement(product, TaxesCategory.High, unitPrice, taxRate, -1 * lineAmountInTax * lineDiscount.Value);
-        //         }
-        //         else
-        //         {
-        //             multipleProductsBuilder.WithProductLine(1, unitPrice, taxRate, TaxesCategory.High, product);
-        //         }
-        //     }
-        //
-        //     if (discount.HasValue)
-        //     {
-        //         multipleProductsBuilder.WithSettlement(discount.Value);
-        //     }
-        //
-        //     var invoice = multipleProductsBuilder.Build();
-        //     invoice.AccountId = accountId;
-        //
-        //     return invoice;
-        // }
-        //
-        // public Invoice CreatePurchaseWithSettlement(Guid accountId, decimal unitPrice, int quantity, decimal taxRate, PaymentCategory paymentCategory, decimal discountRate)
-        // {
-        //     var product = new Product
-        //     {
-        //         Code = "COCA",
-        //         Description = "Coca cola",
-        //         Type = ProductType.Goods
-        //     };
-        //     
-        //     var amountInTax = unitPrice * quantity * taxRate;
-        //     
-        //     var invoice = _builder
-        //         .Reset()
-        //         .WithTerminal("1.1")
-        //         .WithEmployee()
-        //         .WithSupplier()
-        //         .WithPayment(amountInTax, paymentCategory)
-        //         .WithProductLineSettlement(product, TaxesCategory.High, unitPrice, taxRate, (-1) * discountRate * amountInTax)
-        //         .WithSettlement(discountRate)
-        //         .Build();
-        //
-        //     invoice.AccountId = accountId;
-        //
-        //     return invoice;
-        // }
-        //
-        // public Invoice CreatePurchaseWithLineSettlement(Guid accountId, decimal unitPrice, int quantity, decimal taxRate, PaymentCategory paymentCategory, decimal discount)
-        // {
-        //     var product = new Product
-        //     {
-        //         Code = "COCA",
-        //         Description = "Coca cola",
-        //         Type = ProductType.Goods
-        //     };
-        //
-        //     var product2 = new Product
-        //     {
-        //         Code = "Beer",
-        //         Description = "Heineken",
-        //         Type = ProductType.Goods
-        //     };
-        //
-        //     var amountInTax = unitPrice * quantity * taxRate;
-        //
-        //     var invoice = _builder
-        //         .Reset()
-        //         .WithTerminal("1.1")
-        //         .WithEmployee()
-        //         .WithSupplier()
-        //         .WithPayment(amountInTax, paymentCategory)
-        //         .WithProductLine(quantity, unitPrice, taxRate, TaxesCategory.High, product)
-        //         .WithProductLine(quantity, unitPrice, taxRate, TaxesCategory.High, product2)
-        //         .WithSettlement(discount)
-        //         .Build();
-        //
-        //     invoice.AccountId = accountId;
-        //
-        //     return invoice;
-        // }
-        //
-        // public Invoice CreateReturnInvoice(Guid accountId, decimal unitPrice, int quantity, decimal taxRate, PaymentCategory paymentCategory, Invoice originalInvoice)
-        // {
-        //     var amountInTax = unitPrice * quantity * taxRate;
-        //
-        //     var invoice = _builder
-        //         .Reset()
-        //         .WithTerminal("1.1")
-        //         .WithEmployee()
-        //         .WithSupplier()
-        //         .WithPayment(amountInTax, paymentCategory)
-        //         .WithReturnLine(originalInvoice.Lines.First().Product, TaxesCategory.High, unitPrice, quantity, taxRate, originalInvoice)
-        //         .Build();
-        //
-        //     invoice.AccountId = accountId;
-        //
-        //     return invoice;
-        // }
+        public void ConstructWithSettlement(
+            decimal gross,
+            decimal taxRate, 
+            PaymentCategory paymentCategory, 
+            decimal discountRate
+        )
+        {
+            var product = ProductFactory.CreateCocaCola();
+            
+            ConstructAnonymousWithoutLines();
+
+            _builder
+                .WithPayment(gross - gross * discountRate, paymentCategory)
+                .WithProductLineSettlement(
+                    product,
+                    TaxesCategory.High,
+                    gross / taxRate,
+                    taxRate,
+                    -discountRate * gross
+                );
+        }
+
+        /// <summary>
+        /// Construct a return invoice for everything contained in the given invoice.
+        /// </summary>
+        /// <param name="invoice"></param>
+        public void ConstructReturn(Invoice invoice)
+        {
+            ConstructAnonymousWithoutLines();
+
+            foreach (var line in invoice.Lines)
+            {
+                _builder.WithReturnLine(invoice, line);
+            }
+
+            foreach (var payment in invoice.Payments)
+            {
+                _builder.WithPayment(-payment.Amount, payment.Category);   
+            }
+        }
     }
 }

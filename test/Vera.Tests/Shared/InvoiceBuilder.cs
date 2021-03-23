@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Bogus;
+using Microsoft.Extensions.Azure;
+using Vera.Invoices;
 using Vera.Models;
 
 namespace Vera.Tests.Shared
@@ -52,6 +55,16 @@ namespace Vera.Tests.Shared
 
             return this;
         }
+        
+        public InvoiceBuilder WithPayment(PaymentCategory category)
+        {
+            var calculator = new InvoiceTotalsCalculator();
+            var totals = calculator.Calculate(_invoice);
+            
+            _invoice.Payments.Clear();
+
+            return WithPayment(totals.Gross, category);
+        }
 
         public InvoiceBuilder WithPayment(decimal amount, PaymentCategory category)
         {
@@ -71,7 +84,7 @@ namespace Vera.Tests.Shared
         {
             _invoice.Lines.Clear();
 
-            return WithProductLine(1, amount, taxRate, TaxesCategory.High, new Product
+            return WithProductLine(1, amount / taxRate, taxRate, TaxesCategory.High, new Product
             {
                 SystemId = _faker.Random.Number(1, int.MaxValue).ToString(),
                 Type = ProductType.Goods,
@@ -80,11 +93,13 @@ namespace Vera.Tests.Shared
             });
         }
 
-        public InvoiceBuilder WithProductLine(int quantity,
+        public InvoiceBuilder WithProductLine(
+            int quantity,
             decimal unitPrice,
             decimal taxRate,
             TaxesCategory taxCategory,
-            Product product)
+            Product product
+        )
         {
             _invoice.Lines.Add(new InvoiceLine
             {
@@ -136,46 +151,34 @@ namespace Vera.Tests.Shared
             return this;
         }
 
-        public InvoiceBuilder WithReturnLine(
-            Product product,
-            TaxesCategory taxCategory,
-            decimal unitPrice,
-            int quantity,
-            decimal taxRate,
-            Invoice originalInvoice)
+        public InvoiceBuilder WithReturnLine(Invoice invoice, InvoiceLine lineToReturn)
         {
             _invoice.Lines.Add(new InvoiceLine
             {
-                Description = product.Description,
-                Product = product,
-                Quantity = quantity,
-                UnitPrice = unitPrice,
-                Taxes = new Taxes
-                {
-                    Category = taxCategory,
-                    Code = taxCategory.ToString().ToUpper(),
-                    Rate = taxRate
-                },
+                Description = lineToReturn.Description,
+                Product = lineToReturn.Product,
+                Quantity = -lineToReturn.Quantity,
+                UnitPrice = lineToReturn.UnitPrice,
+                Taxes = lineToReturn.Taxes,
                 CreditReference = new CreditReference
                 {
-                    Number = originalInvoice.Number,
+                    Number = invoice.Number,
                     Reason = "Return invoice"
                 }
-        });
+            });
 
             return this;
         }
 
-
-        public InvoiceBuilder WithSettlement(decimal amountInTax)
+        public InvoiceBuilder WithRemark(string remark)
         {
-            _invoice.Settlements.Add(new Settlement
-            {
-                Amount = amountInTax,
-                SystemId = Guid.NewGuid().ToString(),
-                Description = "Description"
-            });
+            _invoice.Remark = remark;
+            return this;
+        }
 
+        public InvoiceBuilder WithSignature(Signature signature)
+        {
+            _invoice.Signature = signature;
             return this;
         }
 

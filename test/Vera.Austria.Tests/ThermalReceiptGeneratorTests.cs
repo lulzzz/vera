@@ -41,7 +41,7 @@ namespace Vera.Austria.Tests
 
             var sb = new StringBuilder();
 
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
+            var visitor = new TextThermalVisitor(new StringWriter(sb));
             node.Accept(visitor);
 
             var result = sb.ToString();
@@ -88,7 +88,7 @@ namespace Vera.Austria.Tests
 
             var sb = new StringBuilder();
 
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
+            var visitor = new TextThermalVisitor(new StringWriter(sb));
             node.Accept(visitor);
 
             var result = sb.ToString();
@@ -121,7 +121,7 @@ namespace Vera.Austria.Tests
 
             var sb = new StringBuilder();
 
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
+            var visitor = new TextThermalVisitor(new StringWriter(sb));
             node.Accept(visitor);
 
             var result = sb.ToString();

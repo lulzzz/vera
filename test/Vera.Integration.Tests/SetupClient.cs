@@ -8,14 +8,13 @@ namespace Vera.Integration.Tests
     {
         private readonly Setup _setup;
         private readonly string _loginToken;
-        private readonly string _accountId;
 
         public SetupClient(Setup setup, ChannelBase channel, string loginToken, string accountId)
         {
             _setup = setup;
             _loginToken = loginToken;
-            _accountId = accountId;
-
+            AccountId = accountId;
+            
             Invoice = new InvoiceService.InvoiceServiceClient(channel);
             Audit = new AuditService.AuditServiceClient(channel);
             Receipt = new ReceiptService.ReceiptServiceClient(channel);
@@ -31,7 +30,7 @@ namespace Vera.Integration.Tests
             }, AuthorizedMetadata);
         }
 
-        public string AccountId => _accountId;
+        public string AccountId { get; }
         public string SupplierSystemId { get; set; }
 
         public Metadata AuthorizedMetadata => new()

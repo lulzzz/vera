@@ -41,9 +41,11 @@ namespace Vera.Norway
         {
             var invoice = context.Invoice;
 
-            var receiptType = context.Original ?
-                (string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber) ? "Salgskvittering" : "Returkvittering")
+            var receiptType = context.Original 
+                ? string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber) 
+                    ? "Salgskvittering" : "Returkvittering"
                 : "KOPI";
+            
             yield return new TextThermalNode(receiptType);
 
             // TODO add {#partial InvoiceReceiptHeader}
@@ -81,14 +83,17 @@ namespace Vera.Norway
             {
                 yield return new TextThermalNode($"Kreditnota: {invoice.Number}");
             }
+            
             if (!string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber))
             {
                 yield return new TextThermalNode($"Kvitteringnummer: {invoice.ReturnedInvoiceNumber}");
             }
 
             //TODO use ReturnedOrderReprint or is valid to check ReturnedInvoiceNumber in this context?
-            var printType = context.Original ? "OPPRINNELIG"
+            var printType = context.Original
+                ? "OPPRINNELIG"
                 : string.IsNullOrEmpty(invoice.ReturnedInvoiceNumber) ? "KOPI" : "DOBBELTTRYKK";
+            
             yield return new TextThermalNode(printType);
 
             yield return new TextThermalNode($"Dato: {invoice.Date:dd-MM-yyyy}");

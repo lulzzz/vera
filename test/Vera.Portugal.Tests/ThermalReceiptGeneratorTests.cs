@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Bogus;
 using Vera.Documents.Visitors;
 using Vera.Invoices;
 using Vera.Models;
-using Vera.Tests.Shared;
+using Vera.Tests.Scenario;
 using Vera.Thermal;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,6 +22,56 @@ namespace Vera.Portugal.Tests
         }
 
         [Fact]
+        public void Should_do_magic()
+        {
+            // var scenario = new SellSingleProductScenario(1.23m, 25m, PaymentCategory.Cash);
+            var scenario = new MultipleTaxRateScenario(new Dictionary<TaxesCategory, decimal>()
+            {
+                {TaxesCategory.High, 1.23m},
+                {TaxesCategory.Intermediate, 1.16m},
+                {TaxesCategory.Low, 1.06m},
+                {TaxesCategory.Zero, 1m},
+            }, 100m);
+            
+            var result = scenario.Execute();
+            
+            var account = new Account
+            {
+                Name = "Rituals Portugal",
+                RegistrationNumber = "123.123.123",
+                Address = new Address
+                {
+                    City = "Lisboa",
+                    Number = "180",
+                    PostalCode = "1500",
+                    Street = "Lalala"
+                }
+            };
+
+            var context = new ThermalReceiptContext
+            {
+                Account = account,
+                Invoice =  result.Invoice,
+                Original = true
+            };
+
+            var generator = new ThermalReceiptGenerator(258501m, "PELICAN THEORY", "9999");
+            var node = generator.Generate(context);
+
+            var sb = new StringBuilder();
+
+            var visitor = new TextThermalVisitor(new StringWriter(sb));
+            node.Accept(visitor);
+
+            var contents = sb.ToString();
+
+            // Assert.Contains("FATURA SIMPLIFICADA", result);
+            // Assert.DoesNotContain("NOTA DE CRÉDITO", result);
+
+            _testOutputHelper.WriteLine(contents);
+        }
+
+        [Fact]
         public void Should_generate_receipt()
         {
             // TODO(kevin): use invoice generator to generate test cases
@@ -30,7 +79,7 @@ namespace Vera.Portugal.Tests
 
             var invoice = new Invoice
             {
-                Supplier = new Supplier
+                Supplier = new Vera.Models.Supplier
                 {
                     Name = "Lisboa store",
                     RegistrationNumber = "123.123.123",
@@ -127,16 +176,10 @@ namespace Vera.Portugal.Tests
 
             var sb = new StringBuilder();
 
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
+            var visitor = new TextThermalVisitor(new StringWriter(sb));
             node.Accept(visitor);
 
             var result = sb.ToString();
-
-            var lines = result.Split(Environment.NewLine);
-            foreach (var line in lines)
-            {
-                Assert.True(line.Length <= 48, $"{line} - exceeds length by {line.Length - 48} chars");
-            }
 
             // Assert.Contains("FATURA SIMPLIFICADA", result);
             // Assert.DoesNotContain("NOTA DE CRÉDITO", result);

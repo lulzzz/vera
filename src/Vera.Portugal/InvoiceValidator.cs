@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace Vera.Portugal
             results.AddRange(ValidateMixedQuantities(invoice));
             results.AddRange(ValidateTaxExemption(invoice));
             results.AddRange(ValidateCreditReference(invoice));
+            results.AddRange(ValidateTotalPaid(invoice));
 
             return results;
         }
@@ -131,6 +133,23 @@ namespace Vera.Portugal
                 select new ValidationResult(
                     $"line '{line.Description}' is credited, but the credit reference is missing",
                     new[] {nameof(line.CreditReference)});
+        }
+
+        private static IEnumerable<ValidationResult> ValidateTotalPaid(Invoice invoice)
+        {
+            var calculator = new InvoiceTotalsCalculator();
+            var totals = calculator.Calculate(invoice);
+            
+            var gross = Math.Round(totals.Gross, 2);
+            var totalPayments = Math.Round(invoice.Payments.Sum(p => p.Amount), 2);
+
+            if (gross != totalPayments)
+            {
+                yield return new ValidationResult(
+                    $"gross is {gross:F} but there is only {totalPayments:F} paid",
+                    new[] {nameof(invoice.Totals)}
+                );
+            }
         }
     }
 }

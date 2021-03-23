@@ -34,15 +34,7 @@ namespace Vera.Norway.Tests
                 SoftwareVersion = "EVA Unified Commerce version 2.0",
             };
 
-            var generator = new ThermalReceiptGenerator();
-            var node = generator.Generate(context);
-
-            var sb = new StringBuilder();
-
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
-            node.Accept(visitor);
-
-            var result = sb.ToString();
+            var result = GenerateReceipt(context);
             
             Assert.Contains("Salgskvittering", result);
             
@@ -73,15 +65,7 @@ namespace Vera.Norway.Tests
                 SoftwareVersion = "EVA Unified Commerce version 2.0",
             };
 
-            var generator = new ThermalReceiptGenerator();
-            var node = generator.Generate(context);
-
-            var sb = new StringBuilder();
-
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
-            node.Accept(visitor);
-
-            var result = sb.ToString();
+            var result = GenerateReceipt(context);
 
             Assert.Contains("KOPI", result);
 
@@ -107,21 +91,11 @@ namespace Vera.Norway.Tests
                 SoftwareVersion = "EVA Unified Commerce version 2.0",
             };
 
-            var generator = new ThermalReceiptGenerator();
-            var node = generator.Generate(context);
-
-            var sb = new StringBuilder();
-
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
-            node.Accept(visitor);
-
-            var result = sb.ToString();
+            var result = GenerateReceipt(context);
 
             Assert.Contains("Returkvittering", result);
-
             Assert.Contains("Kvitteringnummer", result);
             Assert.Contains(returnInvoice.Number, result);
-
             Assert.DoesNotContain("DOBBELTTRYKK", result);
 
             _testOutputHelper.WriteLine(result);
@@ -142,31 +116,30 @@ namespace Vera.Norway.Tests
                 SoftwareVersion = "EVA Unified Commerce version 2.0",
             };
 
-            var generator = new ThermalReceiptGenerator();
-            var node = generator.Generate(context);
-
-            var sb = new StringBuilder();
-
-            var visitor = new StringThermalVisitor(new StringWriter(sb));
-            node.Accept(visitor);
-
-            var result = sb.ToString();
+            var result = GenerateReceipt(context);
 
             Assert.Contains("KOPI", result);
-
             Assert.Contains("DOBBELTTRYKK", result);
 
             _testOutputHelper.WriteLine(result);
         }
 
-        private Invoice CreateTestInvoice()
+        private static string GenerateReceipt(ThermalReceiptContext context)
         {
-            var product = new Product
-            {
-                Code = "COCA",
-                Description = "Coca cola",
-                Type = ProductType.Goods
-            };
+            var generator = new ThermalReceiptGenerator();
+            var node = generator.Generate(context);
+
+            var sb = new StringBuilder();
+
+            var visitor = new TextThermalVisitor(new StringWriter(sb));
+            node.Accept(visitor);
+
+            return sb.ToString();
+        }
+
+        private static Invoice CreateTestInvoice()
+        {
+            var product = ProductFactory.CreateCocaCola();
             
             var builder = new InvoiceBuilder();
 
@@ -183,7 +156,7 @@ namespace Vera.Norway.Tests
 
             invoice.AccountId = Guid.NewGuid();
             invoice.Signature = new Signature { Output = new byte[32] };
-            invoice.Number = Guid.NewGuid().ToString();
+            invoice.Number = new Faker().Random.Number(1, 10_000).ToString();
             invoice.Totals = new InvoiceTotalsCalculator().Calculate(invoice);
 
             return invoice;

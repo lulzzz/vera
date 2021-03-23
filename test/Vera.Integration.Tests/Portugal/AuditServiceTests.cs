@@ -5,6 +5,7 @@ using Google.Protobuf.WellKnownTypes;
 using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Models;
+using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
 using Xunit;
 
@@ -14,7 +15,6 @@ namespace Vera.Integration.Tests.Portugal
     {
         private readonly Setup _setup;
         private readonly ApiWebApplicationFactory _fixture;
-        private AuditResultsReader _invoiceResolver;
 
         public AuditServiceTests(ApiWebApplicationFactory fixture)
         {
@@ -27,17 +27,19 @@ namespace Vera.Integration.Tests.Portugal
         {
             var client = await _setup.CreateClient(Constants.Account);
 
-            var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
-            director.ConstructAnonymousWithSingleProductPaidWithCash();
-
-            var invoice = builder.Result;
+            var scenario = new SellSingleStaticProductScenario(1.23m, 100m, PaymentCategory.Cash)
+            {
+                AccountId = Guid.Parse(client.AccountId),
+                SupplierSystemId = client.SupplierSystemId
+            };
+            
+            var result = scenario.Execute();
 
             await client.OpenPeriod();
             
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = invoice.Pack()
+                Invoice = result.Invoice.Pack()
             };
 
             await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
@@ -45,7 +47,7 @@ namespace Vera.Integration.Tests.Portugal
             var createAuditRequest = new CreateAuditRequest
             {
                 AccountId = client.AccountId,
-                SupplierSystemId = invoice.Supplier.SystemId,
+                SupplierSystemId = result.Invoice.Supplier.SystemId,
                 StartDate = DateTime.UtcNow.AddDays(-1).ToTimestamp(),
                 EndDate = DateTime.UtcNow.AddDays(1).ToTimestamp()
             };
@@ -69,64 +71,37 @@ namespace Vera.Integration.Tests.Portugal
             var httpClient = _fixture.CreateClient();
 
             httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue("authorization"));
-            _invoiceResolver = new AuditResultsReader(httpClient);
 
-            var product1 = new Vera.Models.Product
+            var invoiceResolver = new AuditResultsStore(httpClient);
+
+            var product1 = ProductFactory.CreateRandomProduct();
+            var product2 = ProductFactory.CreateRandomProduct();
+
+            var products = new[]
             {
-                Code = "Beer",
-                Description = "an alcoholic drink",
-                Type = ProductType.Goods
+                product1, product2, product2
             };
-            
-            var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
-            director.ConstructAnonymousWithSingleProductPaidWithCash(product1);
 
-            var invoice = builder.Result;
-            
             await client.OpenPeriod();
-
-            var createInvoiceRequest = new CreateInvoiceRequest
+                
+            foreach (var product in products)
             {
-                Invoice = invoice.Pack()
-            };
+                var scenario = new SellProductScenario(product)
+                {
+                    AccountId = Guid.Parse(client.AccountId),
+                    SupplierSystemId = client.SupplierSystemId
+                };
 
-            await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
-
-            var product2 = new Vera.Models.Product
-            {
-                Code = "Bread",
-                Description = "staple food",
-                Type = ProductType.Goods
-            };
-            
-            director.ConstructAnonymousWithSingleProductPaidWithCash(product2);
-
-            var invoice2 = builder.Result;
-            invoice2.PeriodId = invoice.PeriodId;
-
-            var createInvoiceRequest2 = new CreateInvoiceRequest
-            {
-                Invoice = invoice2.Pack()
-            };
-
-            await client.Invoice.CreateAsync(createInvoiceRequest2, client.AuthorizedMetadata);
-            
-            director.ConstructAnonymousWithSingleProductPaidWithCash(product2);
-
-            var invoice3 = builder.Result;
-            invoice3.PeriodId = invoice.PeriodId;
-
-            var createInvoiceRequest3 = new CreateInvoiceRequest
-            {
-                Invoice = invoice3.Pack()
-            };
-
-            await client.Invoice.CreateAsync(createInvoiceRequest3, client.AuthorizedMetadata);
-
+                var result = scenario.Execute();
+                
+                await client.Invoice.CreateAsync(new CreateInvoiceRequest
+                {
+                    Invoice = result.Invoice.Pack()
+                }, client.AuthorizedMetadata);
+            }
 
             var getAuditReply = await client.GenerateAuditFile(client.SupplierSystemId);
-            var auditProducts = await _invoiceResolver.GetProductsAsync(client.AccountId, getAuditReply.Location);
+            var auditProducts = await invoiceResolver.LoadProductsFromAuditAsync(client.AccountId, getAuditReply.Location);
 
             Assert.Equal(2, auditProducts.Count());
         }
