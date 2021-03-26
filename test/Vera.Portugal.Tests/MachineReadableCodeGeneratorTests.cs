@@ -19,7 +19,7 @@ namespace Vera.Portugal.Tests
 
       var invoice = new Invoice
       {
-        Supplier = new Billable
+        Supplier = new Supplier
         {
           TaxRegistrationNumber = "123456789"
         },

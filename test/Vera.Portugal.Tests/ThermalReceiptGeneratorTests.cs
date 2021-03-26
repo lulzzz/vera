@@ -30,7 +30,7 @@ namespace Vera.Portugal.Tests
 
             var invoice = new Invoice
             {
-                Supplier = new Billable
+                Supplier = new Supplier
                 {
                     Name = "Lisboa store",
                     RegistrationNumber = "123.123.123",

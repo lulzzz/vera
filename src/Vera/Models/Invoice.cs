@@ -52,7 +52,7 @@ namespace Vera.Models
         /// <summary>
         /// Supplier is the seller of the goods/services on the invoice.
         /// </summary>
-        public Billable Supplier { get; set; }
+        public Supplier Supplier { get; set; }
 
         /// <summary>
         /// Employee that was responsible for creating the invoice.

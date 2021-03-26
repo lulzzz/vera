@@ -31,22 +31,30 @@ namespace Vera.Invoices
         private readonly IChainStore _chainStore;
         private readonly ILocker _locker;
         private readonly InvoiceTotalsCalculator _invoiceTotalsCalculator;
+        private readonly ISupplierStore _supplierStore;
 
         public InvoiceProcessor(
             ILogger<InvoiceProcessor> logger,
             IInvoiceStore invoiceStore,
             IChainStore chainStore,
-            ILocker locker)
+            ILocker locker, 
+            ISupplierStore supplierStore)
         {
             _logger = logger;
             _invoiceStore = invoiceStore;
             _chainStore = chainStore;
             _locker = locker;
             _invoiceTotalsCalculator = new InvoiceTotalsCalculator();
+            _supplierStore = supplierStore;
         }
 
         public async Task Process(IComponentFactory factory, Invoice invoice)
         {
+            var systemId = invoice.Supplier?.SystemId;
+            var supplier = string.IsNullOrEmpty(systemId) ? null : await _supplierStore.GetBySystemId(systemId);
+            if (supplier == null) { throw new ValidationException("Missing/unknown supplier"); }
+
+            invoice.Supplier = supplier;
             invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
 
             var validationResults = factory.CreateInvoiceValidator().Validate(invoice);

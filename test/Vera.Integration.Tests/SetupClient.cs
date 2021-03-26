@@ -18,6 +18,7 @@ namespace Vera.Integration.Tests
             Invoice = new InvoiceService.InvoiceServiceClient(channel);
             Audit = new AuditService.AuditServiceClient(channel);
             Receipt = new ReceiptService.ReceiptServiceClient(channel);
+            Supplier = new SupplierService.SupplierServiceClient(channel);
         }
 
         public string AccountId => _accountId;
@@ -31,5 +32,6 @@ namespace Vera.Integration.Tests
         public InvoiceService.InvoiceServiceClient Invoice { get; }
         public AuditService.AuditServiceClient Audit { get; }
         public ReceiptService.ReceiptServiceClient Receipt { get; }
+        public SupplierService.SupplierServiceClient Supplier { get; }
     }
 }

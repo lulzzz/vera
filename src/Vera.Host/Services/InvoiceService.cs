@@ -1,12 +1,9 @@
-using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Bootstrap;
-using Vera.Concurrency;
 using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Host.Security;
@@ -27,8 +24,7 @@ namespace Vera.Host.Services
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
             IInvoiceProcessor invoiceProcessor,
-            IAccountComponentFactoryCollection accountComponentFactoryCollection
-        )
+            IAccountComponentFactoryCollection accountComponentFactoryCollection)
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
@@ -45,7 +41,7 @@ namespace Vera.Host.Services
             
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var invoice = request.Invoice.Unpack();
-            
+
             await _invoiceProcessor.Process(factory, invoice);
 
             return new CreateInvoiceReply
@@ -67,7 +63,8 @@ namespace Vera.Host.Services
 
             return new GetInvoiceReply
             {
-                Number = invoice.Number
+                Number = invoice.Number,
+                Supplier = invoice.Supplier.Pack()
             };
         }
 

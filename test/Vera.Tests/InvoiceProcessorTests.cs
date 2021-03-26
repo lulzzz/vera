@@ -26,6 +26,7 @@ namespace Vera.Tests
             var chainStore = new Mock<IChainStore>();
             var last = new Mock<IChainable>();
             var factory = new Mock<IComponentFactory>();
+            var supplierStore = new Mock<ISupplierStore>();
 
             var bucketGenerator = new Mock<IInvoiceBucketGenerator>();
             var invoiceNumberGenerator = new Mock<IInvoiceNumberGenerator>();
@@ -62,7 +63,8 @@ namespace Vera.Tests
                 new NullLogger<InvoiceProcessor>(),
                 store.Object,
                 chainStore.Object,
-                new InMemoryLocker()
+                new InMemoryLocker(),
+                supplierStore.Object
             );
 
             var builder = new InvoiceBuilder();

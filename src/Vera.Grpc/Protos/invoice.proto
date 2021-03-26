@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "Protos/shared.proto";
+import "Protos/supplier.proto";
 import "google/protobuf/timestamp.proto";
 
 package vera.grpc;
@@ -33,6 +34,7 @@ message GetInvoiceByNumberRequest {
 message GetInvoiceReply {
     // TODO(kevin): extend this to return the full invoice?
     string number = 1;
+    vera.grpc.shared.Supplier supplier = 2;
 }
 
 message ValidateInvoiceRequest {
@@ -77,7 +79,7 @@ message Invoice {
 
     string remark = 8;
 
-    Supplier supplier = 9;
+    vera.grpc.shared.Supplier supplier = 9;
     Customer customer = 10;
     Employee employee = 11;
 
@@ -142,21 +144,6 @@ message Payment {
     vera.grpc.shared.DecimalValue amount = 4;
     
     Category category = 5;
-}
-
-message Supplier {
-    string systemId = 1;
-
-    string name = 2;
-
-    // Registration number of the business
-    string registrationNumber = 3;
-
-    // Registration number when reporting taxes
-    string taxRegistrationNumber = 4;
-
-    // Address is the physical location of the supplier
-    vera.grpc.shared.Address address = 5;
 }
 
 message Customer {

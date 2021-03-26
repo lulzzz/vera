@@ -120,5 +120,57 @@ namespace Vera.Integration.Tests.Portugal
 
             Assert.Contains(validationReply.Results, x => x.Key == "Lines");
         }
+
+        [Fact]
+        public async Task Should_create_invoice_with_supplier()
+        {
+            var _faker = new Faker();
+            var client = await _setup.CreateClient(Constants.Account);
+
+            var supplier = new Grpc.Shared.Supplier
+            {
+                Name = _faker.Name.FullName(),
+                RegistrationNumber = _faker.Random.AlphaNumeric(10),
+                TaxRegistrationNumber = _faker.Random.AlphaNumeric(10),
+                SystemId = _faker.Random.AlphaNumeric(10),
+                Address = new Grpc.Shared.Address
+                {
+                    City = _faker.Address.City(),
+                    Country = _faker.Address.Country(),
+                    Number = _faker.Address.BuildingNumber(),
+                    PostalCode = _faker.Address.ZipCode(),
+                    Region = _faker.Address.County(),
+                    Street = _faker.Address.StreetAddress()
+                }
+            };
+
+            var reply = await client.Supplier.CreateAsync(new CreateSupplierRequest { Supplier = supplier });
+
+            Assert.NotNull(reply);
+
+            var getSupplierReply = await client.Supplier.GetAsync(new GetSupplierRequest { SystemId = supplier.SystemId });
+
+
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), getSupplierReply.SystemId);
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+            var invoice = builder.Result;
+
+            var createInvoiceRequest = new CreateInvoiceRequest
+            {
+                Invoice = invoice.Pack()
+            };
+            var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+
+            var getByNumberRequest = new GetInvoiceByNumberRequest 
+            { 
+                AccountId = client.AccountId, 
+                Number = createInvoiceReply.Number 
+            };
+
+            var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
+
+            Assert.Equal(getInvoiceReply.Supplier.Name, getSupplierReply.Name);
+        }
     }
 }

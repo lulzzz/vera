@@ -16,6 +16,21 @@ message DecimalValue {
     sfixed32 nanos = 2;
 }
 
+message Supplier {
+    string systemId = 1;
+
+    string name = 2;
+
+    // Registration number of the business
+    string registrationNumber = 3;
+
+    // Registration number when reporting taxes
+    string taxRegistrationNumber = 4;
+
+    // Address is the physical location of the supplier
+    Address address = 5;
+}
+
 message Address {
     string street = 1;
 

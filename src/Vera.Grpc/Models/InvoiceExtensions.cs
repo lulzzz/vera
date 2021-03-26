@@ -17,14 +17,7 @@ namespace Vera.Grpc.Models
                 Remark = invoice.Remark,
                 AccountId = Guid.Parse(invoice.Account),
                 TerminalId = invoice.TerminalId,
-                Supplier = new Billable
-                {
-                    SystemId = invoice.Supplier.SystemId,
-                    Name = invoice.Supplier.Name,
-                    RegistrationNumber = invoice.Supplier.RegistrationNumber,
-                    TaxRegistrationNumber = invoice.Supplier.TaxRegistrationNumber,
-                    Address = invoice.Supplier.Address.Unpack(),
-                },
+                Supplier = invoice.Supplier.Unpack(),
                 Employee = new Vera.Models.Employee
                 {
                     SystemId = invoice.Employee.SystemId,
@@ -68,14 +61,7 @@ namespace Vera.Grpc.Models
                 SystemId = invoice.SystemId ?? string.Empty,
                 TerminalId = invoice.TerminalId ?? string.Empty,
                 Remark = invoice.Remark ?? string.Empty,
-                Supplier = new Supplier
-                {
-                    Name = invoice.Supplier.Name,
-                    RegistrationNumber = invoice.Supplier.RegistrationNumber ?? string.Empty,
-                    TaxRegistrationNumber = invoice.Supplier.TaxRegistrationNumber ?? string.Empty,
-                    SystemId = invoice.Supplier.SystemId,
-                    Address = invoice.Supplier.Address.Pack()
-                },
+                Supplier = invoice.Supplier.Pack(),
                 Employee = new Employee
                 {
                     SystemId = invoice.Employee.SystemId,

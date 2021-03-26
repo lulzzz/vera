@@ -1,0 +1,33 @@
+﻿syntax = "proto3";
+
+import "Protos/shared.proto";
+
+package vera.grpc;
+
+message CreateSupplierRequest {
+  vera.grpc.shared.Supplier supplier = 1;
+}
+
+message CreateSupplierReply {
+    string id = 1;
+}
+
+message GetSupplierRequest {
+    string systemId = 1;
+}
+
+message UpdateSupplierRequest {
+    string systemId = 1;
+    vera.grpc.shared.Supplier supplier = 2;
+}
+
+message DeleteSupplierRequest {
+    string systemId = 1;
+}
+
+service SupplierService {
+    rpc Create(CreateSupplierRequest) returns(CreateSupplierReply);
+    rpc Get(GetSupplierRequest) returns(vera.grpc.shared.Supplier);
+    rpc Update(UpdateSupplierRequest) returns(vera.grpc.shared.Supplier);
+    rpc Delete(DeleteSupplierRequest) returns(vera.grpc.shared.Empty);
+}

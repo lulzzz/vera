@@ -1,9 +1,5 @@
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
@@ -150,6 +146,9 @@ namespace Vera.Azure
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
 
                 collection.AddSingleton<IUserStore>(_ => new CosmosUserStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
+
+                collection.AddSingleton<ISupplierStore>(_ => new CosmosSupplierStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
 
                 collection.AddSingleton<IAuditStore>(_ => new CosmosAuditStore(

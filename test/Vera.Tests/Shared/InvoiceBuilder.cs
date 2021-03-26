@@ -43,7 +43,7 @@ namespace Vera.Tests.Shared
 
         public InvoiceBuilder WithSupplier(string supplierSystemId)
         {
-            _invoice.Supplier = new Billable
+            _invoice.Supplier = new Supplier
             {
                 SystemId = supplierSystemId,
                 Name = _faker.Company.CompanyName(),
