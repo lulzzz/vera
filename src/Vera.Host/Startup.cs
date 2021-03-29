@@ -88,6 +88,7 @@ namespace Vera.Host
                 endpoints.MapGrpcService<ReceiptService>();
                 endpoints.MapGrpcService<AuditService>();
                 endpoints.MapGrpcService<SupplierService>();
+                endpoints.MapGrpcService<PeriodService>();
             });
         }
     }

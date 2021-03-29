@@ -1,10 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using Bogus;
-using Grpc.Net.Client;
 using Vera.Grpc;
 using Vera.Grpc.Models;
-using Vera.Integration.Tests.Common;
 using Vera.Tests.Shared;
 using Xunit;
 
@@ -23,14 +20,19 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_generate_a_receipt()
         {
             var client = await _setup.CreateClient(Constants.Account);
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId));
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
+
+            var invoice = builder.Result;
+            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = builder.Result.Pack()
+                Invoice = invoice.Pack()
             };
 
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
@@ -53,14 +55,19 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_mark_receipt_as_printed()
         {
             var client = await _setup.CreateClient(Constants.Account);
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId));
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
+
+            var invoice = builder.Result;
+            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = builder.Result.Pack()
+                Invoice = invoice.Pack()
             };
 
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);

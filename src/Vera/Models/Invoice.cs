@@ -66,6 +66,12 @@ namespace Vera.Models
         public Customer? Customer { get; set; }
 
         /// <summary>
+        /// The period when this invoice was issued
+        /// <seealso cref="Period"/>
+        /// </summary>
+        public string PeriodId { get; set; }
+
+        /// <summary>
         /// Identifier of the cash register that created the invoice.
         /// </summary>
         public string TerminalId { get; set; }

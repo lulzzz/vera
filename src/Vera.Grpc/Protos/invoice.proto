@@ -35,6 +35,7 @@ message GetInvoiceReply {
     // TODO(kevin): extend this to return the full invoice?
     string number = 1;
     vera.grpc.shared.Supplier supplier = 2;
+    string periodId = 3;
 }
 
 message ValidateInvoiceRequest {
@@ -82,6 +83,7 @@ message Invoice {
     vera.grpc.shared.Supplier supplier = 9;
     Customer customer = 10;
     Employee employee = 11;
+    string periodId = 12;
 
     repeated InvoiceLine lines = 13;
     repeated Settlement settlements = 14;

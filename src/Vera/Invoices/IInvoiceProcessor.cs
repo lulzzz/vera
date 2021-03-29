@@ -32,13 +32,15 @@ namespace Vera.Invoices
         private readonly ILocker _locker;
         private readonly InvoiceTotalsCalculator _invoiceTotalsCalculator;
         private readonly ISupplierStore _supplierStore;
+        private readonly IPeriodStore _periodStore;
 
         public InvoiceProcessor(
             ILogger<InvoiceProcessor> logger,
             IInvoiceStore invoiceStore,
             IChainStore chainStore,
-            ILocker locker, 
-            ISupplierStore supplierStore)
+            ILocker locker,
+            ISupplierStore supplierStore, 
+            IPeriodStore periodStore)
         {
             _logger = logger;
             _invoiceStore = invoiceStore;
@@ -46,6 +48,7 @@ namespace Vera.Invoices
             _locker = locker;
             _invoiceTotalsCalculator = new InvoiceTotalsCalculator();
             _supplierStore = supplierStore;
+            _periodStore = periodStore;
         }
 
         public async Task Process(IComponentFactory factory, Invoice invoice)
@@ -54,7 +57,11 @@ namespace Vera.Invoices
             var supplier = string.IsNullOrEmpty(systemId) ? null : await _supplierStore.GetBySystemId(systemId);
             if (supplier == null) { throw new ValidationException("Missing/unknown supplier"); }
 
+            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
+            if (period == null || period.IsClosed) { throw new ValidationException("An open period is required"); }
+
             invoice.Supplier = supplier;
+            invoice.PeriodId = period.Id.ToString();
             invoice.Totals = _invoiceTotalsCalculator.Calculate(invoice);
 
             var validationResults = factory.CreateInvoiceValidator().Validate(invoice);

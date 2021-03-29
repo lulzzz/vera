@@ -67,7 +67,8 @@ namespace Vera.Azure
                 cosmosContainerOptions.Invoices,
                 cosmosContainerOptions.Audits,
                 cosmosContainerOptions.Trails,
-                cosmosContainerOptions.Chains
+                cosmosContainerOptions.Chains,
+                cosmosContainerOptions.Periods
             };
 
             var db = response.Database;
@@ -159,6 +160,9 @@ namespace Vera.Azure
 
                 collection.AddSingleton<IChainStore>(_ => new CosmosChainStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Chains)));
+
+                collection.AddSingleton<IPeriodStore>(_ => new CosmosPeriodStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Periods)));
             });
         }
 

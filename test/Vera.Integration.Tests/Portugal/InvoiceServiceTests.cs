@@ -22,13 +22,16 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_create_an_invoice()
         {
             var client = await _setup.CreateClient(Constants.Account);
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            
+            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -44,12 +47,15 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_have_an_ascending_sequence()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
+
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
+            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             // Create same transaction twice to verify sequence is incremented
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
@@ -69,15 +75,20 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_run_validation()
         {
             var client = await _setup.CreateClient(Constants.Account);
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
-            
+
+            var invoice = builder.Result;
+            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
                 AccountId = client.AccountId,
-                Invoice = builder.Result.Pack()
+                Invoice = invoice.Pack()
             }, client.AuthorizedMetadata);
             
             Assert.Empty(validationReply.Results);
@@ -87,13 +98,16 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_get_validation_results()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
+
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), "1");
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            
+            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+
             invoice.Lines.Add(new Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",
@@ -124,37 +138,16 @@ namespace Vera.Integration.Tests.Portugal
         [Fact]
         public async Task Should_create_invoice_with_supplier()
         {
-            var _faker = new Faker();
             var client = await _setup.CreateClient(Constants.Account);
-
-            var supplier = new Grpc.Shared.Supplier
-            {
-                Name = _faker.Name.FullName(),
-                RegistrationNumber = _faker.Random.AlphaNumeric(10),
-                TaxRegistrationNumber = _faker.Random.AlphaNumeric(10),
-                SystemId = _faker.Random.AlphaNumeric(10),
-                Address = new Grpc.Shared.Address
-                {
-                    City = _faker.Address.City(),
-                    Country = _faker.Address.Country(),
-                    Number = _faker.Address.BuildingNumber(),
-                    PostalCode = _faker.Address.ZipCode(),
-                    Region = _faker.Address.County(),
-                    Street = _faker.Address.StreetAddress()
-                }
-            };
-
-            var reply = await client.Supplier.CreateAsync(new CreateSupplierRequest { Supplier = supplier });
-
-            Assert.NotNull(reply);
-
-            var getSupplierReply = await client.Supplier.GetAsync(new GetSupplierRequest { SystemId = supplier.SystemId });
-
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), getSupplierReply.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
+
             var invoice = builder.Result;
+            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -170,7 +163,38 @@ namespace Vera.Integration.Tests.Portugal
 
             var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
 
-            Assert.Equal(getInvoiceReply.Supplier.Name, getSupplierReply.Name);
+            Assert.Equal(getInvoiceReply.Supplier.Name, supplier.Name);
+        }
+
+        [Fact]
+        public async Task Should_create_invoice_with_period()
+        {
+            var client = await _setup.CreateClient(Constants.Account);
+            var dataProvider = new SampleDataProvier(client);
+            var supplier = await dataProvider.CreateSupplier();
+            var periodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+            var invoice = builder.Result;
+            invoice.PeriodId = periodId;
+
+            var createInvoiceRequest = new CreateInvoiceRequest
+            {
+                Invoice = invoice.Pack()
+            };
+            var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+
+            var getByNumberRequest = new GetInvoiceByNumberRequest
+            {
+                AccountId = client.AccountId,
+                Number = createInvoiceReply.Number
+            };
+
+            var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
+
+            Assert.Equal(getInvoiceReply.PeriodId, periodId);
         }
     }
 }

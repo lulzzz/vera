@@ -1,0 +1,40 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "Protos/shared.proto";
+
+package vera.grpc;
+
+service PeriodService {
+	rpc OpenPeriod(OpenPeriodRequest) returns (OpenPeriodReply);
+	rpc ClosePeriod(ClosePeriodRequest) returns (vera.grpc.shared.Empty);
+	rpc Get(GetPeriodRequest) returns (Period);
+}
+
+message OpenPeriodRequest {
+	string supplierSystemId = 1;
+}
+
+message OpenPeriodReply {
+	string id = 1;
+}
+
+message ClosePeriodRequest {
+	string id = 1;
+	string supplierSystemId = 2;
+}
+
+message GetPeriodRequest {
+	string id = 1;
+	string supplierSystemId = 2;
+}
+
+message Period {
+	google.protobuf.Timestamp opening = 1;
+
+	google.protobuf.Timestamp closing = 2;
+
+	string supplierSystemId = 3;
+
+	string registerId = 4;
+}

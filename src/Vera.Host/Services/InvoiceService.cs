@@ -64,7 +64,8 @@ namespace Vera.Host.Services
             return new GetInvoiceReply
             {
                 Number = invoice.Number,
-                Supplier = invoice.Supplier.Pack()
+                Supplier = invoice.Supplier.Pack(),
+                PeriodId = invoice.PeriodId
             };
         }
 

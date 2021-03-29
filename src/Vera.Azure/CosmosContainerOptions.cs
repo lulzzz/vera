@@ -32,5 +32,10 @@ namespace Vera.Azure
         /// of documents.
         /// </summary>
         public string Chains { get; set; } = "chains";
+
+        /// <summary>
+        /// Name of the periods container.
+        /// </summary>
+        public string Periods { get; set; } = "periods";
     }
 }

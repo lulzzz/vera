@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Bogus;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Vera.Concurrency;
@@ -27,6 +25,7 @@ namespace Vera.Tests
             var last = new Mock<IChainable>();
             var factory = new Mock<IComponentFactory>();
             var supplierStore = new Mock<ISupplierStore>();
+            var periodStore = new Mock<IPeriodStore>();
 
             var bucketGenerator = new Mock<IInvoiceBucketGenerator>();
             var invoiceNumberGenerator = new Mock<IInvoiceNumberGenerator>();
@@ -59,12 +58,19 @@ namespace Vera.Tests
             chainStore.Setup(x => x.Last(It.IsAny<ChainContext>()))
                 .ReturnsAsync(last.Object);
 
+            supplierStore.Setup(x => x.GetBySystemId(It.IsAny<string>()))
+                .ReturnsAsync(new Supplier());
+
+            periodStore.Setup(x => x.GetOpenPeriodForSupplier(It.IsAny<Guid>()))
+                .ReturnsAsync(new Period());
+
             var processor = new InvoiceProcessor(
                 new NullLogger<InvoiceProcessor>(),
                 store.Object,
                 chainStore.Object,
                 new InMemoryLocker(),
-                supplierStore.Object
+                supplierStore.Object,
+                periodStore.Object
             );
 
             var builder = new InvoiceBuilder();
@@ -72,6 +78,8 @@ namespace Vera.Tests
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
+            invoice.Supplier = new Supplier { SystemId = "1" };
+            invoice.PeriodId = Guid.NewGuid().ToString();;
 
             await processor.Process(factory.Object, invoice);
 
