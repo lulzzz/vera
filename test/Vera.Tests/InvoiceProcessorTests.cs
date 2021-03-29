@@ -20,7 +20,7 @@ namespace Vera.Tests
             const string expectedBucket = "my-bucket";
             const string expectedNumber = "my-invoice-no";
 
-            var store = new Mock<IInvoiceStore>();
+            var invoiceStore = new Mock<IInvoiceStore>();
             var chainStore = new Mock<IChainStore>();
             var last = new Mock<IChainable>();
             var factory = new Mock<IComponentFactory>();
@@ -65,8 +65,8 @@ namespace Vera.Tests
                 .ReturnsAsync(new Period());
 
             var processor = new InvoiceProcessor(
-                new NullLogger<InvoiceProcessor>(),
-                store.Object,
+                NullLoggerFactory.Instance,
+                invoiceStore.Object,
                 chainStore.Object,
                 new InMemoryLocker(),
                 supplierStore.Object,
@@ -78,8 +78,6 @@ namespace Vera.Tests
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            invoice.Supplier = new Supplier { SystemId = "1" };
-            invoice.PeriodId = Guid.NewGuid().ToString();;
 
             await processor.Process(factory.Object, invoice);
 
@@ -88,8 +86,6 @@ namespace Vera.Tests
 
             // TODO: assert signature
             Assert.NotNull(invoice.Signature);
-
-            // store.Verify(x => x.Store(It.Is<Invoice>(i => i == invoice), expectedBucket));
         }
     }
 }

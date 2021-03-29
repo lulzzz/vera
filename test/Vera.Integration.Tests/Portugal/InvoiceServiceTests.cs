@@ -30,7 +30,8 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            
+            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -55,7 +56,8 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            
+            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             // Create same transaction twice to verify sequence is incremented
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
@@ -83,8 +85,7 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
-
+            
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
                 AccountId = client.AccountId,
@@ -106,8 +107,7 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
-
+            
             invoice.Lines.Add(new Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",
@@ -147,8 +147,9 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
-
+            
+            await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -172,18 +173,20 @@ namespace Vera.Integration.Tests.Portugal
             var client = await _setup.CreateClient(Constants.Account);
             var dataProvider = new SampleDataProvier(client);
             var supplier = await dataProvider.CreateSupplier();
-            var periodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            
+            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             var builder = new InvoiceBuilder();
             var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
+            
             var invoice = builder.Result;
-            invoice.PeriodId = periodId;
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
             };
+            
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
             var getByNumberRequest = new GetInvoiceByNumberRequest
@@ -194,7 +197,12 @@ namespace Vera.Integration.Tests.Portugal
 
             var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
 
-            Assert.Equal(getInvoiceReply.PeriodId, periodId);
+            var getCurrentPeriodReply = await client.Period.GetCurrentPeriodAsync(new GetCurrentPeriodRequest
+            {
+                SupplierSystemId = supplier.SystemId
+            });
+            
+            Assert.Equal(getCurrentPeriodReply.Id, getInvoiceReply.PeriodId);
         }
     }
 }

@@ -9,6 +9,7 @@ service PeriodService {
 	rpc OpenPeriod(OpenPeriodRequest) returns (OpenPeriodReply);
 	rpc ClosePeriod(ClosePeriodRequest) returns (vera.grpc.shared.Empty);
 	rpc Get(GetPeriodRequest) returns (Period);
+	rpc GetCurrentPeriod(GetCurrentPeriodRequest) returns (Period);
 }
 
 message OpenPeriodRequest {
@@ -29,12 +30,16 @@ message GetPeriodRequest {
 	string supplierSystemId = 2;
 }
 
+message GetCurrentPeriodRequest {
+    string supplierSystemId = 1;
+}
+
 message Period {
-	google.protobuf.Timestamp opening = 1;
-
-	google.protobuf.Timestamp closing = 2;
-
-	string supplierSystemId = 3;
-
-	string registerId = 4;
+    string id = 1;
+	
+	google.protobuf.Timestamp opening = 2;
+	google.protobuf.Timestamp closing = 3;
+	
+	string supplierSystemId = 4;
+	string registerId = 5;
 }

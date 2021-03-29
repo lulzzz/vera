@@ -17,8 +17,10 @@ namespace Vera.Grpc.Models
                 Remark = invoice.Remark,
                 AccountId = Guid.Parse(invoice.Account),
                 TerminalId = invoice.TerminalId,
-                PeriodId = invoice.PeriodId,
-                Supplier = invoice.Supplier.Unpack(),
+                Supplier = new Supplier
+                {
+                    SystemId  = invoice.SupplierSystemId
+                },
                 Employee = new Vera.Models.Employee
                 {
                     SystemId = invoice.Employee.SystemId,
@@ -59,11 +61,10 @@ namespace Vera.Grpc.Models
                 Period = invoice.FiscalPeriod,
                 PeriodYear = invoice.FiscalYear,
                 Timestamp = invoice.Date.ToTimestamp(),
-                PeriodId = invoice.PeriodId,
                 SystemId = invoice.SystemId ?? string.Empty,
                 TerminalId = invoice.TerminalId ?? string.Empty,
                 Remark = invoice.Remark ?? string.Empty,
-                Supplier = invoice.Supplier.Pack(),
+                SupplierSystemId = invoice.Supplier.SystemId,
                 Employee = new Employee
                 {
                     SystemId = invoice.Employee.SystemId,

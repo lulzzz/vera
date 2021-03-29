@@ -15,14 +15,14 @@ namespace Vera.Integration.Tests
             _client = client;
         }
 
-        public async Task<Grpc.Shared.Supplier> CreateSupplier()
+        public async Task<Grpc.Shared.Supplier> CreateSupplier(string systemId = null)
         {
             var supplier = new Grpc.Shared.Supplier
             {
                 Name = _faker.Name.FullName(),
                 RegistrationNumber = _faker.Random.AlphaNumeric(10),
                 TaxRegistrationNumber = _faker.Random.AlphaNumeric(10),
-                SystemId = _faker.Random.AlphaNumeric(10),
+                SystemId = systemId ?? _faker.Random.AlphaNumeric(10),
                 Address = new Grpc.Shared.Address
                 {
                     City = _faker.Address.City(),

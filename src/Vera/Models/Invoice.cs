@@ -69,7 +69,7 @@ namespace Vera.Models
         /// The period when this invoice was issued
         /// <seealso cref="Period"/>
         /// </summary>
-        public string PeriodId { get; set; }
+        public Guid PeriodId { get; set; }
 
         /// <summary>
         /// Identifier of the cash register that created the invoice.

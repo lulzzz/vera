@@ -65,7 +65,7 @@ namespace Vera.Host.Services
             {
                 Number = invoice.Number,
                 Supplier = invoice.Supplier.Pack(),
-                PeriodId = invoice.PeriodId
+                PeriodId = invoice.PeriodId.ToString()
             };
         }
 

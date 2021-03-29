@@ -1,6 +1,7 @@
 ﻿using Grpc.Core;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Vera.Concurrency;
 using Vera.Grpc;
 using Vera.Grpc.Models;
@@ -24,6 +25,8 @@ namespace Vera.Host.Services
 
         public override async Task<OpenPeriodReply> OpenPeriod(OpenPeriodRequest request, ServerCallContext context)
         {
+            // TODO(kevin): check supplier is valid for account
+            
             var supplier = await _supplierStore.GetBySystemId(request.SupplierSystemId);
             if (supplier == null)
             {
@@ -43,14 +46,20 @@ namespace Vera.Host.Services
                     Opening = DateTime.UtcNow,
                     Supplier = supplier
                 };
+                
                 await _periodStore.Store(period);
 
-                return new OpenPeriodReply { Id = period.Id.ToString() };
+                return new OpenPeriodReply
+                {
+                    Id = period.Id.ToString()
+                };
             }
         }
 
         public override async Task<Empty> ClosePeriod(ClosePeriodRequest request, ServerCallContext context)
         {
+            // TODO(kevin): check supplier is valid for account
+            
             var period = await GetAndValidate(request.Id, request.SupplierSystemId);
 
             await _periodStore.Update(new Models.Period
@@ -66,7 +75,24 @@ namespace Vera.Host.Services
 
         public override async Task<Period> Get(GetPeriodRequest request, ServerCallContext context)
         {
+            // TODO(kevin): check supplier is valid for account
+            
             var period = await GetAndValidate(request.Id, request.SupplierSystemId);
+
+            return period.Pack();
+        }
+
+        public override async Task<Period> GetCurrentPeriod(GetCurrentPeriodRequest request, ServerCallContext context)
+        {
+            // TODO(kevin): check supplier is valid for account
+            
+            var supplier = await _supplierStore.GetBySystemId(request.SupplierSystemId);
+            if (supplier == null)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+            }
+
+            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
 
             return period.Pack();
         }

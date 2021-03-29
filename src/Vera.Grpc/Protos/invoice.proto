@@ -63,31 +63,32 @@ message Invoice {
     // Identifier of the invoice in the external system
     string systemId = 2;
     
+    // Identifier of the supplier whom the invoice should be created
+    string supplierSystemId = 3;
+    
     // Identifier of the "cash register" that performed the transaction
-    string terminalId = 3;
+    string terminalId = 4;
     
     // Indicates if this invoice was created manually
-    bool manual = 4;
+    bool manual = 5;
     
     // Fiscal period that this invoice was generated
-    int32 period = 5;
+    int32 period = 6;
 
     // Fiscal year that this invoice was generated
-    int32 periodYear = 6;
+    int32 periodYear = 7;
     
     // Timestamp that the invoice was invoiced
-    google.protobuf.Timestamp timestamp = 7;
+    google.protobuf.Timestamp timestamp = 8;
 
-    string remark = 8;
+    string remark = 9;
 
-    vera.grpc.shared.Supplier supplier = 9;
     Customer customer = 10;
     Employee employee = 11;
-    string periodId = 12;
 
-    repeated InvoiceLine lines = 13;
-    repeated Settlement settlements = 14;
-    repeated Payment payments = 15;
+    repeated InvoiceLine lines = 12;
+    repeated Settlement settlements = 13;
+    repeated Payment payments = 14;
 }
 
 message InvoiceLine {

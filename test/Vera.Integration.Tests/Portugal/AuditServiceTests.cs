@@ -34,10 +34,10 @@ namespace Vera.Integration.Tests.Portugal
             var invoice = builder.Result;
 
             var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
-            invoice.Supplier = supplier.Unpack();
-            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
-
+            var supplier = await dataProvider.CreateSupplier(invoice.Supplier.SystemId);
+    
+            await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -88,7 +88,8 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash(product1);
 
             var invoice = builder.Result;
-            invoice.PeriodId = await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            
+            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
