@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Grpc.Core;
 using Vera.Grpc;
 
@@ -14,7 +15,7 @@ namespace Vera.Integration.Tests
             _setup = setup;
             _loginToken = loginToken;
             _accountId = accountId;
-            
+
             Invoice = new InvoiceService.InvoiceServiceClient(channel);
             Audit = new AuditService.AuditServiceClient(channel);
             Receipt = new ReceiptService.ReceiptServiceClient(channel);
@@ -22,8 +23,17 @@ namespace Vera.Integration.Tests
             Period = new PeriodService.PeriodServiceClient(channel);
         }
 
+        public async Task OpenPeriod()
+        {
+            await Period.OpenPeriodAsync(new OpenPeriodRequest
+            {
+                SupplierSystemId = SupplierSystemId
+            }, AuthorizedMetadata);
+        }
+
         public string AccountId => _accountId;
-        
+        public string SupplierSystemId { get; set; }
+
         public Metadata AuthorizedMetadata => new()
         {
             {"authorization", $"bearer {_loginToken}"}

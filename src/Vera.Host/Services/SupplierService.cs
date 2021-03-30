@@ -18,10 +18,26 @@ namespace Vera.Host.Services
             _supplierStore = supplierStore;
         }
 
+        public override async Task<CreateSupplierReply> CreateIfNotExists(CreateSupplierRequest request, ServerCallContext context)
+        {
+            var supplier = await _supplierStore.GetBySystemId(request.Supplier.SystemId);
+            
+            if (supplier == null)
+            {
+                supplier = request.Supplier.Unpack();
+
+                await _supplierStore.Store(supplier);
+            }
+
+            return new CreateSupplierReply
+            {
+                Id = supplier.Id.ToString()
+            };
+        }
+
         public override async Task<CreateSupplierReply> Create(CreateSupplierRequest request, ServerCallContext context)
         {
-            var grpcSupplier = request.Supplier;
-            var existingSupplier = await _supplierStore.GetBySystemId(grpcSupplier.SystemId);
+            var existingSupplier = await _supplierStore.GetBySystemId(request.Supplier.SystemId);
             if (existingSupplier != null)
             {
                 throw new RpcException(new Status(
@@ -30,21 +46,21 @@ namespace Vera.Host.Services
                 ));
             }
 
-            var supplier = grpcSupplier.Unpack();
+            var supplier = request.Supplier.Unpack();
 
             await _supplierStore.Store(supplier);
 
             return new CreateSupplierReply { Id = supplier.Id.ToString() };
         }
 
-        public override async Task<Grpc.Shared.Supplier> Get(GetSupplierRequest request, ServerCallContext context)
+        public override async Task<Supplier> Get(GetSupplierRequest request, ServerCallContext context)
         {
             var supplier = await GetAndValidateSupplier(request.SystemId);
 
             return supplier.Pack();
         }
 
-        public override async Task<Grpc.Shared.Supplier> Update(UpdateSupplierRequest request, ServerCallContext context)
+        public override async Task<Supplier> Update(UpdateSupplierRequest request, ServerCallContext context)
         {
             var supplier = await GetAndValidateSupplier(request.SystemId);
             var requestSupplier = request.Supplier;
@@ -53,7 +69,7 @@ namespace Vera.Host.Services
             supplier.RegistrationNumber = requestSupplier.RegistrationNumber;
             supplier.TaxRegistrationNumber = requestSupplier.TaxRegistrationNumber;
             supplier.Address = requestSupplier.Address.Unpack();
-            //systemId is not updated
+            // systemId is not updated
 
             await _supplierStore.Update(supplier);
 

@@ -45,15 +45,13 @@ namespace Vera.Azure.Stores
 
         public async Task<Supplier> GetBySystemId(string systemId)
         {
-            var definition = new QueryDefinition(@"
-select top 1 value c[""Value""]
-  from c
- where c.Type = @type
-  and  c[""Value""].SystemId = @systemId")
-                .WithParameter("@type", DocumentType)
-                .WithParameter("@systemId", systemId);
+            var definition = new QueryDefinition(@"select top 1 value c['Value'] from c where c.Type = @type")
+                .WithParameter("@type", DocumentType);
 
-            using var iterator = _container.GetItemQueryIterator<Supplier>(definition);
+            using var iterator = _container.GetItemQueryIterator<Supplier>(definition, requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(systemId)
+            });
 
             var response = await iterator.ReadNextAsync();
 
@@ -83,7 +81,7 @@ select top 1 value c[""Value""]
         {
             return new(
                 s => s.Id,
-                s => s.Id.ToString(),
+                s => s.SystemId.ToString(),
                 supplier,
                 DocumentType
             );

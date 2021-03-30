@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Vera.Norway
+namespace Vera.Dependencies
 {
     public interface IDateProvider
     {

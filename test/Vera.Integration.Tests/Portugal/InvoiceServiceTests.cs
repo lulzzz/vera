@@ -22,17 +22,15 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_create_an_invoice()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
+            await client.OpenPeriod();
+            
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -48,17 +46,15 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_have_an_ascending_sequence()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
+            await client.OpenPeriod();
+            
             // Create same transaction twice to verify sequence is incremented
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
@@ -77,11 +73,9 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_run_validation()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
@@ -99,11 +93,9 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_get_validation_results()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
@@ -139,16 +131,14 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_create_invoice_with_supplier()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
+
+            await client.OpenPeriod();
             
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -164,24 +154,22 @@ namespace Vera.Integration.Tests.Portugal
 
             var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
 
-            Assert.Equal(getInvoiceReply.Supplier.Name, supplier.Name);
+            Assert.Equal(client.SupplierSystemId, getInvoiceReply.Supplier.SystemId);
         }
 
         [Fact]
         public async Task Should_create_invoice_with_period()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
             
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
-
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
             
             var invoice = builder.Result;
 
+            await client.OpenPeriod();
+            
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -199,7 +187,7 @@ namespace Vera.Integration.Tests.Portugal
 
             var getCurrentPeriodReply = await client.Period.GetCurrentPeriodAsync(new GetCurrentPeriodRequest
             {
-                SupplierSystemId = supplier.SystemId
+                SupplierSystemId = client.SupplierSystemId
             });
             
             Assert.Equal(getCurrentPeriodReply.Id, getInvoiceReply.PeriodId);

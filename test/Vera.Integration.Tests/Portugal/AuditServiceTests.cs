@@ -28,15 +28,12 @@ namespace Vera.Integration.Tests.Portugal
             var client = await _setup.CreateClient(Constants.Account);
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId));
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
 
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier(invoice.Supplier.SystemId);
-    
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            await client.OpenPeriod();
             
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -80,16 +77,14 @@ namespace Vera.Integration.Tests.Portugal
                 Description = "an alcoholic drink",
                 Type = ProductType.Goods
             };
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
-
+            
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash(product1);
 
             var invoice = builder.Result;
             
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
+            await client.OpenPeriod();
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -130,7 +125,7 @@ namespace Vera.Integration.Tests.Portugal
             await client.Invoice.CreateAsync(createInvoiceRequest3, client.AuthorizedMetadata);
 
 
-            var getAuditReply = await client.GenerateAuditFile(supplier.SystemId);
+            var getAuditReply = await client.GenerateAuditFile(client.SupplierSystemId);
             var auditProducts = await _invoiceResolver.GetProductsAsync(client.AccountId, getAuditReply.Location);
 
             Assert.Equal(2, auditProducts.Count());

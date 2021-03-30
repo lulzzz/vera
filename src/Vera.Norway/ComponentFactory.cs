@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Vera.Audits;
 using Vera.Configuration;
+using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Signing;
 using Vera.Thermal;

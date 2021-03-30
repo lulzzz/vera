@@ -7,11 +7,6 @@ namespace Vera.Tests.Shared
 {
     public class InvoiceDirector
     {
-        private static readonly string VeraInAscii = string.Join(
-            string.Empty, 
-            Encoding.ASCII.GetBytes("VERA").Select(x => x.ToString())
-        );
-        
         private readonly InvoiceBuilder _builder;
         private readonly Guid _accountId;
         private readonly string _supplierSystemId;
@@ -21,10 +16,6 @@ namespace Vera.Tests.Shared
             _builder = builder;
             _accountId = accountId;
             _supplierSystemId = supplierSystemId;
-        }
-
-        public InvoiceDirector(InvoiceBuilder builder, Guid accountId) : this(builder, accountId, VeraInAscii)
-        {
         }
 
         public void ConstructAnonymousWithoutLines()

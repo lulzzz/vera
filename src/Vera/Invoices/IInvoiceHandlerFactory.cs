@@ -1,26 +1,16 @@
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Vera.Concurrency;
-using Vera.Models;
+using Vera.Dependencies;
 using Vera.Stores;
 
 namespace Vera.Invoices
 {
-    public interface IInvoiceProcessor
+    public interface IInvoiceHandlerFactory
     {
-        /// <summary>
-        /// Responsible for processing the invoice by:
-        ///
-        /// 1. Putting in the correct chain/bucket
-        /// 2. Generating and assigning the correct invoice number
-        /// 3. Generating and assigning a sequence
-        /// 4. Signing the invoice and assigning it
-        /// 5. Storing the invoice
-        /// </summary>
-        Task Process(IComponentFactory factory, Invoice invoice);
+        IInvoiceHandler Create(IInvoiceComponentFactory factory);
     }
 
-    public sealed class InvoiceProcessor : IInvoiceProcessor
+    public sealed class InvoiceHandlerFactory : IInvoiceHandlerFactory
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly IInvoiceStore _invoiceStore;
@@ -29,7 +19,7 @@ namespace Vera.Invoices
         private readonly ISupplierStore _supplierStore;
         private readonly IPeriodStore _periodStore;
 
-        public InvoiceProcessor(
+        public InvoiceHandlerFactory(
             ILoggerFactory loggerFactory,
             IInvoiceStore invoiceStore,
             IChainStore chainStore,
@@ -46,8 +36,10 @@ namespace Vera.Invoices
             _periodStore = periodStore;
         }
 
-        public async Task Process(IComponentFactory factory, Invoice invoice)
+        public IInvoiceHandler Create(IInvoiceComponentFactory factory)
         {
+            var head = new InvoiceSupplierHandler(_supplierStore);
+         
             var persistenceHandler = new InvoicePersistenceHandler(
                 _loggerFactory.CreateLogger<InvoicePersistenceHandler>(),
                 _chainStore,
@@ -56,15 +48,13 @@ namespace Vera.Invoices
                 factory.CreateInvoiceNumberGenerator(),
                 factory.CreateInvoiceBucketGenerator()
             );
-
-            var head = new InvoiceSupplierHandler(_supplierStore);
             
             head.WithNext(new InvoiceOpenPeriodHandler(_periodStore))
                 .WithNext(new InvoiceTotalsHandler())
                 .WithNext(new InvoiceValidationHandler(factory.CreateInvoiceValidator()))
                 .WithNext(new InvoiceLockingHandler(persistenceHandler, factory.CreateInvoiceBucketGenerator(), _locker));
 
-            await head.Handle(invoice);
+            return head;
         }
     }
 }

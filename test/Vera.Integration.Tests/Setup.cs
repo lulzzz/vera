@@ -17,6 +17,7 @@ namespace Vera.Integration.Tests
         public string AccountName { get; set; }
         public string Certification { get; set; }
         public IDictionary<string, string> Configuration { get; } = new Dictionary<string, string>();
+        public string SupplierSystemId { get; set; }
     }
 
     public class LoginEntry
@@ -39,6 +40,9 @@ namespace Vera.Integration.Tests
         
         // Cache of accounts that are created during tests
         private static readonly IDictionary<string, string> ExistingAccounts =
+            new ConcurrentDictionary<string, string>();
+
+        private static readonly IDictionary<string, string> ExistingSuppliers =
             new ConcurrentDictionary<string, string>();
 
         private static readonly SemaphoreSlim Semaphore = new(1, 1);
@@ -67,7 +71,18 @@ namespace Vera.Integration.Tests
 
                 var client = new SetupClient(this, _channel, loginEntry.Token, account);
 
-                if (!exists && context.Configuration.Any())
+                if (!string.IsNullOrEmpty(context.SupplierSystemId))
+                {
+                    client.SupplierSystemId = await CreateSupplierIfNotExists(context, client);
+                }
+                
+                if (exists)
+                {
+                    // Nothing else to configure or client exists already
+                    return client;
+                }
+
+                if (context.Configuration.Any())
                 {
                     var accountConfigurationRequest = new AccountConfigurationRequest
                     {
@@ -76,7 +91,7 @@ namespace Vera.Integration.Tests
                     };
 
                     await client.Account.CreateOrUpdateConfigurationAsync(accountConfigurationRequest,
-                        client.AuthorizedMetadata);
+                        client.AuthorizedMetadata);                    
                 }
 
                 return client;
@@ -86,7 +101,7 @@ namespace Vera.Integration.Tests
                 Semaphore.Release();    
             }
         }
-
+        
         public async Task<LoginEntry> CreateLoginIfNotExists(string companyName)
         {
             if (CompanyLoginTokens.TryGetValue(companyName, out var entry))
@@ -158,6 +173,41 @@ namespace Vera.Integration.Tests
             return (createAccountReply.Id, false);
         }
 
+        private async Task<string> CreateSupplierIfNotExists(AccountContext context, SetupClient client)
+        {
+            if (ExistingSuppliers.TryGetValue(context.SupplierSystemId, out var s))
+            {
+                return s;
+            }
+            
+            var supplier = new CreateSupplierRequest
+            {
+                Supplier = new Supplier
+                {
+                    Name = _faker.Company.CompanyName(),
+                    RegistrationNumber = _faker.Random.AlphaNumeric(10),
+                    TaxRegistrationNumber = _faker.Random.AlphaNumeric(10),
+                    SystemId = context.SupplierSystemId,
+                    Address = new Address
+                    {
+                        City = _faker.Address.City(),
+                        Country = _faker.Address.Country(),
+                        Number = _faker.Address.BuildingNumber(),
+                        PostalCode = _faker.Address.ZipCode(),
+                        Region = _faker.Address.County(),
+                        Street = _faker.Address.StreetAddress()
+                    }
+                }
+            };
+
+            await client.Supplier.CreateIfNotExistsAsync(supplier, client.AuthorizedMetadata);
+
+            // TODO(kevin): convert to set, we can use SystemId instead of Id anyway
+            ExistingSuppliers[context.SupplierSystemId] = context.SupplierSystemId;
+            
+            return context.SupplierSystemId;
+        }
+        
         public Metadata CreateAuthorizedMetadata(string token)
         {
             return new()

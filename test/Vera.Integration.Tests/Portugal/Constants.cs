@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Bogus;
 
@@ -34,7 +35,8 @@ tq4HEcmINDkh3fy0/V5XRqzAmGlH6dgxPMgEdddzdRrl
                 {"SocialCapital", "1234"},
                 {"CertificateNumber", "9999"},
                 {"CertificateName", "PELICANTHEORY - UNIPESSOAL LDA"}
-            }
+            },
+            SupplierSystemId = Guid.NewGuid().ToString()
         };
     }
 }

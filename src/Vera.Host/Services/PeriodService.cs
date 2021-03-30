@@ -3,6 +3,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Concurrency;
+using Vera.Dependencies;
 using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
@@ -14,12 +15,19 @@ namespace Vera.Host.Services
     {
         private readonly ISupplierStore _supplierStore;
         private readonly IPeriodStore _periodStore;
+        private readonly IDateProvider _dateProvider;
         private readonly ILocker _locker;
 
-        public PeriodService(ISupplierStore supplierStore, IPeriodStore periodStore, ILocker locker)
+        public PeriodService(
+            ISupplierStore supplierStore, 
+            IPeriodStore periodStore,
+            IDateProvider dateProvider,
+            ILocker locker
+        )
         {
             _supplierStore = supplierStore;
             _periodStore = periodStore;
+            _dateProvider = dateProvider;
             _locker = locker;
         }
 
@@ -43,7 +51,7 @@ namespace Vera.Host.Services
 
                 var period = new Models.Period
                 {
-                    Opening = DateTime.UtcNow,
+                    Opening = _dateProvider.Now,
                     Supplier = supplier
                 };
                 
@@ -67,7 +75,7 @@ namespace Vera.Host.Services
                 Id = period.Id,
                 Supplier = period.Supplier,
                 Opening = period.Opening,
-                Closing = DateTime.UtcNow,
+                Closing = _dateProvider.Now
             });
 
             return new Empty();

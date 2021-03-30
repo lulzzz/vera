@@ -4,6 +4,14 @@ import "Protos/shared.proto";
 
 package vera.grpc;
 
+service SupplierService {
+    rpc Create(CreateSupplierRequest) returns (CreateSupplierReply);
+    rpc Get(GetSupplierRequest) returns (vera.grpc.shared.Supplier);
+    rpc Update(UpdateSupplierRequest) returns (vera.grpc.shared.Supplier);
+    rpc Delete(DeleteSupplierRequest) returns (vera.grpc.shared.Empty);
+    rpc CreateIfNotExists(CreateSupplierRequest) returns (CreateSupplierReply);
+}
+
 message CreateSupplierRequest {
   vera.grpc.shared.Supplier supplier = 1;
 }
@@ -23,11 +31,4 @@ message UpdateSupplierRequest {
 
 message DeleteSupplierRequest {
     string systemId = 1;
-}
-
-service SupplierService {
-    rpc Create(CreateSupplierRequest) returns(CreateSupplierReply);
-    rpc Get(GetSupplierRequest) returns(vera.grpc.shared.Supplier);
-    rpc Update(UpdateSupplierRequest) returns(vera.grpc.shared.Supplier);
-    rpc Delete(DeleteSupplierRequest) returns(vera.grpc.shared.Empty);
 }

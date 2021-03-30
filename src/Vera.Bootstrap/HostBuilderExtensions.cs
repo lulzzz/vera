@@ -2,8 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Austria;
 using Vera.Concurrency;
+using Vera.Dependencies;
 using Vera.Invoices;
-using Vera.Norway;
 using Vera.Portugal;
 using Vera.Security;
 using Vera.Services;
@@ -28,7 +28,7 @@ namespace Vera.Bootstrap
 
                 // Services
                 collection.AddTransient<IUserRegisterService, UserRegisterService>();
-                collection.AddTransient<IInvoiceProcessor, InvoiceProcessor>();
+                collection.AddTransient<IInvoiceHandlerFactory, InvoiceHandlerFactory>();
                 collection.AddTransient<IDateProvider, RealLifeDateProvider>();
             });
 

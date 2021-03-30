@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Vera.Concurrency;
+using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Signing;
@@ -23,7 +24,7 @@ namespace Vera.Tests
             var invoiceStore = new Mock<IInvoiceStore>();
             var chainStore = new Mock<IChainStore>();
             var last = new Mock<IChainable>();
-            var factory = new Mock<IComponentFactory>();
+            var factory = new Mock<IInvoiceComponentFactory>();
             var supplierStore = new Mock<ISupplierStore>();
             var periodStore = new Mock<IPeriodStore>();
 
@@ -64,7 +65,7 @@ namespace Vera.Tests
             periodStore.Setup(x => x.GetOpenPeriodForSupplier(It.IsAny<Guid>()))
                 .ReturnsAsync(new Period());
 
-            var processor = new InvoiceProcessor(
+            var invoiceHandlerFactory = new InvoiceHandlerFactory(
                 NullLoggerFactory.Instance,
                 invoiceStore.Object,
                 chainStore.Object,
@@ -79,7 +80,7 @@ namespace Vera.Tests
 
             var invoice = builder.Result;
 
-            await processor.Process(factory.Object, invoice);
+            await invoiceHandlerFactory.Create(factory.Object).Handle(invoice);
 
             Assert.Equal(expectedNumber, invoice.Number);
             Assert.Equal(last.Object.NextSequence, invoice.Sequence);

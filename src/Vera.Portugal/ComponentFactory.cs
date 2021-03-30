@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
+using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Signing;
 using Vera.Thermal;

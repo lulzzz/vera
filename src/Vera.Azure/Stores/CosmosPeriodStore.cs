@@ -46,15 +46,16 @@ namespace Vera.Azure.Stores
         public async Task<Period> GetOpenPeriodForSupplier(Guid supplierId)
         {
             var definition = new QueryDefinition(@"
-select top 1 value c[""Value""]
+select top 1 value c['Value']
   from c
  where c.Type = @type
-  and  c[""Value""].Supplier.Id = @supplierId
-  and  c[""Value""].IsClosed = false")
-              .WithParameter("@type", DocumentType)
-              .WithParameter("@supplierId", supplierId.ToString());
+   and  c['Value'].IsClosed = false")
+              .WithParameter("@type", DocumentType);
             
-            using var iterator = _container.GetItemQueryIterator<Period>(definition);
+            using var iterator = _container.GetItemQueryIterator<Period>(definition, requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(supplierId.ToString())
+            });
 
             var response = await iterator.ReadNextAsync();
 

@@ -17,18 +17,18 @@ namespace Vera.Host.Services
     {
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
-        private readonly IInvoiceProcessor _invoiceProcessor;
+        private readonly IInvoiceHandlerFactory _invoiceHandlerFactory;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
         public InvoiceService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
-            IInvoiceProcessor invoiceProcessor,
+            IInvoiceHandlerFactory invoiceHandlerFactory,
             IAccountComponentFactoryCollection accountComponentFactoryCollection)
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
-            _invoiceProcessor = invoiceProcessor;
+            _invoiceHandlerFactory = invoiceHandlerFactory;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
@@ -42,7 +42,8 @@ namespace Vera.Host.Services
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var invoice = request.Invoice.Unpack();
 
-            await _invoiceProcessor.Process(factory, invoice);
+            var handler = _invoiceHandlerFactory.Create(factory);
+            await handler.Handle(invoice);
 
             return new CreateInvoiceReply
             {

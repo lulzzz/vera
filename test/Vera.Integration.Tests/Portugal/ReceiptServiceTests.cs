@@ -20,17 +20,15 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_generate_a_receipt()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
-
+            
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
+            await client.OpenPeriod();
+            
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -56,17 +54,15 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_mark_receipt_as_printed()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            var dataProvider = new SampleDataProvier(client);
-            var supplier = await dataProvider.CreateSupplier();
 
             var builder = new InvoiceBuilder();
-            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), supplier.SystemId);
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
-            
-            await dataProvider.CreateOpenPeriod(supplier.SystemId);
 
+            await client.OpenPeriod();
+           
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
