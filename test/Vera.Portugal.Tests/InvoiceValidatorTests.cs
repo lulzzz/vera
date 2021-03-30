@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using Vera.Models;
+using Vera.Portugal.Invoices;
 using Vera.Tests.Shared;
 using Xunit;
 

@@ -1,4 +1,6 @@
-﻿using Xunit;
+﻿using System.Text;
+using Vera.Models;
+using Xunit;
 
 namespace Vera.Austria.Tests
 {
@@ -29,7 +31,7 @@ namespace Vera.Austria.Tests
 
 
             var transformer = new ShortFormSignatureTransformer();
-            var got = transformer.Transform(jwt);
+            var got = transformer.Transform(new Signature(null, Encoding.UTF8.GetBytes(jwt)));
 
             Assert.Equal(expected, got);
         }

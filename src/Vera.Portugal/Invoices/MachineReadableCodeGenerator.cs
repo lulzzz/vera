@@ -2,16 +2,16 @@ using Vera.Models;
 using Vera.Portugal.Models;
 using Vera.Signing;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Invoices
 {
   public class MachineReadableCodeGenerator : IMachineReadableCodeGenerator
   {
-    private readonly string _shortSignature;
+    private readonly IShortFormSignatureTransformer _shortFormSignatureTransformer;
     private readonly string _certificateNumber;
 
-    public MachineReadableCodeGenerator(string shortSignature, string certificateNumber)
+    public MachineReadableCodeGenerator(IShortFormSignatureTransformer shortFormSignatureTransformer, string certificateNumber)
     {
-      _shortSignature = shortSignature;
+      _shortFormSignatureTransformer = shortFormSignatureTransformer;
       _certificateNumber = certificateNumber;
     }
 
@@ -40,7 +40,7 @@ namespace Vera.Portugal
         .NonTaxable(table.Zero)
         .TaxTotal(table.Total)
         .Total(totals.Gross)
-        .Hash(_shortSignature)
+        .Hash(_shortFormSignatureTransformer.Transform(invoice.Signature))
         .CertificateNumber(_certificateNumber);
 
       return builder.ToString();

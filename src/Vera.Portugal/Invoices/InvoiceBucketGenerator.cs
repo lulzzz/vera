@@ -2,7 +2,7 @@ using System.Text;
 using Vera.Invoices;
 using Vera.Models;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Invoices
 {
     public sealed class InvoiceBucketGenerator : IInvoiceBucketGenerator
     {

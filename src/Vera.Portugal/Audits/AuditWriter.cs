@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 using Vera.Audits;
 using Vera.Portugal.Models;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Audits
 {
     public class AuditWriter : IAuditWriter
     {

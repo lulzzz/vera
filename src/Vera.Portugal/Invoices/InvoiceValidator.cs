@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Vera.Invoices;
 using Vera.Models;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Invoices
 {
     public class InvoiceValidator : IInvoiceValidator
     {

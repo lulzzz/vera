@@ -2,6 +2,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Vera.Portugal.Invoices;
 using Vera.Signing;
 using Xunit;
 

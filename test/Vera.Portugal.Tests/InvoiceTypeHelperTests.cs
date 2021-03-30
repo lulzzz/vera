@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Vera.Models;
+using Vera.Portugal.Invoices;
 using Vera.Portugal.Models;
 using Xunit;
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Vera.Models;
 using Vera.Signing;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Invoices
 {
     public sealed class PackageSigner : IPackageSigner
     {

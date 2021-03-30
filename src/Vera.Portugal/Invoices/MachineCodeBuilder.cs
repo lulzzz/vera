@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Vera.Models;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Invoices
 {
   /// <summary>
   /// Builder to build a code according to the

@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Moq;
 using Vera.Models;
+using Vera.Portugal.Invoices;
+using Vera.Signing;
 using Xunit;
 
 namespace Vera.Portugal.Tests
@@ -51,7 +54,11 @@ namespace Vera.Portugal.Tests
         }
       };
 
-      var generator = new MachineReadableCodeGenerator("qaai", "9999");
+      var transformer = new Mock<IShortFormSignatureTransformer>();
+      transformer.Setup(x => x.Transform(It.IsAny<Signature>()))
+        .Returns("qaai");
+
+      var generator = new MachineReadableCodeGenerator( transformer.Object, "9999");
       var result = generator.Generate(invoice);
 
       Assert.Equal(expected, result);

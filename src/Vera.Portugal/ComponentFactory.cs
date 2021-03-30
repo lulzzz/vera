@@ -3,6 +3,8 @@ using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Invoices;
+using Vera.Portugal.Audits;
+using Vera.Portugal.Invoices;
 using Vera.Signing;
 using Vera.Thermal;
 
@@ -47,6 +49,7 @@ namespace Vera.Portugal
         public IThermalReceiptGenerator CreateThermalReceiptGenerator()
         {
             return new ThermalReceiptGenerator(
+                new MachineReadableCodeGenerator(new ShortFormSignatureTransformer(), _configuration.CertificateNumber),
                 _configuration.SocialCapital,
                 _configuration.CertificateName,
                 _configuration.CertificateNumber

@@ -6,6 +6,7 @@ using System.Text;
 using Vera.Documents.Nodes;
 using Vera.Extensions;
 using Vera.Models;
+using Vera.Signing;
 using Vera.Thermal;
 
 namespace Vera.Portugal
@@ -14,12 +15,19 @@ namespace Vera.Portugal
     {
         private static readonly CultureInfo Culture = CultureInfo.CreateSpecificCulture("pt-PT");
 
+        private readonly IMachineReadableCodeGenerator _machineReadableCodeGenerator;
         private readonly decimal _socialCapital;
         private readonly string _certificateName;
         private readonly string _certificateNumber;
 
-        public ThermalReceiptGenerator(decimal socialCapital, string certificateName, string certificateNumber)
+        public ThermalReceiptGenerator(
+            IMachineReadableCodeGenerator machineReadableCodeGenerator, 
+            decimal socialCapital, 
+            string certificateName, 
+            string certificateNumber
+        )
         {
+            _machineReadableCodeGenerator = machineReadableCodeGenerator;
             _socialCapital = socialCapital;
             _certificateName = certificateName;
             _certificateNumber = certificateNumber;
@@ -346,7 +354,7 @@ namespace Vera.Portugal
             yield return new TextThermalNode($"certificado no {_certificateNumber}/AT");
             yield return new TextThermalNode("preços unitários com iva incluido");
 
-            yield return new QRCodeThermalNode(Convert.ToBase64String(context.Invoice.Signature.Output));
+            yield return new QRCodeThermalNode(_machineReadableCodeGenerator.Generate(context.Invoice));
             yield return new SpacingThermalNode(1);
 
             if (context.Footer != null)

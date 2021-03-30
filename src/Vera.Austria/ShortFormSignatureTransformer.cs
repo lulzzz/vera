@@ -1,20 +1,18 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Text;
+using Vera.Models;
 using Vera.Signing;
 
 namespace Vera.Austria
 {
     public class ShortFormSignatureTransformer : IShortFormSignatureTransformer
     {
-        public string Transform(string signature)
+        public string Transform(Signature signature)
         {
-            if (string.IsNullOrEmpty(signature))
-            {
-                return null;
-            }
+            var value = Encoding.UTF8.GetString(signature.Output);
 
-            var parts = signature.Split('.');
+            var parts = value.Split('.');
 
             if (parts.Length != 3)
             {

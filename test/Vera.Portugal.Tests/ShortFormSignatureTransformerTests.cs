@@ -1,4 +1,6 @@
 using System;
+using Vera.Models;
+using Vera.Portugal.Invoices;
 using Xunit;
 
 namespace Vera.Portugal.Tests
@@ -9,7 +11,7 @@ namespace Vera.Portugal.Tests
         public void Should_return_correct_zipped_signature()
         {
             var transformer = new ShortFormSignatureTransformer();
-            var got = transformer.Transform("R2sB3JRSFGWZJ5vM4s14R2sB3JRSFGWZ");
+            var got = transformer.Transform(new Signature(null, Convert.FromBase64String("R2sB3JRSFGWZJ5vM4s14R2sB3JRSFGWZ")));
 
             Assert.Equal("RWRW", got);
         }
@@ -20,7 +22,7 @@ namespace Vera.Portugal.Tests
             var transformer = new ShortFormSignatureTransformer();
 
             Assert.Throws<NullReferenceException>(() => transformer.Transform(null));
-            Assert.Throws<NullReferenceException>(() => transformer.Transform(string.Empty));
+            Assert.Throws<NullReferenceException>(() => transformer.Transform(new Signature()));
         }
     }
 }

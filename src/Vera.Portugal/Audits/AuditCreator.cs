@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Vera.Audits;
 using Vera.Models;
+using Vera.Portugal.Invoices;
 using Vera.Portugal.Models;
 using Invoice = Vera.Models.Invoice;
 using ProductType = Vera.Portugal.Models.ProductType;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Audits
 {
     public class AuditCreator
     {

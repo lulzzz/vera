@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Moq;
 using Vera.Documents.Visitors;
 using Vera.Invoices;
 using Vera.Models;
+using Vera.Signing;
 using Vera.Tests.Scenario;
 using Vera.Thermal;
 using Xunit;
@@ -24,7 +26,6 @@ namespace Vera.Portugal.Tests
         [Fact]
         public void Should_do_magic()
         {
-            // var scenario = new SellSingleProductScenario(1.23m, 25m, PaymentCategory.Cash);
             var scenario = new MultipleTaxRateScenario(new Dictionary<TaxesCategory, decimal>()
             {
                 {TaxesCategory.High, 1.23m},
@@ -55,7 +56,13 @@ namespace Vera.Portugal.Tests
                 Original = true
             };
 
-            var generator = new ThermalReceiptGenerator(258501m, "PELICAN THEORY", "9999");
+            const string expectedMachineReadableCode = "MACHINE_QR_CODE_HERE";
+
+            var machineReadableCodeGenerator = new Mock<IMachineReadableCodeGenerator>();
+            machineReadableCodeGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
+                .Returns(expectedMachineReadableCode);
+
+            var generator = new ThermalReceiptGenerator(machineReadableCodeGenerator.Object, 258501m, "PELICAN THEORY", "9999");
             var node = generator.Generate(context);
 
             var sb = new StringBuilder();
@@ -65,6 +72,7 @@ namespace Vera.Portugal.Tests
 
             var contents = sb.ToString();
 
+            Assert.Contains(expectedMachineReadableCode, contents);
             // Assert.Contains("FATURA SIMPLIFICADA", result);
             // Assert.DoesNotContain("NOTA DE CRÉDITO", result);
 
@@ -171,7 +179,9 @@ namespace Vera.Portugal.Tests
                 Original = true
             };
 
-            var generator = new ThermalReceiptGenerator(258501m, "PELICAN THEORY", "9999");
+            var machineReadableCodeGenerator = new Mock<IMachineReadableCodeGenerator>();
+
+            var generator = new ThermalReceiptGenerator(machineReadableCodeGenerator.Object, 258501m, "PELICAN THEORY", "9999");
             var node = generator.Generate(context);
 
             var sb = new StringBuilder();

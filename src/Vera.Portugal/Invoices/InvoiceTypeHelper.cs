@@ -2,7 +2,7 @@ using System.Linq;
 using Vera.Models;
 using Vera.Portugal.Models;
 
-namespace Vera.Portugal
+namespace Vera.Portugal.Invoices
 {
     public static class InvoiceTypeHelper
     {

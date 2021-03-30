@@ -1,3 +1,5 @@
+using Vera.Models;
+
 namespace Vera.Signing
 {
     /// <summary>
@@ -9,8 +11,8 @@ namespace Vera.Signing
         /// <summary>
         /// Transforms the given base64 version of the signature to its short form.
         /// </summary>
-        /// <param name="signature">base64 of the signature</param>
+        /// <param name="signature"></param>
         /// <returns></returns>
-        string Transform(string signature);
+        string Transform(Signature signature);
     }
 }
