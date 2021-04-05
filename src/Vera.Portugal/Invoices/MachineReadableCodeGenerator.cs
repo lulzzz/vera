@@ -22,8 +22,8 @@ namespace Vera.Portugal.Invoices
 
       var builder = new MachineCodeBuilder()
         .Issuer(invoice.Supplier.TaxRegistrationNumber)
-        .Purchaser(invoice.Customer.TaxRegistrationNumber)
-        .PurchaserCountry(invoice.Customer.BillingAddress?.Country)
+        .Purchaser(invoice.Customer?.TaxRegistrationNumber)
+        .PurchaserCountry(invoice.Customer?.BillingAddress?.Country)
         .DocumentType(InvoiceTypeHelper.DetermineType(invoice).ToString())
         .DocumentState(InvoiceStatus.N.ToString())
         .DocumentDate(invoice.Date)
