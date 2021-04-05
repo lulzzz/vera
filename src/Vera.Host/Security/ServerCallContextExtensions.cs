@@ -19,10 +19,11 @@ namespace Vera.Host.Security
         /// <param name="accountId"></param>
         /// <returns></returns>
         /// <exception cref="RpcException">when the account cannot be resolved</exception>
-        public static async Task<Account> ResolveAccount(this ServerCallContext context, IAccountStore store, string accountId)
+        public static async Task<Account> ResolveAccount(this ServerCallContext context, IAccountStore store)
         {
             var companyId = context.GetCompanyId();
-            var account = await store.Get(companyId, Guid.Parse(accountId));
+            var accountId = context.GetAccountId();
+            var account = await store.Get(companyId, accountId);
 
             return account ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthenticated"));
         }
@@ -30,6 +31,13 @@ namespace Vera.Host.Security
         public static Guid GetCompanyId(this ServerCallContext context)
         {
             return Guid.Parse(context.FindFirstValue(ClaimTypes.CompanyId));
+        }
+
+        public static Guid GetAccountId(this ServerCallContext context)
+        {
+            var accountId = context.RequestHeaders.GetValue(MetadataKeys.AccountId);
+            
+            return accountId != null ? Guid.Parse(accountId) : throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthenticated"));
         }
 
         public static string GetUsername(this ServerCallContext context)

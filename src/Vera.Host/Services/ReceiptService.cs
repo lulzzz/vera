@@ -39,7 +39,7 @@ namespace Vera.Host.Services
 
         public override async Task<RenderThermalReply> RenderThermal(RenderThermalRequest request, ServerCallContext context)
         {
-            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var account = await context.ResolveAccount(_accountStore);
             var invoice = await _invoiceStore.GetByNumber(account.Id, request.InvoiceNumber);
 
             if (invoice == null)

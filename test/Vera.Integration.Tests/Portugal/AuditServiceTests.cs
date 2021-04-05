@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Vera.Grpc;
 using Vera.Grpc.Models;
+using Vera.Host.Security;
 using Vera.Models;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
@@ -74,7 +75,7 @@ namespace Vera.Integration.Tests.Portugal
             var client = await _setup.CreateClient(Constants.Account);
             var httpClient = _fixture.CreateClient();
 
-            httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue("authorization"));
+            httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue(MetadataKeys.Authorization));
 
             var invoiceResolver = new AuditResultsStore(httpClient);
 
@@ -87,7 +88,7 @@ namespace Vera.Integration.Tests.Portugal
             };
 
             await client.OpenPeriod();
-                
+
             foreach (var product in products)
             {
                 var scenario = new SellProductScenario(product)
@@ -98,9 +99,7 @@ namespace Vera.Integration.Tests.Portugal
 
                 var result = scenario.Execute();
 
-                var openRegisterReply = await client.OpenRegister(100m);
                 var invoice = result.Invoice;
-                invoice.RegisterId = openRegisterReply.Id;
 
                 await client.Invoice.CreateAsync(new CreateInvoiceRequest
                 {
@@ -108,7 +107,7 @@ namespace Vera.Integration.Tests.Portugal
                 }, client.AuthorizedMetadata);
             }
 
-            var getAuditReply = await client.GenerateAuditFile(client.SupplierSystemId);
+            var getAuditReply = await client.GenerateAuditFile();
             var auditProducts = await invoiceResolver.LoadProductsFromAuditAsync(client.AccountId, getAuditReply.Location);
 
             Assert.Equal(2, auditProducts.Count());

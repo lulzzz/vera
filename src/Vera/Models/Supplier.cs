@@ -27,5 +27,10 @@ namespace Vera.Models
         /// Address is the physical location of the supplier
         /// </summary>
         public Address Address { get; set; }
+
+        /// <summary>
+        /// The id of the account that can operate on this supplier
+        /// </summary>
+        public Guid AccountId { get; set; }
     }
 }

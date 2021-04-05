@@ -1,4 +1,6 @@
-﻿namespace Vera.Grpc.Models
+﻿using System;
+
+namespace Vera.Grpc.Models
 {
     public static class SupplierExtensions
     {
@@ -10,7 +12,7 @@
                 RegistrationNumber = supplier.RegistrationNumber ?? string.Empty,
                 TaxRegistrationNumber = supplier.TaxRegistrationNumber ?? string.Empty,
                 SystemId = supplier.SystemId,
-                Address = supplier.Address.Pack()
+                Address = supplier.Address.Pack(),
             };
 
             return result;
@@ -24,7 +26,7 @@
                 RegistrationNumber = supplier.RegistrationNumber ?? string.Empty,
                 TaxRegistrationNumber = supplier.TaxRegistrationNumber ?? string.Empty,
                 SystemId = supplier.SystemId,
-                Address = supplier.Address.Unpack()
+                Address = supplier.Address.Unpack(),
             };
 
             return result;

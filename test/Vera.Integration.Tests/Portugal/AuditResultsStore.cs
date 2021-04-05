@@ -36,49 +36,74 @@ namespace Vera.Integration.Tests.Portugal
 
         public async Task LoadInvoicesFromAuditAsync(string accountId, string name)
         {
-            var auditFile = await GetAuditFileAsync(accountId, name);
+            var auditFiles = await GetAuditFileAsync(accountId, name);
 
-            foreach (var auditInvoice in auditFile.SourceDocuments.SalesInvoices.Invoice)
+            foreach (var file in auditFiles)
             {
-                var invoiceResult = new InvoiceResult
+                var auditInvoices = file.SourceDocuments.SalesInvoices.Invoice;
+                if (auditInvoices != null)
                 {
-                    InvoiceNumber = auditInvoice.InvoiceNo,
-                    ATCUD = auditInvoice.ATCUD,
-                    InvoiceType = auditInvoice.InvoiceType,
-                    GrossTotal = auditInvoice.DocumentTotals.GrossTotal,
-                    NetTotal = auditInvoice.DocumentTotals.NetTotal,
-                    InvoiceLinesCount = auditInvoice.Line.Length
-                    // TODO determinte PaymentType from audit and assert in test
-                };
-                
-                _actualResults.Add(auditInvoice.InvoiceNo, invoiceResult);
+                    foreach (var invoice in auditInvoices)
+                    {
+                        var result = new InvoiceResult
+                        {
+                            InvoiceNumber = invoice.InvoiceNo,
+                            ATCUD = invoice.ATCUD,
+                            InvoiceType = invoice.InvoiceType,
+                            GrossTotal = invoice.DocumentTotals.GrossTotal,
+                            NetTotal = invoice.DocumentTotals.NetTotal,
+                            InvoiceLinesCount = invoice.Line.Length
+                            // TODO determinte PaymentType from audit and assert in test
+                        };
+
+                        _actualResults.Add(result.InvoiceNumber, result);
+                    }
+                }
             }
         }
 
         public async Task<IEnumerable<Models.Product>> LoadProductsFromAuditAsync(string accountId, string name)
         {
-            var auditFile = await GetAuditFileAsync(accountId, name);
+            var products = new List<Models.Product>();
+            var auditFiles = await GetAuditFileAsync(accountId, name);
 
-            return auditFile.MasterFiles.Product.Select(p => new Models.Product
+            foreach (var file in auditFiles)
             {
-                Code = p.ProductCode,
-                Description = p.ProductDescription
-            });
+                var auditProducts = file.MasterFiles.Product;
+                if (auditProducts != null)
+                {
+                    products.AddRange(
+                        auditProducts.Select(p => new Models.Product
+                        {
+                            Code = p.ProductCode,
+                            Description = p.ProductDescription
+                        }));
+                }
+            }
+
+            return products;
         }
 
-        private async Task<AuditFile> GetAuditFileAsync(string accountId, string name)
+        private async Task<IEnumerable<AuditFile>> GetAuditFileAsync(string accountId, string name)
         {
             var serializer = new XmlSerializer(typeof(AuditFile));
             var response = await _httpClient.GetAsync($"download/audit/{accountId}/{name}");
             var result = await response.Content.ReadAsStreamAsync();
 
             using var zipArchive = new ZipArchive(result);
-            var entry = zipArchive.Entries.First();
-            using var sr = new StreamReader(entry.Open());
 
-            return (AuditFile)serializer.Deserialize(sr);
+            var files = new List<AuditFile>();
+            foreach (var entry in zipArchive.Entries)
+            {
+                using var sr = new StreamReader(entry.Open());
+
+                var file = (AuditFile)serializer.Deserialize(sr);
+                files.Add(file);
+            }
+
+            return files;
         }
-        
+
         public IEnumerable<InvoiceResult> ExpectedResults => _expectedResults;
     }
 
@@ -91,7 +116,7 @@ namespace Vera.Integration.Tests.Portugal
         public decimal NetTotal { get; set; }
         public int InvoiceLinesCount { get; set; }
         public int ProductsCount { get; set; }
-        
+
         public Invoice Invoice { get; set; }
         public CreateInvoiceReply Reply { get; set; }
     }

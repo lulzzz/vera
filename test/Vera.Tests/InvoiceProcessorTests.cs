@@ -58,7 +58,7 @@ namespace Vera.Tests
             chainStore.Setup(x => x.Last(It.IsAny<ChainContext>()))
                 .ReturnsAsync(last.Object);
 
-            supplierStore.Setup(x => x.GetBySystemId(It.IsAny<string>()))
+            supplierStore.Setup(x => x.Get(It.IsAny<Guid>(), It.IsAny<string>()))
                 .ReturnsAsync(new Supplier());
 
             var registerId = Guid.NewGuid();

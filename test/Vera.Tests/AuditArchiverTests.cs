@@ -54,7 +54,7 @@ namespace Vera.Tests
             var audit = new Audit
             {
                 Start = new DateTime(2020, 1, 1),
-                End = new DateTime(2021, 1, 1)
+                End = new DateTime(2020, 12, 31)
             };
 
             await archiver.Archive(account, audit);

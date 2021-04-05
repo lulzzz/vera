@@ -33,14 +33,14 @@ namespace Vera.Integration.Tests
             return reply;
         }
 
-        public static async Task<GetAuditReply> GenerateAuditFile(this SetupClient client, string supplierSystemId)
+        public static async Task<GetAuditReply> GenerateAuditFile(this SetupClient client)
         {
             var createAuditRequest = new CreateAuditRequest
             {
                 AccountId = client.AccountId,
-                SupplierSystemId = supplierSystemId,
+                SupplierSystemId = client.SupplierSystemId,
                 StartDate = DateTime.UtcNow.AddDays(-1).ToTimestamp(),
-                EndDate = DateTime.UtcNow.AddDays(1).ToTimestamp()
+                EndDate = DateTime.UtcNow.ToTimestamp()
             };
             var createAuditReply = await client.Audit.CreateAsync(createAuditRequest, client.AuthorizedMetadata);
             var getAuditReply = await client.GetAuditReplyAsync(createAuditReply.AuditId);

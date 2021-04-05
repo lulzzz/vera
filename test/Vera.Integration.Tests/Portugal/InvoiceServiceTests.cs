@@ -195,10 +195,8 @@ namespace Vera.Integration.Tests.Portugal
 
             var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
 
-            var getCurrentPeriodReply = await client.Period.GetCurrentPeriodAsync(new GetCurrentPeriodRequest
-            {
-                SupplierSystemId = client.SupplierSystemId
-            }, client.AuthorizedMetadata);
+            var getPeriodRequest = new GetCurrentPeriodRequest { SupplierSystemId = client.SupplierSystemId };
+            var getCurrentPeriodReply = await client.Period.GetCurrentPeriodAsync(getPeriodRequest, client.AuthorizedMetadata);
             
             Assert.Equal(getCurrentPeriodReply.Id, getInvoiceReply.PeriodId);
         }

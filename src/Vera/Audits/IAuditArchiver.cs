@@ -118,14 +118,13 @@ namespace Vera.Audits
             {
                 yield return (offset, end);
 
-                // Move offset to the next month
-                offset = end.AddDays(1);
+                // Set offset to end and move to the next day after end
+                offset = end;
+                end = end.AddDays(1);
 
-                // Move to end of the offset' month
-                lastDayOfMonth = DateTime.DaysInMonth(offset.Year, offset.Month);
-
-                // offset is at start of the new month, move this to end of that month
-                end = new DateTime(offset.Year, offset.Month, lastDayOfMonth);
+                // set end to last day of end month
+                lastDayOfMonth = DateTime.DaysInMonth(end.Year, end.Month);
+                end = new DateTime(end.Year, end.Month, lastDayOfMonth);
 
                 // Ensure end does not pass that of the audit
                 end = Min(end, audit.End);

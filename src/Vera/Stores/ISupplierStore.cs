@@ -8,8 +8,7 @@ namespace Vera.Stores
     {
         Task Store(Supplier supplier);
         Task Update(Supplier supplier);
-        Task<Supplier> Get(Guid supplierId);
-        Task<Supplier> GetBySystemId(string systemId);
+        Task<Supplier> Get(Guid accountId, string systemId);
         Task Delete(Supplier supplier);
     }
 }

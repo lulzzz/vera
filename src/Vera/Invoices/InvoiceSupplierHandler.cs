@@ -23,7 +23,7 @@ namespace Vera.Invoices
                 throw new ValidationException("Missing supplier");
             }
             
-            var supplier = await _supplierStore.GetBySystemId(supplierSystemId);
+            var supplier = await _supplierStore.Get(invoice.AccountId, supplierSystemId);
             
             if (supplier == null)
             {

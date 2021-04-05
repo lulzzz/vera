@@ -40,7 +40,7 @@ namespace Vera.Host.Services
 
         public override async Task<CreateAuditReply> Create(CreateAuditRequest request, ServerCallContext context)
         {
-            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var account = await context.ResolveAccount(_accountStore);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
             // TODO(kevin): validate the request, start < end and supplier is not empty/nil
@@ -70,7 +70,7 @@ namespace Vera.Host.Services
 
         public override async Task<GetAuditReply> Get(GetAuditRequest request, ServerCallContext context)
         {
-            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var account = await context.ResolveAccount(_accountStore);
             var audit = await _auditStore.Get(account.Id, Guid.Parse(request.AuditId));
 
             return new GetAuditReply

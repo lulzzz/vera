@@ -18,7 +18,6 @@ message DecimalValue {
 
 message Supplier {
     string systemId = 1;
-
     string name = 2;
 
     // Registration number of the business
@@ -33,11 +32,8 @@ message Supplier {
 
 message Address {
     string street = 1;
-
     string number = 2;
-
     string city = 3;
-
     string postalCode = 4;
 
     // Country in the ISO 3166-1 format

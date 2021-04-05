@@ -34,7 +34,7 @@ namespace Vera.Host.Services
 
         public override async Task<CreateInvoiceReply> Create(CreateInvoiceRequest request, ServerCallContext context)
         {
-            var account = await context.ResolveAccount(_accountStore, request.Invoice.Account);
+            var account = await context.ResolveAccount(_accountStore);
 
             // TODO: validate invoice, very, very, very strict
             // TODO(kevin): NF525 - requires signature of original invoice on the returned line
@@ -59,7 +59,7 @@ namespace Vera.Host.Services
 
         public override async Task<GetInvoiceReply> GetByNumber(GetInvoiceByNumberRequest request, ServerCallContext context)
         {
-            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var account = await context.ResolveAccount(_accountStore);
             var invoice = await _invoiceStore.GetByNumber(account.Id, request.Number);
 
             return new GetInvoiceReply
@@ -72,7 +72,7 @@ namespace Vera.Host.Services
 
         public override async Task<ValidateInvoiceReply> Validate(ValidateInvoiceRequest request, ServerCallContext context)
         {
-            var account = await context.ResolveAccount(_accountStore, request.AccountId);
+            var account = await context.ResolveAccount(_accountStore);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var invoice = request.Invoice.Unpack();
 

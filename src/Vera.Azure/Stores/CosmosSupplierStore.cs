@@ -1,7 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos;
 using System;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Vera.Models;
 using Vera.Stores;
@@ -26,27 +25,15 @@ namespace Vera.Azure.Stores
             await _container.CreateItemAsync(document, new PartitionKey(document.PartitionKey));
         }
 
-        public async Task<Supplier> Get(Guid supplierId)
+        public async Task<Supplier> Get(Guid accountId, string systemId)
         {
-            try
-            {
-                var document = await _container.ReadItemAsync<TypedDocument<Supplier>>(
-                    supplierId.ToString(),
-                    new PartitionKey(supplierId.ToString())
-                );
-
-                return document.Resource.Value;
-            }
-            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-        }
-
-        public async Task<Supplier> GetBySystemId(string systemId)
-        {
-            var definition = new QueryDefinition(@"select top 1 value c['Value'] from c where c.Type = @type")
-                .WithParameter("@type", DocumentType);
+            var definition = new QueryDefinition(@"
+select top 1 value c['Value'] 
+from c 
+where c.Type = @type
+and c['Value'].AccountId = @accountId")
+                .WithParameter("@type", DocumentType)
+                .WithParameter("@accountId", accountId);
 
             using var iterator = _container.GetItemQueryIterator<Supplier>(definition, requestOptions: new QueryRequestOptions
             {

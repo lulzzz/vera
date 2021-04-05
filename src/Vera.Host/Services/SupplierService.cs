@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
+using Vera.Host.Security;
 using Vera.Stores;
 
 namespace Vera.Host.Services
@@ -20,11 +21,12 @@ namespace Vera.Host.Services
 
         public override async Task<CreateSupplierReply> CreateIfNotExists(CreateSupplierRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.GetBySystemId(request.Supplier.SystemId);
+            var supplier = await _supplierStore.Get(context.GetAccountId(), request.Supplier.SystemId);
             
             if (supplier == null)
             {
                 supplier = request.Supplier.Unpack();
+                supplier.AccountId = context.GetAccountId();
 
                 await _supplierStore.Store(supplier);
             }
@@ -37,7 +39,7 @@ namespace Vera.Host.Services
 
         public override async Task<CreateSupplierReply> Create(CreateSupplierRequest request, ServerCallContext context)
         {
-            var existingSupplier = await _supplierStore.GetBySystemId(request.Supplier.SystemId);
+            var existingSupplier = await _supplierStore.Get(context.GetAccountId(), request.Supplier.SystemId);
             if (existingSupplier != null)
             {
                 throw new RpcException(new Status(
@@ -47,6 +49,7 @@ namespace Vera.Host.Services
             }
 
             var supplier = request.Supplier.Unpack();
+            supplier.AccountId = context.GetAccountId();
 
             await _supplierStore.Store(supplier);
 
@@ -55,14 +58,14 @@ namespace Vera.Host.Services
 
         public override async Task<Supplier> Get(GetSupplierRequest request, ServerCallContext context)
         {
-            var supplier = await GetAndValidateSupplier(request.SystemId);
+            var supplier = await GetAndValidateSupplier(request.SystemId, context);
 
             return supplier.Pack();
         }
 
         public override async Task<Supplier> Update(UpdateSupplierRequest request, ServerCallContext context)
         {
-            var supplier = await GetAndValidateSupplier(request.SystemId);
+            var supplier = await GetAndValidateSupplier(request.SystemId, context);
             var requestSupplier = request.Supplier;
 
             supplier.Name = requestSupplier.Name;
@@ -78,20 +81,25 @@ namespace Vera.Host.Services
 
         public override async Task<Empty> Delete(DeleteSupplierRequest request, ServerCallContext context)
         {
-            var supplier = await GetAndValidateSupplier(request.SystemId);
+            var supplier = await GetAndValidateSupplier(request.SystemId, context);
 
             await _supplierStore.Delete(supplier);
 
             return new Empty();
         }
 
-        private async Task<Models.Supplier> GetAndValidateSupplier(string supplierSystemId)
+        private async Task<Models.Supplier> GetAndValidateSupplier(string supplierSystemId, ServerCallContext context)
         {
-            var supplier = await _supplierStore.GetBySystemId(supplierSystemId);
-
+            var supplier = await _supplierStore.Get(context.GetAccountId(), supplierSystemId);
             if (supplier == null)
             {
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+            }
+
+            var accountId = context.GetAccountId();
+            if (supplier.AccountId != accountId)
+            {
+                throw new RpcException(new Status(StatusCode.PermissionDenied, "Supplier cannot be accessed by this account"));
             }
 
             return supplier;

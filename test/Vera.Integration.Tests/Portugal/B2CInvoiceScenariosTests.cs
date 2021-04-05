@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vera.Grpc;
 using Vera.Grpc.Models;
+using Vera.Host.Security;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Models;
@@ -29,7 +30,7 @@ namespace Vera.Integration.Tests.Portugal
             var client = await _setup.CreateClient(Constants.Account);
             
             var httpClient = _fixture.CreateClient();
-            httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue("authorization"));
+            httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue(MetadataKeys.Authorization));
             
             _auditResultsStore = new AuditResultsStore(httpClient);
 
@@ -257,7 +258,7 @@ namespace Vera.Integration.Tests.Portugal
                 });
             }
 
-            var getAuditReply = await client.GenerateAuditFile(client.SupplierSystemId);
+            var getAuditReply = await client.GenerateAuditFile();
             
             await _auditResultsStore.LoadInvoicesFromAuditAsync(client.AccountId, getAuditReply.Location);
 

@@ -8,7 +8,8 @@ using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
 using Vera.Stores;
-using System.Linq;
+using Vera.Host.Security;
+using Vera.Host.Security;
 
 namespace Vera.Host.Services
 {
@@ -35,9 +36,8 @@ namespace Vera.Host.Services
 
         public override async Task<OpenPeriodReply> OpenPeriod(OpenPeriodRequest request, ServerCallContext context)
         {
-            // TODO(kevin): check supplier is valid for account
-            
-            var supplier = await _supplierStore.GetBySystemId(request.SupplierSystemId);
+            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
+
             if (supplier == null)
             {
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
@@ -110,42 +110,37 @@ namespace Vera.Host.Services
         }
 
         public override async Task<Period> Get(GetPeriodRequest request, ServerCallContext context)
-        {
-            // TODO(kevin): check supplier is valid for account
-            
-            var period = await GetAndValidate(request.Id, request.SupplierSystemId);
-
-            return period.Pack();
-        }
-
-        public override async Task<Period> GetCurrentPeriod(GetCurrentPeriodRequest request, ServerCallContext context)
-        {
-            // TODO(kevin): check supplier is valid for account
-            
-            var supplier = await _supplierStore.GetBySystemId(request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
-
+            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
             var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
 
-            return period.Pack();
-        }
-
-        private async Task<Models.Period> GetAndValidate(string periodId, string supplierSystemId)
-        {
-            var supplier = await _supplierStore.GetBySystemId(supplierSystemId);
             if (supplier == null)
             {
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
             }
+            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
 
-            var period = await _periodStore.Get(Guid.Parse(periodId), supplier.Id);
+            if (period == null)
             if (period == null)
             {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+            }
+            return period.Pack();
+            return period;
+        }
+        private async Task<Models.Period> GetAndValidate(PeriodValidationModel model)
+        {
+            var supplier = await _supplierStore.Get(model.AccountId, model.SupplierSystemId);
+            var period = await _periodStore.Get(Guid.Parse(model.PeriodId), supplier.Id);
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+            if (period == null)
+
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Period does not exist"));
             }
+
+            return period;
+        }
+            return supplier;
+        }
 
             return period;
         }

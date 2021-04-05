@@ -8,6 +8,7 @@ using Bogus;
 using Grpc.Core;
 using Vera.Grpc;
 using Vera.Grpc.Shared;
+using Vera.Host.Security;
 
 namespace Vera.Integration.Tests
 {
@@ -212,7 +213,7 @@ namespace Vera.Integration.Tests
         {
             return new()
             {
-                {"authorization", $"bearer {token}"}
+                { MetadataKeys.Authorization, $"bearer {token}" }
             };
         }
 

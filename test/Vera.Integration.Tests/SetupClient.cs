@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Grpc.Core;
 using Vera.Grpc;
+using Vera.Host.Security;
 
 namespace Vera.Integration.Tests
 {
@@ -47,7 +48,8 @@ namespace Vera.Integration.Tests
 
         public Metadata AuthorizedMetadata => new()
         {
-            {"authorization", $"bearer {_loginToken}"}
+            { MetadataKeys.Authorization, $"bearer {_loginToken}" },
+            { MetadataKeys.AccountId, AccountId }
         };
 
         public AccountService.AccountServiceClient Account => _setup.AccountClient;
