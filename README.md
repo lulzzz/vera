@@ -31,6 +31,7 @@ Latin for true. We want this product to be the one and only source for all the a
 - Latest dotnet core version (https://dotnet.microsoft.com/download)
 - Currently requires access to a Windows machine/vm to be able to run the Cosmos emulator (https://docs.microsoft.com/en-us/azure/cosmos-db/local-emulator)
 - Either Rider or Visual Studio (prefer Rider :))
+- Use conventions from: https://www.conventionalcommits.org to build commit messages
 
 ## Registering a new service
 - Invoke the `.MapGrpcService<>(..)` on the `endpoints` in the `Startup.cs` in the Vera.Host project
@@ -41,8 +42,9 @@ Latin for true. We want this product to be the one and only source for all the a
 
 ## Cosmos model
 - companies
-  - Container for: `Company`, `Account` and `User`
+  - Container for: `Company`, `Account`, `Supplier` and `User`
   - All of these are partitioned on the id of the `Company`, separated by the `Type` property
+  - Except for the `Supplier`, which is partioned on the id of the `Account`
 - invoices
   - Container for: `Invoice`
   - Partioned on id of the account that created the invoice plus the invoice' number
@@ -55,6 +57,9 @@ Latin for true. We want this product to be the one and only source for all the a
 - chains
   - Container for: `ChainDocument`
   - Partitioned on the "bucket" which is defined by the caller, for invoices this is defined by its "bucket"
+- periods
+  - Container for: `Period`
+  - Partioned on the id of the supplier
 
 # Deployment
 
@@ -70,7 +75,7 @@ Latin for true. We want this product to be the one and only source for all the a
   - Name of the container to use for the invoices
   - Defaults to "invoices"
 - `VERA__COSMOS__CONTAINER__COMPANIES`
-  - Name of the container to use for the companies, accounts and users
+  - Name of the container to use for the companies, accounts, suppliers and users
   - Defaults to "companies"
 - `VERA__COSMOS__CONTAINER__AUDITS`
   - Name of the container to use for the audits
@@ -78,6 +83,9 @@ Latin for true. We want this product to be the one and only source for all the a
 - `VERA__COSMOS__CONTAINER__TRAILS`
   - Name of the container to use for trails like printing
   - Defaults to "trails"
+- `VERA__COSMOS__CONTAINER__PERIODS`
+  - Name of the container to use for periods
+  - Defaults to "periods"
 
 ### Blobs
 - `VERA__BLOB__CONNECTIONSTRING`
