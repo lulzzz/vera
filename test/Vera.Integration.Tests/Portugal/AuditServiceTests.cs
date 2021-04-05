@@ -89,6 +89,8 @@ namespace Vera.Integration.Tests.Portugal
 
             await client.OpenPeriod();
 
+            var openRegisterReply = await client.OpenRegister(100m);
+
             foreach (var product in products)
             {
                 var scenario = new SellProductScenario(product)
@@ -100,6 +102,7 @@ namespace Vera.Integration.Tests.Portugal
                 var result = scenario.Execute();
 
                 var invoice = result.Invoice;
+                invoice.RegisterId = openRegisterReply.Id;
 
                 await client.Invoice.CreateAsync(new CreateInvoiceRequest
                 {

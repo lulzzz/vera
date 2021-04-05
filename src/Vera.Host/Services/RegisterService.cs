@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Threading.Tasks;
 using Vera.Grpc;
+using Vera.Host.Security;
 using Vera.Stores;
 
 namespace Vera.Host.Services
@@ -21,7 +22,7 @@ namespace Vera.Host.Services
 
         public override async Task<OpenRegisterReply> OpenRegister(OpenRegisterRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.GetBySystemId(request.SupplierSystemId);
+            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
             if (supplier == null)
             {
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));

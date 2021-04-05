@@ -31,6 +31,10 @@ message GetPeriodRequest {
 	string supplierSystemId = 2;
 }
 
+message GetCurrentPeriodRequest {
+	string supplierSystemId = 1;
+}
+
 service RegisterService {
 	rpc OpenRegister(OpenRegisterRequest) returns (OpenRegisterReply);
 }
