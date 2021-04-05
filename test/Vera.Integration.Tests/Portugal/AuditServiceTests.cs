@@ -36,10 +36,14 @@ namespace Vera.Integration.Tests.Portugal
             var result = scenario.Execute();
 
             await client.OpenPeriod();
-            
+
+            var openRegisterReply = await client.OpenRegister(100m);
+            var invoice = result.Invoice;
+            invoice.RegisterId = openRegisterReply.Id;
+
             var createInvoiceRequest = new CreateInvoiceRequest
             {
-                Invoice = result.Invoice.Pack()
+                Invoice = invoice.Pack()
             };
 
             await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
@@ -93,10 +97,14 @@ namespace Vera.Integration.Tests.Portugal
                 };
 
                 var result = scenario.Execute();
-                
+
+                var openRegisterReply = await client.OpenRegister(100m);
+                var invoice = result.Invoice;
+                invoice.RegisterId = openRegisterReply.Id;
+
                 await client.Invoice.CreateAsync(new CreateInvoiceRequest
                 {
-                    Invoice = result.Invoice.Pack()
+                    Invoice = invoice.Pack()
                 }, client.AuthorizedMetadata);
             }
 

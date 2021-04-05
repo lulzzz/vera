@@ -4,11 +4,11 @@ import "Protos/shared.proto";
 
 package vera.grpc;
 
-service RegisterService {
-    rpc Register (RegisterRequest) returns (vera.grpc.shared.Empty);
+service UserRegisterService {
+    rpc RegisterUser (RegisterUserRequest) returns (vera.grpc.shared.Empty);
 }
 
-message RegisterRequest {
+message RegisterUserRequest {
     string companyName = 1;
     string username = 2;
     string password = 3;

@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Vera.Concurrency;
-using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Signing;
@@ -62,8 +61,10 @@ namespace Vera.Tests
             supplierStore.Setup(x => x.GetBySystemId(It.IsAny<string>()))
                 .ReturnsAsync(new Supplier());
 
+            var registerId = Guid.NewGuid();
+            var period = new Period { Registers = { new Register { Id = registerId } }};
             periodStore.Setup(x => x.GetOpenPeriodForSupplier(It.IsAny<Guid>()))
-                .ReturnsAsync(new Period());
+                .ReturnsAsync(period);
 
             var invoiceHandlerFactory = new InvoiceHandlerFactory(
                 NullLoggerFactory.Instance,
@@ -79,6 +80,7 @@ namespace Vera.Tests
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             var invoice = builder.Result;
+            invoice.RegisterId = registerId.ToString();
 
             await invoiceHandlerFactory.Create(factory.Object).Handle(invoice);
 

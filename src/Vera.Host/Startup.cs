@@ -80,7 +80,7 @@ namespace Vera.Host
             {
                 endpoints.MapControllers();
 
-                endpoints.MapGrpcService<RegisterService>();
+                endpoints.MapGrpcService<UserRegisterService>();
                 endpoints.MapGrpcService<LoginService>();
                 endpoints.MapGrpcService<AccountService>();
                 endpoints.MapGrpcService<TokenService>();
@@ -89,6 +89,7 @@ namespace Vera.Host
                 endpoints.MapGrpcService<AuditService>();
                 endpoints.MapGrpcService<SupplierService>();
                 endpoints.MapGrpcService<PeriodService>();
+                endpoints.MapGrpcService<RegisterService>();
             });
         }
     }

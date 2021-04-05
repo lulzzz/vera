@@ -54,7 +54,7 @@ namespace Vera.Integration.Tests
 
             _runShortId = (DateTime.UtcNow.Ticks - new DateTime(2020, 1, 1).Ticks).ToString("x");
 
-            RegisterClient = new RegisterService.RegisterServiceClient(channel);
+            RegisterClient = new UserRegisterService.UserRegisterServiceClient(channel);
             LoginClient = new LoginService.LoginServiceClient(channel); 
             AccountClient = new AccountService.AccountServiceClient(channel);
             TokenClient = new TokenService.TokenServiceClient(channel);
@@ -109,14 +109,14 @@ namespace Vera.Integration.Tests
                 return entry;
             }
             
-            var registerRequest = new RegisterRequest
+            var registerRequest = new RegisterUserRequest
             {
                 Username = _faker.Internet.UserName(),
                 Password = _faker.Internet.Password(),
                 CompanyName = _runShortId + _faker.Company.CompanyName()
             };
 
-            using var registerCall = RegisterClient.RegisterAsync(registerRequest);
+            using var registerCall = RegisterClient.RegisterUserAsync(registerRequest);
 
             await registerCall.ResponseAsync;
 
@@ -216,7 +216,7 @@ namespace Vera.Integration.Tests
             };
         }
 
-        public RegisterService.RegisterServiceClient RegisterClient { get; }
+        public UserRegisterService.UserRegisterServiceClient RegisterClient { get; }
         public LoginService.LoginServiceClient LoginClient { get; }
         public AccountService.AccountServiceClient AccountClient { get; }
         public TokenService.TokenServiceClient TokenClient { get; }

@@ -8,9 +8,11 @@ using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
 using Vera.Stores;
+using System.Linq;
 
 namespace Vera.Host.Services
 {
+    [Authorize]
     public class PeriodService : Grpc.PeriodService.PeriodServiceBase
     {
         private readonly ISupplierStore _supplierStore;
@@ -67,18 +69,44 @@ namespace Vera.Host.Services
         public override async Task<Empty> ClosePeriod(ClosePeriodRequest request, ServerCallContext context)
         {
             // TODO(kevin): check supplier is valid for account
-            
+
             var period = await GetAndValidate(request.Id, request.SupplierSystemId);
 
-            await _periodStore.Update(new Models.Period
+            async Task<Empty> Update()
             {
-                Id = period.Id,
-                Supplier = period.Supplier,
-                Opening = period.Opening,
-                Closing = _dateProvider.Now
-            });
+                period.Closing = _dateProvider.Now;
 
-            return new Empty();
+                await _periodStore.Update(period);
+
+                return new Empty();
+            }
+            
+            var registers = period.Registers;
+            var registersToClose = request.Registers?.Count ?? 0;
+            var registersOpened = registers.Count;
+
+            if (registersOpened == 0)
+            {
+                return await Update();
+            }
+            
+            if (registersOpened != registersToClose)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Missing one or more registers in the closing"));
+            }
+
+            var closingRegistersIds = request.Registers.ToDictionary(r => r.Id);
+            foreach (var register in registers)
+            {
+                if (!closingRegistersIds.TryGetValue(register.Id.ToString(), out var closingRegister))
+                {
+                    throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Unkown register {register.Id}"));
+                }
+
+                register.ClosingAmount = closingRegister.ClosingAmount;
+            }
+
+            return await Update();
         }
 
         public override async Task<Period> Get(GetPeriodRequest request, ServerCallContext context)

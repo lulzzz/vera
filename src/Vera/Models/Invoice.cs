@@ -74,7 +74,7 @@ namespace Vera.Models
         /// <summary>
         /// Identifier of the cash register that created the invoice.
         /// </summary>
-        public string TerminalId { get; set; }
+        public string RegisterId { get; set; }
 
         public int FiscalPeriod { get; set; }
         public int FiscalYear { get; set; }

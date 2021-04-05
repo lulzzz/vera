@@ -4,7 +4,7 @@ using Grpc.Net.Client;
 using Vera.Grpc;
 using Xunit;
 using LoginService = Vera.Grpc.LoginService;
-using RegisterService = Vera.Grpc.RegisterService;
+using UserRegisterService = Vera.Grpc.UserRegisterService;
 
 namespace Vera.Integration.Tests.Common
 {
@@ -27,15 +27,15 @@ namespace Vera.Integration.Tests.Common
         {
             var faker = new Faker();
 
-            var registerRequest = new RegisterRequest
+            var registerRequest = new RegisterUserRequest
             {
                 Username = faker.Internet.UserName(),
                 Password = faker.Internet.Password(),
                 CompanyName = faker.Company.CompanyName()
             };
 
-            var registerClient = new RegisterService.RegisterServiceClient(_channel);
-            await registerClient.RegisterAsync(registerRequest);
+            var registerClient = new UserRegisterService.UserRegisterServiceClient(_channel);
+            await registerClient.RegisterUserAsync(registerRequest);
 
             var loginClient = new LoginService.LoginServiceClient(_channel);
             var loginResult = await loginClient.LoginAsync(new LoginRequest

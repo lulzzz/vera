@@ -20,6 +20,7 @@ namespace Vera.Integration.Tests
             Receipt = new ReceiptService.ReceiptServiceClient(channel);
             Supplier = new SupplierService.SupplierServiceClient(channel);
             Period = new PeriodService.PeriodServiceClient(channel);
+            Register = new RegisterService.RegisterServiceClient(channel);
         }
 
         public async Task OpenPeriod()
@@ -28,6 +29,17 @@ namespace Vera.Integration.Tests
             {
                 SupplierSystemId = SupplierSystemId
             }, AuthorizedMetadata);
+        }
+
+        public async Task<OpenRegisterReply> OpenRegister(decimal amount)
+        {
+            var reply = await Register.OpenRegisterAsync(new OpenRegisterRequest
+            {
+                SupplierSystemId = SupplierSystemId,
+                OpeningAmount = amount
+            }, AuthorizedMetadata);
+
+            return reply;
         }
 
         public string AccountId { get; }
@@ -44,5 +56,6 @@ namespace Vera.Integration.Tests
         public ReceiptService.ReceiptServiceClient Receipt { get; }
         public SupplierService.SupplierServiceClient Supplier { get; }
         public PeriodService.PeriodServiceClient Period { get; }
+        public RegisterService.RegisterServiceClient Register { get; set; }
     }
 }

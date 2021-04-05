@@ -67,7 +67,7 @@ message Invoice {
     string supplierSystemId = 3;
     
     // Identifier of the "cash register" that performed the transaction
-    string terminalId = 4;
+    string registerId = 4;
     
     // Indicates if this invoice was created manually
     bool manual = 5;

@@ -1,39 +1,46 @@
+﻿using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
+using System;
 using System.Threading.Tasks;
-using Grpc.Core;
 using Vera.Grpc;
-using Vera.Grpc.Shared;
-using Vera.Models;
-using Vera.Services;
+using Vera.Stores;
 
 namespace Vera.Host.Services
 {
+    [Authorize]
     public class RegisterService : Grpc.RegisterService.RegisterServiceBase
     {
-        private readonly IUserRegisterService _userRegisterService;
+        private readonly IPeriodStore _periodStore;
+        private readonly ISupplierStore _supplierStore;
 
-        public RegisterService(IUserRegisterService userRegisterService)
+        public RegisterService(IPeriodStore periodStore, ISupplierStore supplierStore)
         {
-            _userRegisterService = userRegisterService;
+            _periodStore = periodStore;
+            _supplierStore = supplierStore;
         }
 
-        public override async Task<Empty> Register(RegisterRequest request, ServerCallContext context)
+        public override async Task<OpenRegisterReply> OpenRegister(OpenRegisterRequest request, ServerCallContext context)
         {
-            var result = await _userRegisterService.Register(
-                request.CompanyName,
-                new UserToCreate
-                {
-                    Username = request.Username,
-                    Password = request.Password,
-                    Type = UserType.Admin
-                }
-            );
-
-            if (result != null)
+            var supplier = await _supplierStore.GetBySystemId(request.SupplierSystemId);
+            if (supplier == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, result.Message));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+            }
+            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
+            if (period == null)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Period does not exist"));
             }
 
-            return new Empty();
+            var register = new Models.Register
+            {
+                OpeningAmount = request.OpeningAmount
+            };
+            period.Registers.Add(register);
+
+            await _periodStore.Update(period);
+
+            return new OpenRegisterReply { Id = register.Id.ToString() };
         }
     }
 }

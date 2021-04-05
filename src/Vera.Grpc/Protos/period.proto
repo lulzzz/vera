@@ -23,6 +23,7 @@ message OpenPeriodReply {
 message ClosePeriodRequest {
 	string id = 1;
 	string supplierSystemId = 2;
+	repeated Register registers = 3;
 }
 
 message GetPeriodRequest {
@@ -30,8 +31,17 @@ message GetPeriodRequest {
 	string supplierSystemId = 2;
 }
 
-message GetCurrentPeriodRequest {
-    string supplierSystemId = 1;
+service RegisterService {
+	rpc OpenRegister(OpenRegisterRequest) returns (OpenRegisterReply);
+}
+
+message OpenRegisterRequest {
+	string supplierSystemId = 1;
+	vera.grpc.shared.DecimalValue openingAmount = 2;
+}
+
+message OpenRegisterReply {
+	string id = 1;
 }
 
 message Period {
@@ -41,5 +51,12 @@ message Period {
 	google.protobuf.Timestamp closing = 3;
 	
 	string supplierSystemId = 4;
-	string registerId = 5;
+	repeated Register registers = 5;
+}
+
+message Register {
+	string id = 1;
+
+    vera.grpc.shared.DecimalValue openingAmount = 2;
+	vera.grpc.shared.DecimalValue closingAmount = 3;
 }

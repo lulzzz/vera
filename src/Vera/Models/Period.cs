@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Vera.Models
 {
@@ -7,6 +8,7 @@ namespace Vera.Models
         public Period()
         {
             Id = Guid.NewGuid();
+            Registers = new List<Register>();
         }
 
         public Guid Id { get; set; }
@@ -20,8 +22,13 @@ namespace Vera.Models
         /// The closing time of the period, the date time when the period was closed
         /// </summary>
         public DateTime Closing { get; set; }
+        public bool IsClosed => Closing != DateTime.MinValue;
+
         public Supplier Supplier { get; set; }
 
-        public bool IsClosed => Closing != DateTime.MinValue;
+        /// <summary>
+        /// A collection of registers in a certain period
+        /// </summary>
+        public ICollection<Register> Registers { get; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Vera.Models;
 using Vera.Stores;
@@ -24,6 +25,12 @@ namespace Vera.Invoices
             }
 
             invoice.PeriodId = period.Id;
+
+            var register = period.Registers.FirstOrDefault(r => r.Id.ToString() == invoice.RegisterId);
+            if (register == null)
+            {
+                throw new ValidationException("An open register is required");
+            }
             
             await base.Handle(invoice);
         }
