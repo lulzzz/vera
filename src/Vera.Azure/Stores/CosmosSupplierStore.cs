@@ -31,13 +31,13 @@ namespace Vera.Azure.Stores
 select top 1 value c['Value'] 
 from c 
 where c.Type = @type
-and c['Value'].AccountId = @accountId")
+and c['Value'].SystemId = @systemId")
                 .WithParameter("@type", DocumentType)
-                .WithParameter("@accountId", accountId);
+                .WithParameter("@systemId", systemId);
 
             using var iterator = _container.GetItemQueryIterator<Supplier>(definition, requestOptions: new QueryRequestOptions
             {
-                PartitionKey = new PartitionKey(systemId)
+                PartitionKey = new PartitionKey(accountId.ToString())
             });
 
             var response = await iterator.ReadNextAsync();
@@ -68,7 +68,7 @@ and c['Value'].AccountId = @accountId")
         {
             return new(
                 s => s.Id,
-                s => s.SystemId.ToString(),
+                s => s.AccountId.ToString(),
                 supplier,
                 DocumentType
             );
