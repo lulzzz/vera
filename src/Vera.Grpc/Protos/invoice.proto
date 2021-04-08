@@ -1,6 +1,7 @@
 syntax = "proto3";
 
 import "Protos/shared.proto";
+import "Protos/productType.proto";
 import "google/protobuf/timestamp.proto";
 
 package vera.grpc;
@@ -124,16 +125,6 @@ message Settlement {
 }
 
 message Payment {
-    enum Category {
-        OTHER = 0;
-        DEBIT = 1;
-        CREDIT = 2;
-        CASH = 3;
-        CHANGE = 4;
-        VOUCHER = 5;
-        ONLINE = 6;
-    }
-
     string systemId = 1;
 
     // Timestamp of the transaction
@@ -145,7 +136,7 @@ message Payment {
     // Amount that was paid
     vera.grpc.shared.DecimalValue amount = 4;
     
-    Category category = 5;
+    vera.grpc.shared.PaymentCategory category = 5;
 }
 
 message Customer {
@@ -172,17 +163,6 @@ message Employee {
 }
 
 message Product {
-    enum Type {
-        // Generic fallback value. Please use the most specific value for the product.
-        OTHER = 0;
-        
-        // Generic fallback for goods. Please use the most specific value for the product.
-        GOODS = 1;
-        
-        // Gift card product. Used to purchase stuff at a later point in time.
-        GIFT_CARD = 2;
-    }
-
     string systemId = 1; 
     
     // Article code of the product as used by the merchant
@@ -195,30 +175,15 @@ message Product {
     string description = 4;
     
     // Type of the product. Some type of products like gift cards require special handling
-    Type type = 5;
+    vera.grpc.productType.ProductType type = 5;
 }
 
 message TaxValue {
-    enum Category {
-        // Also called the standard tax rate.
-        HIGH = 0;
-
-        // Also called the reduced tax rate.
-        LOW = 1;
-
-        // 0% rate
-        ZERO = 2;
-
-        // 0% rate because of an exemption.
-        EXEMPT = 3;
-
-        // Intermediate rate that some countries use like Portugal. It's in between HIGH and LOW.
-        INTERMEDIATE = 4;
-    }
+    
 
     vera.grpc.shared.DecimalValue rate = 1;
     string code = 2;
-    Category category = 3;
+    vera.grpc.shared.TaxCategory category = 3;
 
     string exemptionCode = 4;
     string exemptionReason = 5;

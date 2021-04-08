@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Vera.Extensions;
 using Vera.Grpc;
 using Vera.Grpc.Models;
 using Vera.Host.Security;
@@ -276,12 +277,10 @@ namespace Vera.Integration.Tests.Portugal
                 
                 var totals = calculator.Calculate(expectedInvoice);
                 
-                Assert.Equal(Round(totals.Gross, 2), got.GrossTotal);
-                Assert.Equal(Round(totals.Net, 2), got.NetTotal);
+                Assert.Equal(totals.Gross.Round(2), got.GrossTotal);
+                Assert.Equal(totals.Net.Round(2), got.NetTotal);
             }
         }
-        
-        private static decimal Round(decimal d, int decimals) => Math.Round(Math.Abs(d), decimals);
         
         public class Test
         {

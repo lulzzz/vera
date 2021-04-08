@@ -148,7 +148,7 @@ namespace Vera.Austria.Tests
 
             var invoice = builder
                 .Reset()
-                .WithTerminal("1.1")
+                .WithRegister("1.1")
                 .WithEmployee()
                 .WithSupplier("123123")
                 .WithPayment(unitPrice, PaymentCategory.Cash)

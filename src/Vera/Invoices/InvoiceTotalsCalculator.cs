@@ -1,10 +1,11 @@
 using System;
 using System.Linq;
+using Vera.Extensions;
 using Vera.Models;
 
 namespace Vera.Invoices
 {
-    public class  InvoiceTotalsCalculator
+    public class InvoiceTotalsCalculator
     {
         // TODO(kevin): do the rounding to 2 decimals here already?
         public Totals Calculate(Invoice invoice)
@@ -26,6 +27,9 @@ namespace Vera.Invoices
 
                 line.Gross = line.Quantity * line.UnitPrice * line.Taxes.Rate;
                 line.Net = line.Quantity * line.UnitPrice;
+
+                line.Gross = line.Gross.RoundKeepSign(2);
+                line.Net = line.Net.RoundKeepSign(2);
 
                 entry.Base += line.Net;
                 entry.Value += line.Gross - line.Net;

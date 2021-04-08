@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Vera.Extensions;
 using Vera.Invoices;
 using Vera.Models;
 using Xunit;
@@ -32,9 +33,10 @@ namespace Vera.Tests
             var calculator = new InvoiceTotalsCalculator();
             var totals = calculator.Calculate(input);
             var table = totals.Taxes;
+            var net = (12.99m / 1.23m).Round(2);
 
             Assert.Equal(12.99m, totals.Gross);
-            Assert.Equal(12.99m / 1.23m, totals.Net);
+            Assert.Equal(net, totals.Net);
 
             Assert.NotNull(table.High);
             Assert.Equal(1.23m, table.High.Rate);

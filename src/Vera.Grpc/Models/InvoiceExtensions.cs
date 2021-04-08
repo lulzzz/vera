@@ -131,15 +131,7 @@ namespace Vera.Grpc.Models
             {
                 Code = taxes.Code,
                 Rate = taxes.Rate,
-                Category = taxes.Category switch
-                {
-                    TaxesCategory.High => TaxValue.Types.Category.High,
-                    TaxesCategory.Low => TaxValue.Types.Category.Low,
-                    TaxesCategory.Zero => TaxValue.Types.Category.Zero,
-                    TaxesCategory.Exempt => TaxValue.Types.Category.Exempt,
-                    TaxesCategory.Intermediate => TaxValue.Types.Category.Intermediate,
-                    _ => throw new ArgumentOutOfRangeException()
-                },
+                Category = taxes.Category.Map(),
                 ExemptionCode = taxes.ExemptionCode ?? string.Empty,
                 ExemptionReason = taxes.ExemptionReason ?? string.Empty
             };
@@ -151,17 +143,7 @@ namespace Vera.Grpc.Models
             {
                 SystemId = payment.SystemId,
                 Amount = payment.Amount,
-                Category = payment.Category switch
-                {
-                    PaymentCategory.Other => Payment.Types.Category.Other,
-                    PaymentCategory.Debit => Payment.Types.Category.Debit,
-                    PaymentCategory.Credit => Payment.Types.Category.Credit,
-                    PaymentCategory.Cash => Payment.Types.Category.Cash,
-                    PaymentCategory.Change => Payment.Types.Category.Change,
-                    PaymentCategory.Voucher => Payment.Types.Category.Voucher,
-                    PaymentCategory.Online => Payment.Types.Category.Online,
-                    _ => throw new ArgumentOutOfRangeException()
-                },
+                Category = payment.Category.Map(),
                 Description = payment.Description,
                 Timestamp = payment.Date.ToTimestamp()
             };
@@ -181,12 +163,12 @@ namespace Vera.Grpc.Models
         {
             var category = p.Category switch
             {
-                Payment.Types.Category.Other => PaymentCategory.Other,
-                Payment.Types.Category.Debit => PaymentCategory.Debit,
-                Payment.Types.Category.Credit => PaymentCategory.Credit,
-                Payment.Types.Category.Cash => PaymentCategory.Cash,
-                Payment.Types.Category.Voucher => PaymentCategory.Voucher,
-                Payment.Types.Category.Online => PaymentCategory.Online,
+                Shared.PaymentCategory.Other => PaymentCategory.Other,
+                Shared.PaymentCategory.Debit => PaymentCategory.Debit,
+                Shared.PaymentCategory.Credit => PaymentCategory.Credit,
+                Shared.PaymentCategory.Cash => PaymentCategory.Cash,
+                Shared.PaymentCategory.Voucher => PaymentCategory.Voucher,
+                Shared.PaymentCategory.Online => PaymentCategory.Online,
                 _ => throw new ArgumentOutOfRangeException(nameof(p.Category), p.Category, null)
             };
 
@@ -219,11 +201,11 @@ namespace Vera.Grpc.Models
                     Rate = line.Tax.Rate,
                     Category = line.Tax.Category switch
                     {
-                        TaxValue.Types.Category.High => TaxesCategory.High,
-                        TaxValue.Types.Category.Low => TaxesCategory.Low,
-                        TaxValue.Types.Category.Zero => TaxesCategory.Zero,
-                        TaxValue.Types.Category.Exempt => TaxesCategory.Exempt,
-                        TaxValue.Types.Category.Intermediate => TaxesCategory.Intermediate,
+                        Shared.TaxCategory.High => TaxesCategory.High,
+                        Shared.TaxCategory.Low => TaxesCategory.Low,
+                        Shared.TaxCategory.Zero => TaxesCategory.Zero,
+                        Shared.TaxCategory.Exempt => TaxesCategory.Exempt,
+                        Shared.TaxCategory.Intermediate => TaxesCategory.Intermediate,
                         _ => throw new ArgumentOutOfRangeException(nameof(line.Tax.Category), line.Tax.Category,
                             "unknown tax category")
                     },

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Vera.Audits;
+using Vera.Extensions;
 using Vera.Models;
 using Vera.Portugal.Invoices;
 using Vera.Portugal.Models;
@@ -227,12 +228,12 @@ namespace Vera.Portugal.Audits
 
                     DocumentTotals = new SourceDocumentsSalesInvoicesInvoiceDocumentTotals
                     {
-                        TaxPayable = Round(totals.Taxes.Total, 2),
-                        NetTotal = Round(totals.Net, 2),
-                        GrossTotal = Round(totals.Gross, 2),
+                        TaxPayable = totals.Taxes.Total.Round(2),
+                        NetTotal = totals.Net.Round(2),
+                        GrossTotal = totals.Gross.Round(2),
                         Settlement = invoice.Settlements?.Select(s => new Models.Settlement
                         {
-                            SettlementAmount = Round(s.Amount, 2),
+                            SettlementAmount = s.Amount.Round(2),
                             SettlementAmountSpecified = true,
                             PaymentTerms = s.Description,
 
@@ -282,8 +283,8 @@ namespace Vera.Portugal.Audits
             }
 
             sourceDocumentsSalesInvoices.NumberOfEntries = invoices.Count().ToString();
-            sourceDocumentsSalesInvoices.TotalDebit = Round(totalDebitExTax, 2);
-            sourceDocumentsSalesInvoices.TotalCredit = Round(totalCreditExTax, 2);
+            sourceDocumentsSalesInvoices.TotalDebit = totalDebitExTax.Round(2);
+            sourceDocumentsSalesInvoices.TotalCredit = totalCreditExTax.Round(2);
         }
 
         private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(
@@ -292,7 +293,7 @@ namespace Vera.Portugal.Audits
             InvoiceLine line,
             int index)
         {
-            var settlement = Round(line.Settlements?.Sum(s => s.Amount) ?? 0, 2);
+            var settlement = (line.Settlements?.Sum(s => s.Amount) ?? 0).Round(2);
 
             return new SourceDocumentsSalesInvoicesInvoiceLine
             {
@@ -317,8 +318,8 @@ namespace Vera.Portugal.Audits
 
                 Description = line.Description,
 
-                UnitPrice = Round(line.UnitPrice, 4),
-                Item = Round(line.Net, 2),
+                UnitPrice = line.UnitPrice.Round(4),
+                Item = line.Net.Round(2),
                 ItemElementName = line.Net > 0 ? ItemChoiceType4.CreditAmount : ItemChoiceType4.DebitAmount,
 
                 SettlementAmount = settlement,
@@ -379,7 +380,5 @@ namespace Vera.Portugal.Audits
 
         private static DateTime GetDateTime(DateTime dt) =>
             new(dt.Year, dt.Month, dt.Day, dt.Hour, dt.Minute, dt.Second);
-
-        private static decimal Round(decimal d, int decimals) => Math.Round(Math.Abs(d), decimals);
     }
 }

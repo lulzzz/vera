@@ -42,3 +42,30 @@ message Address {
     // Region in the ISO 3166-2 format
     string region = 6;
 }
+
+enum TaxCategory {
+    // Also called the standard tax rate.
+    HIGH = 0;
+
+    // Also called the reduced tax rate.
+    LOW = 1;
+
+    // 0% rate
+    ZERO = 2;
+
+    // 0% rate because of an exemption.
+    EXEMPT = 3;
+
+    // Intermediate rate that some countries use like Portugal. It's in between HIGH and LOW.
+    INTERMEDIATE = 4;
+}
+
+enum PaymentCategory {
+    OTHER = 0;
+    DEBIT = 1;
+    CREDIT = 2;
+    CASH = 3;
+    CHANGE = 4;
+    VOUCHER = 5;
+    ONLINE = 6;
+}

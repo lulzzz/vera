@@ -147,7 +147,7 @@ namespace Vera.Norway.Tests
 
             var invoice = builder
                 .Reset()
-                .WithTerminal("1.1")
+                .WithRegister("1.1")
                 .WithEmployee()
                 .WithSupplier("123")
                 .WithPayment(amountInTax, PaymentCategory.Cash)

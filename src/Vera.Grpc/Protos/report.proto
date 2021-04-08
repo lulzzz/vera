@@ -1,0 +1,81 @@
+﻿syntax = "proto3";
+
+import "Protos/shared.proto";
+import "Protos/productType.proto";
+import "google/protobuf/timestamp.proto";
+
+package vera.grpc;
+
+service ReportService {
+	rpc GenerateDailyXReport(GenerateDailyXReportRequest) returns(RegisterReport);
+}
+
+message GenerateDailyXReportRequest{
+    string supplierSystemId = 2;
+    string registerId = 3;
+}
+
+message RegisterReport {
+	//Timestamp when the report was generated
+	google.protobuf.Timestamp timestamp = 1;
+	
+    string accountName = 2;
+    string taxNumber = 3;
+
+	vera.grpc.shared.Supplier supplier = 4;
+
+    repeated PaymentReport payments = 5;
+    repeated TaxReport taxes = 6;
+    repeated ProductReport products = 7;
+	repeated EmployeePaymentsReport employeePayments = 8;
+
+    DiscountReport discount = 9;
+    ReturnReport Return = 10;
+    TotalsReport Totals = 11;
+}
+
+message PaymentReport {
+    vera.grpc.shared.PaymentCategory category = 1;
+    int32 count = 2;
+    vera.grpc.shared.DecimalValue amount = 3;
+}
+
+message TaxReport {
+    vera.grpc.shared.TaxCategory category = 1;
+    vera.grpc.shared.DecimalValue rate = 2;
+    vera.grpc.shared.DecimalValue amount = 3;
+}
+
+message ProductReport {
+    vera.grpc.productType.ProductType type = 1;
+    int32 count = 2;
+    vera.grpc.shared.DecimalValue amount = 3;
+}
+
+message EmployeePaymentsReport {
+    EmployeeReport employee = 1;
+    PaymentReport payment = 2;
+} 
+
+message EmployeeReport {
+    string systemId = 1;
+    string firstName = 2;
+    string lastName = 3;
+}
+
+message DiscountReport {
+    int32 count = 1;
+    vera.grpc.shared.DecimalValue amount = 2;
+}
+
+message ReturnReport {
+    int32 count = 1;
+    vera.grpc.shared.DecimalValue amount = 2;
+}
+
+message TotalsReport {
+    vera.grpc.shared.DecimalValue cash = 1;
+    vera.grpc.shared.DecimalValue gross = 2;
+    vera.grpc.shared.DecimalValue return = 3;
+    vera.grpc.shared.DecimalValue net = 4;
+}

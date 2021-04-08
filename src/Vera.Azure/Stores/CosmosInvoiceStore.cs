@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Vera.Audits;
@@ -25,7 +26,7 @@ namespace Vera.Azure.Stores
                 i => PartitionKeyByNumber(i.AccountId, i.Number),
                 invoice
             );
-            
+
             await _container.CreateItemAsync(byNumber, new PartitionKey(byNumber.PartitionKey));
         }
 
@@ -46,7 +47,7 @@ namespace Vera.Azure.Stores
         public async Task<ICollection<Invoice>> List(AuditCriteria criteria)
         {
             // TODO(kevin): filter on fiscal period(s) instead of start/end date
-            var definition = new QueryDefinition(@"
+            var query = new StringBuilder(@"
 select value i
  from c[""Value""] i
 where i.AccountId = @accountId
@@ -54,6 +55,18 @@ where i.AccountId = @accountId
   and i.Date >= @startDate
   and i.Date <= @endDate
 ");
+            QueryDefinition definition;
+            if (!string.IsNullOrEmpty(criteria.RegisterId))
+            {
+                query.Append("and i.RegisterId = @registerId");
+
+                definition = new QueryDefinition(query.ToString());
+                definition.WithParameter("@registerId", criteria.RegisterId);
+            }
+            else
+            {
+                definition = new QueryDefinition(query.ToString());
+            }
 
             definition
                 .WithParameter("@accountId", criteria.AccountId)

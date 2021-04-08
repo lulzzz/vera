@@ -31,7 +31,7 @@ namespace Vera.Tests.Shared
             _builder
                 .Reset()
                 .WithAccount(_accountId)
-                .WithTerminal("1.1")
+                .WithRegister("1.1")
                 .WithEmployee()
                 .WithSupplier(_supplierSystemId)
                 .WithSignature(new Signature

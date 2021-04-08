@@ -1,0 +1,14 @@
+﻿syntax = "proto3";
+
+package vera.grpc.productType;
+
+enum ProductType {
+    // Generic fallback value. Please use the most specific value for the product.
+    OTHER = 0;
+        
+    // Generic fallback for goods. Please use the most specific value for the product.
+    GOODS = 1;
+        
+    // Gift card product. Used to purchase stuff at a later point in time.
+    GIFT_CARD = 2;
+}

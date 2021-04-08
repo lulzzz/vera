@@ -1,10 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Vera.Austria;
 using Vera.Concurrency;
 using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Portugal;
+using Vera.Reports;
 using Vera.Security;
 using Vera.Services;
 using Vera.Stores;
@@ -21,6 +21,7 @@ namespace Vera.Bootstrap
                 collection.AddTransient<ITokenFactory, RandomTokenFactory>();
                 collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
                 collection.AddTransient<IAccountComponentFactoryCollection, AccountComponentFactoryCollection>();
+                collection.AddTransient<IRegisterReportGenerator, RegisterReportGenerator>();
 
                 // Stores
                 collection.AddSingleton<IBlobStore, TemporaryBlobStore>();

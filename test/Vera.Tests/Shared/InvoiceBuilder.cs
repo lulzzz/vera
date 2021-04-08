@@ -26,9 +26,9 @@ namespace Vera.Tests.Shared
             return this;
         }
 
-        public InvoiceBuilder WithTerminal(string terminal)
+        public InvoiceBuilder WithRegister(string registerId)
         {
-            _invoice.RegisterId = terminal;
+            _invoice.RegisterId = registerId;
             return this;
         }
 
