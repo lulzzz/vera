@@ -3,6 +3,7 @@ using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Invoices;
+using Vera.Models;
 using Vera.Portugal.Audits;
 using Vera.Portugal.Invoices;
 using Vera.Signing;
@@ -31,7 +32,7 @@ namespace Vera.Portugal
             return new InvoiceValidator();
         }
 
-        public IInvoiceBucketGenerator CreateInvoiceBucketGenerator()
+        public IBucketGenerator<Invoice> CreateInvoiceBucketGenerator()
         {
             return new InvoiceBucketGenerator();
         }

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Grpc.Models;
+using Vera.Grpc.Shared;
 using Vera.Host.Security;
 using Vera.Invoices;
 using Vera.Stores;

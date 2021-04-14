@@ -1,10 +1,10 @@
 using System.Text;
-using Vera.Invoices;
+using Vera.Dependencies;
 using Vera.Models;
 
 namespace Vera.Portugal.Invoices
 {
-    public sealed class InvoiceBucketGenerator : IInvoiceBucketGenerator
+    public sealed class InvoiceBucketGenerator : IBucketGenerator<Invoice>
     {
         public string Generate(Invoice invoice)
         {

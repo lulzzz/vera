@@ -12,7 +12,7 @@ namespace Vera.Austria
 {
     public class ThermalReceiptGenerator : IThermalReceiptGenerator
     {
-        private static readonly CultureInfo Culture = CultureInfo.CreateSpecificCulture("de-DE");
+        private static readonly CultureInfo Culture = CultureInfo.CreateSpecificCulture("de-AT");
 
         private readonly string _certificateNumber;
 

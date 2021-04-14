@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Vera.Concurrency;
+using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Signing;
@@ -27,7 +28,7 @@ namespace Vera.Tests
             var supplierStore = new Mock<ISupplierStore>();
             var periodStore = new Mock<IPeriodStore>();
 
-            var bucketGenerator = new Mock<IInvoiceBucketGenerator>();
+            var bucketGenerator = new Mock<IBucketGenerator<Invoice>>();
             var invoiceNumberGenerator = new Mock<IInvoiceNumberGenerator>();
             var signer = new Mock<IPackageSigner>();
 

@@ -43,6 +43,16 @@ message Address {
     string region = 6;
 }
 
+// Signature captures the in-/output of the signing of the invoice
+message Signature {
+    // Input is the data that was used to create the resulting signature, which
+    // can be found in the output
+    bytes input = 1;
+
+    // Output is the actual signed data
+    bytes output = 2;
+}
+
 enum TaxCategory {
     // Also called the standard tax rate.
     HIGH = 0;

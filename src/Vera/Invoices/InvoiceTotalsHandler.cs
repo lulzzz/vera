@@ -1,9 +1,10 @@
 ﻿using System.Threading.Tasks;
+using Vera.Dependencies.Handlers;
 using Vera.Models;
 
 namespace Vera.Invoices
 {
-    public class InvoiceTotalsHandler : InvoiceHandler
+    public class InvoiceTotalsHandler : HandlerChain<Invoice>
     {
         private readonly InvoiceTotalsCalculator _calculator;
 

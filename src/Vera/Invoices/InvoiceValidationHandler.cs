@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Vera.Dependencies.Handlers;
 using Vera.Models;
 
 namespace Vera.Invoices
 {
-    public class InvoiceValidationHandler : InvoiceHandler
+    public class InvoiceValidationHandler : HandlerChain<Invoice>
     {
         private readonly IInvoiceValidator _validator;
 

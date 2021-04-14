@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Invoices;
+using Vera.Models;
 using Vera.Signing;
 using Vera.Thermal;
 
@@ -36,7 +33,7 @@ namespace Vera.Norway
             //return new InvoiceValidator();
         }
 
-        public IInvoiceBucketGenerator CreateInvoiceBucketGenerator()
+        public IBucketGenerator<Invoice> CreateInvoiceBucketGenerator()
         {
             throw new NotImplementedException();
             //return new InvoiceBucketGenerator();

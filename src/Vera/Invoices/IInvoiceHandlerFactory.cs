@@ -1,13 +1,15 @@
 using Microsoft.Extensions.Logging;
 using Vera.Concurrency;
 using Vera.Dependencies;
+using Vera.Dependencies.Handlers;
+using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.Invoices
 {
     public interface IInvoiceHandlerFactory
     {
-        IInvoiceHandler Create(IInvoiceComponentFactory factory);
+        IHandlerChain<Invoice> Create(IInvoiceComponentFactory factory);
     }
 
     public sealed class InvoiceHandlerFactory : IInvoiceHandlerFactory
@@ -36,7 +38,7 @@ namespace Vera.Invoices
             _periodStore = periodStore;
         }
 
-        public IInvoiceHandler Create(IInvoiceComponentFactory factory)
+        public IHandlerChain<Invoice> Create(IInvoiceComponentFactory factory)
         {
             var head = new InvoiceSupplierHandler(_supplierStore);
          
@@ -52,7 +54,7 @@ namespace Vera.Invoices
             head.WithNext(new InvoiceOpenPeriodHandler(_periodStore))
                 .WithNext(new InvoiceTotalsHandler())
                 .WithNext(new InvoiceValidationHandler(factory.CreateInvoiceValidator()))
-                .WithNext(new InvoiceLockingHandler(persistenceHandler, factory.CreateInvoiceBucketGenerator(), _locker));
+                .WithNext(new LockingHandler<Invoice>(persistenceHandler, _locker, factory.CreateInvoiceBucketGenerator()));
 
             return head;
         }

@@ -37,5 +37,11 @@ namespace Vera.Azure
         /// Name of the periods container.
         /// </summary>
         public string Periods { get; set; } = "periods";
+
+        /// <summary>
+        /// Contain different types of documents
+        /// <seealso cref="Models.Report"/>
+        /// </summary>
+        public string Documents { get; set; } = "documents";
     }
 }

@@ -1,12 +1,16 @@
-﻿using Google.Protobuf.WellKnownTypes;
+﻿using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using System.Linq;
 using System.Threading.Tasks;
+using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Grpc.Models;
+using Vera.Grpc.Shared;
 using Vera.Host.Security;
 using Vera.Reports;
+using Vera.Stores;
 
 namespace Vera.Host.Services
 {
@@ -14,13 +18,22 @@ namespace Vera.Host.Services
     public class ReportService : Grpc.ReportService.ReportServiceBase
     {
         private readonly IRegisterReportGenerator _registerReportGenerator;
+        private readonly IAccountStore _accountStore;
+        private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
+        private readonly IReportHandlerFactory _reportHandlerFactory;
 
-        public ReportService(IRegisterReportGenerator terminalReportGenerator)
+        public ReportService(IRegisterReportGenerator registerReportGenerator,
+            IAccountStore accountStore,
+            IAccountComponentFactoryCollection accountComponentFactoryCollection, 
+            IReportHandlerFactory reportHandlerFactory)
         {
-            _registerReportGenerator = terminalReportGenerator;
+            _registerReportGenerator = registerReportGenerator;
+            _accountStore = accountStore;
+            _accountComponentFactoryCollection = accountComponentFactoryCollection;
+            _reportHandlerFactory = reportHandlerFactory;
         }
 
-        public override async Task<Grpc.RegisterReport> GenerateDailyXReport(GenerateDailyXReportRequest request, ServerCallContext context)
+        public override async Task<RegisterReport> GenerateDailyXReport(GenerateDailyXReportRequest request, ServerCallContext context)
         {
             if (string.IsNullOrEmpty(request.SupplierSystemId) || string.IsNullOrEmpty(request.RegisterId))
             {
@@ -37,12 +50,25 @@ namespace Vera.Host.Services
 
             var report = await _registerReportGenerator.Generate(registerReportContext);
 
-            var registerReport = new Grpc.RegisterReport
+            var account = await context.ResolveAccount(_accountStore);
+            var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
+            var handler = _reportHandlerFactory.Create(factory);
+
+            await handler.Handle(report);
+
+            var registerReport = new RegisterReport
             {
+                Number = report.Number,
+                Sequence = report.Sequence,
+                Signature = new Signature
+                {
+                    Input = ByteString.CopyFromUtf8(report.Signature.Input),
+                    Output = ByteString.CopyFrom(report.Signature.Output)
+                },
                 Timestamp = report.Date.ToTimestamp(),
                 AccountName = report.Account.Name,
                 TaxNumber = report.Account.TaxRegistrationNumber,
-                Supplier = report.Supplier.Pack(),
+                SupplierId = report.SupplierId.ToString(),
                 Discount = new DiscountReport
                 {
                     Amount = report.Discount.Amount,

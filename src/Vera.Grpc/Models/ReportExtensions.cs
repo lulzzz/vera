@@ -2,7 +2,7 @@
 {
     public static class ReportExtensions
     {
-        public static PaymentReport Pack(this Reports.RegisterReport.PaymentReport r)
+        public static PaymentReport Pack(this Vera.Models.RegisterReport.PaymentReport r)
         {
             return new PaymentReport
             {
@@ -12,7 +12,7 @@
             };
         }
 
-        public static TaxReport Pack(this Reports.RegisterReport.TaxesReport r)
+        public static TaxReport Pack(this Vera.Models.RegisterReport.TaxesReport r)
         {
             return new TaxReport
             {
@@ -22,7 +22,7 @@
             };
         }
 
-        public static ProductReport Pack(this Reports.RegisterReport.ProductReport r)
+        public static ProductReport Pack(this Vera.Models.RegisterReport.ProductReport r)
         {
             return new ProductReport
             {
@@ -32,7 +32,7 @@
             };
         }
 
-        public static EmployeePaymentsReport Pack(this Reports.RegisterReport.EmployeePaymentsReport r)
+        public static EmployeePaymentsReport Pack(this Vera.Models.RegisterReport.EmployeePaymentsReport r)
         {
             return new EmployeePaymentsReport
             {

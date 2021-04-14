@@ -1,28 +1,30 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Vera.Dependencies;
+using Vera.Dependencies.Handlers;
 using Vera.Models;
 using Vera.Signing;
 using Vera.Stores;
 
 namespace Vera.Invoices
 {
-    public class InvoicePersistenceHandler : InvoiceHandler
+    public class InvoicePersistenceHandler : HandlerChain<Invoice>
     {
         private readonly ILogger<InvoicePersistenceHandler> _logger;
         private readonly IChainStore _chainStore;
         private readonly IInvoiceStore _invoiceStore;
         private readonly IPackageSigner _signer;
         private readonly IInvoiceNumberGenerator _invoiceNumberGenerator;
-        private readonly IInvoiceBucketGenerator _invoiceBucketGenerator;
+        private readonly IBucketGenerator<Invoice> _invoiceBucketGenerator;
 
         public InvoicePersistenceHandler(
             ILogger<InvoicePersistenceHandler> logger,
             IChainStore chainStore,
             IInvoiceStore invoiceStore, 
             IPackageSigner signer, 
-            IInvoiceNumberGenerator invoiceNumberGenerator, 
-            IInvoiceBucketGenerator invoiceBucketGenerator
+            IInvoiceNumberGenerator invoiceNumberGenerator,
+            IBucketGenerator<Invoice> invoiceBucketGenerator
         )
         {
             _logger = logger;

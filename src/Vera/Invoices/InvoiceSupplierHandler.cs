@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Vera.Dependencies.Handlers;
 using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.Invoices
 {
-    public class InvoiceSupplierHandler : InvoiceHandler
+    public class InvoiceSupplierHandler : HandlerChain<Invoice>
     {
         private readonly ISupplierStore _supplierStore;
 

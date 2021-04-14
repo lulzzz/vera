@@ -11,8 +11,8 @@ service ReportService {
 }
 
 message GenerateDailyXReportRequest{
-    string supplierSystemId = 2;
-    string registerId = 3;
+    string supplierSystemId = 1;
+    string registerId = 2;
 }
 
 message RegisterReport {
@@ -22,7 +22,7 @@ message RegisterReport {
     string accountName = 2;
     string taxNumber = 3;
 
-	vera.grpc.shared.Supplier supplier = 4;
+	string supplierId = 4;
 
     repeated PaymentReport payments = 5;
     repeated TaxReport taxes = 6;
@@ -32,6 +32,14 @@ message RegisterReport {
     DiscountReport discount = 9;
     ReturnReport Return = 10;
     TotalsReport Totals = 11;
+
+    // Report number that has been assigned to the report
+    string number = 12;
+
+    // Sequence number of the report
+    int32 sequence = 13;
+
+    vera.grpc.shared.Signature signature = 14;
 }
 
 message PaymentReport {

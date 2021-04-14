@@ -1,6 +1,7 @@
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Invoices;
+using Vera.Reports;
 using Vera.Thermal;
 
 namespace Vera.Dependencies
@@ -8,7 +9,7 @@ namespace Vera.Dependencies
     /// <summary>
     /// Responsible for creating the components that can be overriden per certification implementation.
     /// </summary>
-    public interface IComponentFactory : IInvoiceComponentFactory 
+    public interface IComponentFactory : IInvoiceComponentFactory, IReportComponentFactory
     {
         IConfigurationValidator CreateConfigurationValidator();
         IThermalReceiptGenerator CreateThermalReceiptGenerator();

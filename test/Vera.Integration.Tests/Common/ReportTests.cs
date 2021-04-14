@@ -66,7 +66,6 @@ namespace Vera.Integration.Tests.Common
             {
                 RegisterId = openRegisterReply.Id,
                 SupplierSystemId = client.SupplierSystemId
-
             };
 
             var report = await client.Report.GenerateDailyXReportAsync(request, client.AuthorizedMetadata);
@@ -86,6 +85,7 @@ namespace Vera.Integration.Tests.Common
             Assert.Equal(grossTotal, (decimal)report.Totals.Gross);
             Assert.Equal(netTotal.Round(9), (decimal)report.Totals.Net);
             Assert.Equal(invoiceReturn.Totals.Gross, (decimal)report.Totals.Return);
+            Assert.True(!string.IsNullOrEmpty(report.Number));
         }
 
         internal async Task<Models.Invoice> CreateInvoice(SetupClient client, Scenario scenario, string registerId)

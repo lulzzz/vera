@@ -23,7 +23,7 @@ message CreateInvoiceReply {
     // Sequence number of the invoice
     int32 sequence = 2;
 
-    Signature signature = 3;
+    vera.grpc.shared.Signature signature = 3;
 }
 
 message GetInvoiceByNumberRequest {
@@ -45,16 +45,6 @@ message ValidateInvoiceRequest {
 
 message ValidateInvoiceReply {
     map<string, string> results = 1;
-}
-
-// Signature captures the in-/output of the signing of the invoice
-message Signature {
-    // Input is the data that was used to create the resulting signature, which
-    // can be found in the output
-    bytes input = 1;
-
-    // Output is the actual signed data
-    bytes output = 2;
 }
 
 message Invoice {

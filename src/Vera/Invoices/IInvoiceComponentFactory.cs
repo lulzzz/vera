@@ -1,11 +1,13 @@
-﻿using Vera.Signing;
+﻿using Vera.Dependencies;
+using Vera.Models;
+using Vera.Signing;
 
 namespace Vera.Invoices
 {
     public interface IInvoiceComponentFactory
     {
         IInvoiceValidator CreateInvoiceValidator();
-        IInvoiceBucketGenerator CreateInvoiceBucketGenerator();
+        IBucketGenerator<Invoice> CreateInvoiceBucketGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
         IPackageSigner CreatePackageSigner();
     }

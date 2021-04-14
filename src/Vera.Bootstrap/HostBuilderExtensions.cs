@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
 using Vera.Dependencies;
 using Vera.Invoices;
+using Vera.Models;
 using Vera.Portugal;
 using Vera.Reports;
 using Vera.Security;
@@ -30,6 +31,8 @@ namespace Vera.Bootstrap
                 // Services
                 collection.AddTransient<IUserRegisterService, UserRegisterService>();
                 collection.AddTransient<IInvoiceHandlerFactory, InvoiceHandlerFactory>();
+                collection.AddSingleton<IBucketGenerator<RegisterReport>, ReportBucketGenerator>();
+                collection.AddTransient<IReportHandlerFactory, ReportHandlerFactory>();
                 collection.AddTransient<IDateProvider, RealLifeDateProvider>();
             });
 

@@ -16,6 +16,15 @@ namespace Vera.Signing
             PreviousSignature = previous?.Output;
         }
 
+        public Package(RegisterReport report, Signature? previous)
+        {
+            Timestamp = report.Date;
+            Number = report.Number;
+            Net = report.Totals.Net;
+            Gross = report.Totals.Gross;
+            PreviousSignature = previous?.Output;
+        }
+
         /// <summary>
         /// Date and time that the package was created.
         /// </summary>
