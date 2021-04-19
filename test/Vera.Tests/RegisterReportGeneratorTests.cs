@@ -1,9 +1,12 @@
-﻿using Moq;
+﻿using Google.Protobuf.Collections;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vera.Audits;
+using Vera.Bootstrap;
 using Vera.Dependencies;
+using Vera.Dependencies.Handlers;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Reports;
@@ -48,15 +51,16 @@ namespace Vera.Tests
         }
 
         [Fact]
-        public async Task Should_generate_report()
+        public async Task Should_generate_x_report()
         {
             const string registerId = "1";
+            
             var account = new Account();
             var supplier = new Supplier();
             var calculator = new InvoiceTotalsCalculator();
-
             var builder = new InvoiceBuilder();
             var director = new InvoiceDirector(builder, account.Id, supplier.SystemId);
+
             director.ConstructAnonymousWithSingleProductPaidWithCash();
             var invoice1 = builder.Result;
             invoice1.Totals = calculator.Calculate(invoice1);
@@ -92,15 +96,15 @@ namespace Vera.Tests
             var accountStore = new Mock<IAccountStore>();
 
             supplierStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<string>()))
-                .ReturnsAsync(new Supplier());
+                .ReturnsAsync(supplier);
 
             accountStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<Guid>()))
-                .ReturnsAsync(new Account());
+                .ReturnsAsync(account);
 
             var context = new RegisterReportContext
             {
-                AccountId = Guid.NewGuid(),
-                CompanyId = Guid.NewGuid(),
+                AccountId = account.Id,
+                CompanyId = account.CompanyId,
                 SupplierSystemId = "1",
                 RegisterId = registerId
             };
@@ -116,6 +120,59 @@ namespace Vera.Tests
             Assert.True(report.Products.Count == 1);
             Assert.True(report.Discount.Count == 1);
             Assert.True(report.Return.Amount == invoice3.Totals.Gross);
+        }
+
+        [Fact]
+        public async Task Should_generate_z_report_when_period_is_closed()
+        {
+            var registerId = Guid.NewGuid();
+            string registerIdString = registerId.ToString();
+            var account = new Account();
+            var supplier = new Supplier();
+            var calculator = new InvoiceTotalsCalculator();
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, account.Id, supplier.SystemId);
+
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+            var invoice1 = builder.Result;
+            invoice1.Totals = calculator.Calculate(invoice1);
+            invoice1.RegisterId = registerIdString;
+
+            var dateProvider = new Mock<RealLifeDateProvider>();
+            var invoiceStore = new Mock<IInvoiceStore>();
+            invoiceStore.Setup(i => i.List(It.IsAny<AuditCriteria>()))
+                .ReturnsAsync(new List<Invoice>()
+                {
+                    invoice1,
+                });
+            var supplierStore = new Mock<ISupplierStore>();
+            var accountStore = new Mock<IAccountStore>();
+
+            supplierStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<string>()))
+                .ReturnsAsync(supplier);
+
+            accountStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<Guid>()))
+                .ReturnsAsync(account);
+
+            var generator = new RegisterReportGenerator(dateProvider.Object, invoiceStore.Object, 
+                supplierStore.Object, accountStore.Object);
+
+            var handler = new Mock<IHandlerChain<RegisterReport>>();
+            var reportHandlerFactory = new Mock<IReportHandlerFactory>();
+            reportHandlerFactory.Setup((s) => s.Create(It.IsAny<IReportComponentFactory>()))
+                .Returns(handler.Object);
+            
+            var acfCollection = new Mock<IAccountComponentFactoryCollection>();
+            var periodStore = new Mock<IPeriodStore>();
+
+
+            var period = new Period { Supplier = supplier };
+            period.Registers.Add(new Register { Id = registerId });
+
+            var periodManager = new PeriodManager(generator, reportHandlerFactory.Object, acfCollection.Object,
+                periodStore.Object, dateProvider.Object);
+
+            await periodManager.ClosePeriod(period, account, period.Registers);
         }
     }
 }

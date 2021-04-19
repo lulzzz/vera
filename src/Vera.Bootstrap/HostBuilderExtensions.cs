@@ -23,6 +23,7 @@ namespace Vera.Bootstrap
                 collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
                 collection.AddTransient<IAccountComponentFactoryCollection, AccountComponentFactoryCollection>();
                 collection.AddTransient<IRegisterReportGenerator, RegisterReportGenerator>();
+                collection.AddTransient<PeriodManager>();
 
                 // Stores
                 collection.AddSingleton<IBlobStore, TemporaryBlobStore>();

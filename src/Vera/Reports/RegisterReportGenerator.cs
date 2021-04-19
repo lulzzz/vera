@@ -10,6 +10,11 @@ using static Vera.Models.RegisterReport;
 
 namespace Vera.Reports
 {
+    public interface IRegisterReportGenerator
+    {
+        public Task<RegisterReport> Generate(RegisterReportContext context);
+    }
+
     public class RegisterReportGenerator : IRegisterReportGenerator
     {
         private readonly IDateProvider _dateProvider;
@@ -59,7 +64,8 @@ namespace Vera.Reports
                 {
                     Account = AccountReport.FromAccount(account),
                     SupplierId = supplier.Id,
-                    Date = _dateProvider.Now
+                    Date = _dateProvider.Now,
+                    ReportType = context.ReportType
                 };
             }
 
@@ -181,14 +187,10 @@ namespace Vera.Reports
                     Gross = totalAmount,
                     Return = totalAmountReturns,
                     Net = totalAmountNet
-                }
+                },
+                ReportType = context.ReportType
             };
         }
-    }
-
-    public interface IRegisterReportGenerator
-    {
-        public Task<RegisterReport> Generate(RegisterReportContext context);
     }
 
     public class RegisterReportContext
@@ -197,5 +199,6 @@ namespace Vera.Reports
         public Guid CompanyId { get; set; }
         public string SupplierSystemId { get; set; }
         public string RegisterId { get; set; }
+        public ReportType ReportType { get; set; }
     }
 }

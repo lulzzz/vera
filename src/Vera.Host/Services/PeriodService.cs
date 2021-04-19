@@ -10,6 +10,7 @@ using Vera.Grpc.Shared;
 using Vera.Stores;
 using Vera.Host.Security;
 using System.Linq;
+using Vera.Bootstrap;
 
 namespace Vera.Host.Services
 {
@@ -18,20 +19,25 @@ namespace Vera.Host.Services
     {
         private readonly ISupplierStore _supplierStore;
         private readonly IPeriodStore _periodStore;
+        private readonly IAccountStore _accountStore;
         private readonly IDateProvider _dateProvider;
         private readonly ILocker _locker;
+        private readonly PeriodManager periodManager;
 
         public PeriodService(
             ISupplierStore supplierStore,
             IPeriodStore periodStore,
+            IAccountStore accountStore,
             IDateProvider dateProvider,
-            ILocker locker
-        )
+            ILocker locker,
+            PeriodManager periodManager)
         {
             _supplierStore = supplierStore;
             _periodStore = periodStore;
+            _accountStore = accountStore;
             _dateProvider = dateProvider;
             _locker = locker;
+            this.periodManager = periodManager;
         }
 
         public override async Task<OpenPeriodReply> OpenPeriod(OpenPeriodRequest request, ServerCallContext context)
@@ -68,48 +74,23 @@ namespace Vera.Host.Services
 
         public override async Task<Empty> ClosePeriod(ClosePeriodRequest request, ServerCallContext context)
         {
+            var accountId = context.GetAccountId();
             var period = await GetAndValidate(new PeriodValidationModel
             {
-                AccountId = context.GetAccountId(),
+                AccountId = accountId,
                 SupplierSystemId = request.SupplierSystemId,
                 PeriodId = request.Id
             });
-
-            async Task<Empty> Update()
+            var account = await _accountStore.Get(accountId, context.GetCompanyId());
+            var registers = request.Registers.Select(r => new Models.Register 
             {
-                period.Closing = _dateProvider.Now;
+                Id = Guid.Parse(r.Id),
+                ClosingAmount = r.ClosingAmount
+            });
 
-                await _periodStore.Update(period);
+            await periodManager.ClosePeriod(period, account, registers);
 
-                return new Empty();
-            }
-
-            var registers = period.Registers;
-            var registersToClose = request.Registers?.Count ?? 0;
-            var registersOpened = registers.Count;
-
-            if (registersOpened == 0)
-            {
-                return await Update();
-            }
-
-            if (registersOpened != registersToClose)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Missing one or more registers in the closing"));
-            }
-
-            var closingRegistersIds = request.Registers.ToDictionary(r => r.Id);
-            foreach (var register in registers)
-            {
-                if (!closingRegistersIds.TryGetValue(register.Id.ToString(), out var closingRegister))
-                {
-                    throw new RpcException(new Status(StatusCode.FailedPrecondition, $"Unkown register {register.Id}"));
-                }
-
-                register.ClosingAmount = closingRegister.ClosingAmount;
-            }
-
-            return await Update();
+            return new Empty();
         }
 
         public override async Task<Period> Get(GetPeriodRequest request, ServerCallContext context)

@@ -20,8 +20,8 @@ namespace Vera.Signing
         {
             Timestamp = report.Date;
             Number = report.Number;
-            Net = report.Totals.Net;
-            Gross = report.Totals.Gross;
+            Net = report.Totals?.Net ?? 0m;
+            Gross = report.Totals?.Gross ?? 0m;
             PreviousSignature = previous?.Output;
         }
 

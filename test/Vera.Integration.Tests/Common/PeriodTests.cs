@@ -64,15 +64,7 @@ namespace Vera.Integration.Tests.Common
         [Fact]
         public async Task Should_close_period_with_registers()
         {
-            var accountContext = new AccountContext
-            {
-                CompanyName = _faker.Company.CompanyName(),
-                AccountName = _faker.Company.CompanyName(),
-                Certification = "123",
-                SupplierSystemId = _faker.Random.AlphaNumeric(10)
-            };
-
-            var client = await _setup.CreateClient(accountContext);
+            var client = await _setup.CreateClient(Portugal.Constants.Account);
 
             var openPeriodRequest = new OpenPeriodRequest { SupplierSystemId = client.SupplierSystemId };
             var openPeriodReply = await client.Period.OpenPeriodAsync(openPeriodRequest, client.AuthorizedMetadata);
