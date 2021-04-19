@@ -15,11 +15,6 @@ namespace Vera.Norway
             {
                 PrivateKey = value;
             }
-
-            if (config.TryGetValue("AllowMultipleDuplicates", out value))
-            {
-                AllowMultipleDuplicates = Convert.ToBoolean(value);
-            }
         }
 
         [Required]
@@ -28,12 +23,6 @@ namespace Vera.Norway
             Description = "RSA private key to use for signing the invoices"
         )]
         public string PrivateKey { get; set; }
-
-        [Required]
-        [Display(
-            Description = "Allow multiple successful reprints"
-            )]
-        public bool AllowMultipleDuplicates { get; set; } = true;
 
     }
 }
