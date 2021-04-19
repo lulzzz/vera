@@ -22,7 +22,7 @@ namespace Vera.Austria
 
             return new StringBuilder()
               .Append(ExtractPayload(parts[1]))
-              .Append("_")
+              .Append('_')
               .Append(ExtractSignature(parts[2]))
               .ToString();
         }
