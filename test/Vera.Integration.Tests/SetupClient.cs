@@ -23,6 +23,7 @@ namespace Vera.Integration.Tests
             Period = new PeriodService.PeriodServiceClient(channel);
             Register = new RegisterService.RegisterServiceClient(channel);
             Report = new ReportService.ReportServiceClient(channel);
+            EventLog = new EventLogService.EventLogServiceClient(channel);
         }
 
         public async Task OpenPeriod()
@@ -61,5 +62,7 @@ namespace Vera.Integration.Tests
         public PeriodService.PeriodServiceClient Period { get; }
         public RegisterService.RegisterServiceClient Register { get; set; }
         public ReportService.ReportServiceClient Report { get; set; }
+
+        public EventLogService.EventLogServiceClient EventLog { get; set; }
     }
 }

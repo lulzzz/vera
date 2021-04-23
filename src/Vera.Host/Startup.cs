@@ -91,6 +91,7 @@ namespace Vera.Host
                 endpoints.MapGrpcService<PeriodService>();
                 endpoints.MapGrpcService<RegisterService>();
                 endpoints.MapGrpcService<ReportService>();
+                endpoints.MapGrpcService<EventLogService>();
             });
         }
     }

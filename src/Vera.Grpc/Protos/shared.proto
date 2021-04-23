@@ -30,6 +30,13 @@ message Supplier {
     Address address = 5;
 }
 
+message Register {
+	string id = 1;
+
+	vera.grpc.shared.DecimalValue openingAmount = 2;
+	vera.grpc.shared.DecimalValue closingAmount = 3;
+}
+
 message Address {
     string street = 1;
     string number = 2;

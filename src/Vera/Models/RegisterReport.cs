@@ -12,6 +12,9 @@ namespace Vera.Models
         }
 
         public Guid Id { get; set; }
+
+        public string RegisterId { get; set; }
+
         public DateTime Date { get; set; }
         public Guid SupplierId { get; set; }
         public AccountReport Account { get; set; }

@@ -45,6 +45,26 @@ and c['Value'].SystemId = @systemId")
             return response.FirstOrDefault();
         }
 
+        public async Task<Supplier> Get(Guid accountId, Guid supplierId)
+        {
+            var definition = new QueryDefinition(@"
+select top 1 value c['Value'] 
+from c 
+where c.Type = @type
+and c['Value'].Id = @id")
+                .WithParameter("@type", DocumentType)
+                .WithParameter("@id", supplierId);
+
+            using var iterator = _container.GetItemQueryIterator<Supplier>(definition, requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(accountId.ToString())
+            });
+
+            var response = await iterator.ReadNextAsync();
+
+            return response.FirstOrDefault();
+        }
+
         public Task Update(Supplier supplier)
         {
             var document = ToDocument(supplier);

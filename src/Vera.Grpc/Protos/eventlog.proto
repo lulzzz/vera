@@ -1,0 +1,83 @@
+﻿syntax = "proto3";
+
+import "Protos/shared.proto";
+
+import "google/protobuf/timestamp.proto";
+
+package vera.grpc;
+
+service EventLogService {
+	rpc Create(CreateEventLogRequest) returns (CreateEventLogReply);
+	rpc List(ListEventLogRequest) returns (ListEventLogReply);
+}
+
+message CreateEventLogRequest {
+	EventLog eventlog = 1;
+}
+
+message CreateEventLogReply {
+	string id = 1;
+}
+
+message ListEventLogRequest {
+	// Start of the period to get the event logs for
+	google.protobuf.Timestamp startDate = 1;
+
+	// End of the period to get the event logs for
+	google.protobuf.Timestamp endDate = 2;
+
+	EventLogType type = 3;
+}
+
+message ListEventLogReply {
+	repeated EventLogItem eventLogs = 1;
+}
+
+message EventLog {
+	// Timestamp of the event log
+	google.protobuf.Timestamp timestamp = 1;
+
+	string supplierSystemId = 2;
+
+	string registerId = 3;
+
+	EventLogType type = 4;
+}
+
+message EventLogItem {
+
+	string id = 1;
+
+	string supplierSystemId = 2;
+
+	EventLogType type = 3;
+
+
+	// Timestamp of the event log
+	google.protobuf.Timestamp timestamp = 4;
+
+	string registerId = 5;
+}
+
+enum EventLogType {
+	
+	NONE = 0;
+
+	APP_START = 1;
+        
+	LOGIN = 2;
+        
+	LOGOUT = 3;
+
+	OPEN_CASH_DRAWER = 4;
+
+	CLOSE_CASH_DRAWER = 5;
+
+	X_REPORT = 6;
+
+	Z_REPORT = 7;
+
+	RECEIPT_PRINTED = 8;
+
+	RECEIPT_REPRINTED = 9;
+}

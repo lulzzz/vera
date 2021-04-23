@@ -43,5 +43,10 @@ namespace Vera.Azure
         /// <seealso cref="Models.Report"/>
         /// </summary>
         public string Documents { get; set; } = "documents";
+
+        /// <summary>
+        /// Contains event logs
+        /// </summary>
+        public string EventLogs { get; set; } = "eventlogs";
     }
 }

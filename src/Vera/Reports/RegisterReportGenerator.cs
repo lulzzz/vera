@@ -65,7 +65,8 @@ namespace Vera.Reports
                     Account = AccountReport.FromAccount(account),
                     SupplierId = supplier.Id,
                     Date = _dateProvider.Now,
-                    ReportType = context.ReportType
+                    ReportType = context.ReportType,
+                    RegisterId = context.RegisterId
                 };
             }
 
@@ -164,6 +165,7 @@ namespace Vera.Reports
 
             return new RegisterReport
             {
+                RegisterId = context.RegisterId,
                 Date = _dateProvider.Now,
                 Account = AccountReport.FromAccount(account),
                 SupplierId = supplier.Id,
