@@ -13,17 +13,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Start Cosmos Emulator
-        run: |  
-          Write-Host "Launching Cosmos DB Emulator"
-          Import-Module "$env:ProgramFiles\Azure Cosmos DB Emulator\PSModules\Microsoft.Azure.CosmosDB.Emulator"
-          Start-CosmosDbEmulator -NoUI
-          
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '5.0.200'
-      
       - name: Run integration tests
-        run: dotnet test --nologo --filter FullyQualifiedName~Integration
+        run: dotnet test --nologo -v -q --filter FullyQualifiedName~Integration
+        env:
+          VERA__COSMOS__CONNECTIONSTRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
