@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Extensions.Configuration;
@@ -16,78 +18,76 @@ namespace Vera.Azure
 {
     public static class HostBuilderExtensions
     {
-        private static readonly Mutex Mutex = new();
+        private static readonly SemaphoreSlim Lock = new(1, 1);
         private static volatile bool _created;
-
-        // TODO(kevin): do not like this, but also don't know a better way for this do-once on startup kind of work
+        
         public static IHost ConfigureCosmos(this IHost host)
         {
-            using var scope = host.Services.CreateScope();
+            if (_created) return host;
 
-            var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
-
-            var cosmosOptions = config
-                .GetSection(CosmosOptions.Section)
-                .Get<CosmosOptions>();
-
-            var cosmosContainerOptions = config
-                .GetSection(CosmosContainerOptions.Section)
-                .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
-
-            var client = scope.ServiceProvider.GetRequiredService<CosmosClient>();
-
-            if (_created)
+            // Running on the background to prevent deadlocks that occur
+            // when running the async code below synchronously and I did
+            // not find a way to run this before startup with the IHostBuilder
+            Task.Run(async () =>
             {
-                return host;
-            }
+                if (_created) return;
+                
+                await Lock.WaitAsync();
+
+                if (_created)
+                {
+                    Lock.Release();
+                    return;
+                }
+
+                using var scope = host.Services.CreateScope();
+
+                var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+                var cosmosOptions = config
+                    .GetSection(CosmosOptions.Section)
+                    .Get<CosmosOptions>();
+
+                var cosmosContainerOptions = config
+                    .GetSection(CosmosContainerOptions.Section)
+                    .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
+
+                var client = scope.ServiceProvider.GetRequiredService<CosmosClient>();
+
+                var throughput = ThroughputProperties.CreateManualThroughput(400);
+                
+                var response = await client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database, throughput);
+
+                const string partitionKeyPath = "/PartitionKey";
+
+                var containers = new[]
+                {
+                    cosmosContainerOptions.Companies,
+                    cosmosContainerOptions.Invoices,
+                    cosmosContainerOptions.Audits,
+                    cosmosContainerOptions.Trails,
+                    cosmosContainerOptions.Chains,
+                    cosmosContainerOptions.Periods,
+                    cosmosContainerOptions.Documents,
+                    cosmosContainerOptions.EventLogs
+                };
+
+                var db = response.Database;
+
+                foreach (var container in containers)
+                {
+                    await db
+                        .DefineContainer(container, partitionKeyPath)
+                        .CreateIfNotExistsAsync();
+                }
+
+                _created = true;
+
+                Lock.Release();
+            });
             
-            // Locking here for the integration tests to prevent concurrency issues
-            // when creating the database and containers. Integration test spins up
-            // multiple instances of the app, every test get its own app that runs this
-            // piece of code
-            Mutex.WaitOne();
-
-            if (_created)
-            {
-                Mutex.ReleaseMutex();
-                return host;
-            }
-
-            var throughput = ThroughputProperties.CreateManualThroughput(400);
-
-            var response = client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database, throughput)
-                .GetAwaiter()
-                .GetResult();
-
-            const string partitionKeyPath = "/PartitionKey";
-
-            var containers = new[]
-            {
-                cosmosContainerOptions.Companies,
-                cosmosContainerOptions.Invoices,
-                cosmosContainerOptions.Audits,
-                cosmosContainerOptions.Trails,
-                cosmosContainerOptions.Chains,
-                cosmosContainerOptions.Periods,
-                cosmosContainerOptions.Documents,
-                cosmosContainerOptions.EventLogs
-            };
-
-            var db = response.Database;
-
-            foreach (var container in containers)
-            {
-                db
-                    .DefineContainer(container, partitionKeyPath)
-                    .CreateIfNotExistsAsync()
-                    .GetAwaiter()
-                    .GetResult();
-            }
-
-            _created = true;
-
-            Mutex.ReleaseMutex();
-
+            while (!_created) { }
+            
             return host;
         }
 
@@ -132,8 +132,8 @@ namespace Vera.Azure
                 var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
                     .WithContentResponseOnWrite(false)
                     .WithConnectionModeDirect()
-                    .WithRequestTimeout(TimeSpan.FromSeconds(5))
-                    .WithThrottlingRetryOptions(TimeSpan.FromSeconds(5), 6)
+                    .WithRequestTimeout(TimeSpan.FromSeconds(1))
+                    .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
                     .WithApplicationName("vera")
                     .Build();
 
