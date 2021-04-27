@@ -18,6 +18,6 @@ jobs:
         with:
           dotnet-version: '5.0.200'
       - name: Run integration tests
-        run: dotnet test --nologo -v -q --filter FullyQualifiedName~Integration
+        run: dotnet test --nologo -v q --filter FullyQualifiedName~Integration
         env:
           VERA__COSMOS__CONNECTIONSTRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
