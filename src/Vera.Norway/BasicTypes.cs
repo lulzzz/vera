@@ -161,13 +161,13 @@ namespace Vera.Norway
                 basic.BasicID = "RETURN";
                 basic.PredefinedBasicID = "11006";
             }
-            //else if (payments.Any(p => p.Method == "CASH"))
-            //{
-            //    // Cash transaction
-            //    basic.BasicDesc = "CASH";
-            //    basic.BasicID = "CASH";
-            //    basic.PredefinedBasicID = "11001";
-            //}
+            else if (payments.Any(p => p.Category == PaymentCategory.Cash))
+            {
+                // Cash transaction
+                basic.BasicDesc = "CASH";
+                basic.BasicID = "CASH";
+                basic.PredefinedBasicID = "11001";
+            }
 
             // TODO (kevin) support more complex scenarios?
             // 11001	Cash sale
@@ -246,33 +246,27 @@ namespace Vera.Norway
             // TODO (kevin) check if this is correct
 
             // payment method is not mapped
-            //switch (p.Method)
-            //{
-            //    case "CASH":
-            //        return "12001";
-            //    case "PIN":
-            //        return "12002";
-            //    case "VISA":
-            //    case "ECMC":
-            //    case "VPAY":
-            //    case "AMEX":
-            //    case "MAES":
-            //    case "DISC":
-            //        return "12003";
+            switch (p.Category)
+            {
+                case PaymentCategory.Cash:
+                    return "12001";
+                case PaymentCategory.Debit:
+                    return "12002";
+                case PaymentCategory.Credit:
+                    return "12003";
+                default:
+                    return "12999";
 
-            //        // TODO (kevin) map these
-            //        //          12004	Bank account
-            //        //          12005	Gift token
-            //        //          12006	Customer card
-            //        //          12007	Loyalty, stamps
-            //        //          12008	Bottle deposit
-            //        //          12009	Check
-            //        //          12010	Credit note
-            //        //          12011	Mobile phone apps
-            //}
-
-            // Other
-            return "12999";
+                    // TODO (kevin) map these
+                    //          12004	Bank account
+                    //          12005	Gift token
+                    //          12006	Customer card
+                    //          12007	Loyalty, stamps
+                    //          12008	Bottle deposit
+                    //          12009	Check
+                    //          12010	Credit note
+                    //          12011	Mobile phone apps
+            }
         }
 
         private static string TranslateProductToBasicID(Product p)

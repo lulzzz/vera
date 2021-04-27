@@ -1,5 +1,4 @@
-﻿using System;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
@@ -23,53 +22,37 @@ namespace Vera.Norway
 
         public IConfigurationValidator CreateConfigurationValidator()
         {
-            throw new NotImplementedException();
-            //return new ConfigurationValidator();
+            return new ConfigurationValidator();
         }
 
         public IInvoiceValidator CreateInvoiceValidator()
         {
-            throw new NotImplementedException();
-            //return new InvoiceValidator();
+            return new NullInvoiceValidator();
         }
 
         public IBucketGenerator<Invoice> CreateInvoiceBucketGenerator()
         {
-            throw new NotImplementedException();
-            //return new InvoiceBucketGenerator();
+            return new InvoiceBucketGenerator();
         }
 
         public IInvoiceNumberGenerator CreateInvoiceNumberGenerator()
         {
-            throw new NotImplementedException();
-            //return new InvoiceNumberGenerator();
+            return new InvoiceNumberGenerator();
         }
 
         public IPackageSigner CreatePackageSigner()
         {
-            throw new NotImplementedException();
-            //use something else instead of PrivateKeyVersion or ignore it?
-            //return new PackageSigner(_rsa, _configuration.PrivateKeyVersion);
+            return new PackageSigner(_rsa, _configuration.PrivateKeyVersion);
         }
 
         public IThermalReceiptGenerator CreateThermalReceiptGenerator()
         {
-            throw new NotImplementedException();
-            //return new ThermalReceiptGenerator(
-            //    _configuration.SocialCapital,
-            //    _configuration.CertificateName,
-            //    _configuration.CertificateNumber
-            //);
+            return new ThermalReceiptGenerator();
         }
 
         public IAuditWriter CreateAuditWriter()
         {
-            throw new NotImplementedException();
-            //return new AuditWriter(
-            //    _configuration.ProductCompanyTaxId,
-            //    _configuration.CertificateName,
-            //    _configuration.CertificateNumber
-            //);
+            return new AuditWriter(new RealLifeDateProvider());
         }
     }
 }

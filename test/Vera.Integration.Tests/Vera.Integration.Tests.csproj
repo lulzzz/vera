@@ -18,6 +18,7 @@
     <ItemGroup>
       <ProjectReference Include="..\..\src\Vera.Bootstrap\Vera.Bootstrap.csproj" />
       <ProjectReference Include="..\..\src\Vera.Host\Vera.Host.csproj" />
+      <ProjectReference Include="..\..\src\Vera.Norway\Vera.Norway.csproj" />
       <ProjectReference Include="..\Vera.Tests\Vera.Tests.csproj" />
     </ItemGroup>
 

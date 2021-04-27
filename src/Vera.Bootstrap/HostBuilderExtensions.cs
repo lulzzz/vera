@@ -4,6 +4,7 @@ using Vera.Concurrency;
 using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Models;
+using Vera.Norway;
 using Vera.Portugal;
 using Vera.Reports;
 using Vera.Security;
@@ -39,6 +40,7 @@ namespace Vera.Bootstrap
 
             // Registration of all the certification implementations
             builder.UseVeraPortugal();
+            builder.UseVeraNorway();
 
             return builder;
         }
