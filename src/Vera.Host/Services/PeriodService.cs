@@ -1,5 +1,6 @@
 ﻿using Grpc.Core;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Concurrency;
@@ -81,14 +82,22 @@ namespace Vera.Host.Services
                 SupplierSystemId = request.SupplierSystemId,
                 PeriodId = request.Id
             });
-            var account = await _accountStore.Get(accountId, context.GetCompanyId());
+            var account = await _accountStore.Get( context.GetCompanyId(), accountId);
             var registers = request.Registers.Select(r => new Models.Register 
             {
                 Id = Guid.Parse(r.Id),
                 ClosingAmount = r.ClosingAmount
             });
 
-            await periodManager.ClosePeriod(period, account, registers);
+            try
+            {
+                await periodManager.ClosePeriod(period, account, registers);
+            }
+            catch (ValidationException validationException)
+            {
+                throw new RpcException(
+                    new Status(StatusCode.FailedPrecondition, validationException.Message));
+            }
 
             return new Empty();
         }

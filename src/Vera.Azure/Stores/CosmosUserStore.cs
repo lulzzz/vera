@@ -2,6 +2,8 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
+using Vera.Azure.Extensions;
 using Vera.Stores;
 using User = Vera.Models.User;
 
@@ -39,27 +41,14 @@ namespace Vera.Azure.Stores
             );
         }
 
-        public async Task<User> GetByCompany(Guid companyId, string username)
+        public Task<User> GetByCompany(Guid companyId, string username)
         {
-            var definition = new QueryDefinition(@"
-select top 1 value c[""Value""]
-  from c 
-where c[""Value""].Username = @username
-  and c.Type = @type")
-                .WithParameter("@username", username)
-                .WithParameter("@type", DocumentType);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<User>>()
+                .Where(x => x.Value.CompanyId == companyId 
+                            && x.Value.Username == username
+                            && x.Type == DocumentType);
 
-            var iterator = _container.GetItemQueryIterator<User>(
-                definition,
-                requestOptions: new QueryRequestOptions
-                {
-                    PartitionKey = new PartitionKey(companyId.ToString())
-                }
-            );
-
-            var response = await iterator.ReadNextAsync();
-
-            return response.FirstOrDefault();
+            return queryable.FirstOrDefault();
         }
 
         private static TypedDocument<User> ToDocument(User user)

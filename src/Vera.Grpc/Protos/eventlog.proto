@@ -26,7 +26,9 @@ message ListEventLogRequest {
 	// End of the period to get the event logs for
 	google.protobuf.Timestamp endDate = 2;
 
-	EventLogType type = 3;
+	string registerId = 3;
+
+	EventLogType type = 4;
 }
 
 message ListEventLogReply {

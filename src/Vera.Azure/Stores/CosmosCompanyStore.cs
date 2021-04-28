@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
 
@@ -48,21 +49,12 @@ namespace Vera.Azure.Stores
             return result.Resource.Value;
         }
 
-        public async Task<Company> GetByName(string name)
+        public Task<Company> GetByName(string name)
         {
-            var definition = new QueryDefinition(@"
-select top 1 value c[""Value""]
-  from c
- where c.Type = @type
-  and  c[""Value""].Name = @name")
-                .WithParameter("@type", DocumentType)
-                .WithParameter("@name", name);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<Company>>()
+                .Where(x => x.Type == DocumentType && x.Value.Name == name);
 
-            using var iterator = _container.GetItemQueryIterator<Company>(definition);
-
-            var response = await iterator.ReadNextAsync();
-
-            return response.FirstOrDefault();
+            return queryable.FirstOrDefault();
         }
 
         private static TypedDocument<Company> ToDocument(Company company)

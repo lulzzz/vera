@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
 
@@ -43,23 +44,13 @@ namespace Vera.Azure.Stores
             }
         }
 
-        public async Task<Period> GetOpenPeriodForSupplier(Guid supplierId)
+
+        public Task<Period> GetOpenPeriodForSupplier(Guid supplierId)
         {
-            var definition = new QueryDefinition(@"
-select top 1 value c['Value']
-  from c
- where c.Type = @type
-   and  c['Value'].IsClosed = false")
-              .WithParameter("@type", DocumentType);
-            
-            using var iterator = _container.GetItemQueryIterator<Period>(definition, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(supplierId.ToString())
-            });
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<Period>>(true)
+                .Where(x => x.Type == DocumentType && !x.Value.IsClosed && x.Value.Supplier.Id == supplierId);
 
-            var response = await iterator.ReadNextAsync();
-
-            return response.FirstOrDefault();
+            return queryable.FirstOrDefault();
         }
 
         public Task Update(Period period)

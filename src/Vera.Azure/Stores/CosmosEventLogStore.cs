@@ -1,7 +1,9 @@
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
+using Vera.Azure.Extensions;
 using Vera.EventLogs;
 using Vera.Models;
 using Vera.Stores;
@@ -27,44 +29,34 @@ namespace Vera.Azure.Stores
             await _container.CreateItemAsync(byId);
         }
 
-        public async Task<ICollection<EventLog>> List(EventLogCriteria eventLogCriteria)
+        public Task<ICollection<EventLog>> List(EventLogCriteria eventLogCriteria)
         {
-            var query = new StringBuilder(@"
-select value i
- from c[""Value""] i
-where i.Date >= @startDate
-  and i.Date <= @endDate
-  and i.Supplier.AccountId = @accountId");
+            var orderedQueryable = _container.GetItemLinqQueryable<Document<EventLog>>(true);
 
-            QueryDefinition definition;
+            var queryable = orderedQueryable
+                .Where(x => x.Value.Supplier.AccountId == eventLogCriteria.AccountId);
+            
+            if (eventLogCriteria.StartDate.HasValue)
+            {
+                queryable = queryable.Where(x => x.Value.Date >= eventLogCriteria.StartDate.Value);
+            }
+            
+            if (eventLogCriteria.EndDate.HasValue)
+            {
+                queryable = queryable.Where(x => x.Value.Date <= eventLogCriteria.EndDate.Value);
+            }
+            
             if (eventLogCriteria.Type.HasValue)
             {
-                query.Append("and i.Type = @type");
-
-                definition = new QueryDefinition(query.ToString());
-                definition.WithParameter("@type", eventLogCriteria.Type);
+                queryable = queryable.Where(x => x.Value.Type == eventLogCriteria.Type.Value);
             }
-            else
+            
+            if (!string.IsNullOrEmpty(eventLogCriteria.RegisterId))
             {
-                definition = new QueryDefinition(query.ToString());
+                queryable = queryable.Where(x => x.Value.RegisterId == eventLogCriteria.RegisterId);
             }
 
-            definition
-                .WithParameter("@startDate", eventLogCriteria.StartDate)
-                .WithParameter("@endDate", eventLogCriteria.EndDate)
-                .WithParameter("@accountId", eventLogCriteria.AccountId);
-
-            var iterator = _container.GetItemQueryIterator<EventLog>(definition);
-
-            var invoices = new List<EventLog>();
-
-            while (iterator.HasMoreResults)
-            {
-                var results = await iterator.ReadNextAsync();
-                invoices.AddRange(results);
-            }
-
-            return invoices;
+            return queryable.ToListAsync();
         }
     }
 }

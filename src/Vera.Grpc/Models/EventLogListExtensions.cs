@@ -14,11 +14,13 @@ namespace Vera.Grpc.Models
 
             var criteria = new EventLogCriteria
             {
-                EndDate = request.EndDate == null ? DateTime.MaxValue : request.EndDate.ToDateTime(),
+                EndDate = request.EndDate?.ToDateTime(),
 
-                StartDate = request.StartDate == null ? DateTime.MinValue : request.StartDate.ToDateTime(),
+                StartDate = request.StartDate?.ToDateTime(),
 
                 Type = type,
+
+                RegisterId = request.RegisterId,
 
                 AccountId = accountId
             };

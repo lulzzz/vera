@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
 
@@ -55,30 +56,12 @@ namespace Vera.Azure.Stores
             }
         }
 
-        public async Task<ICollection<Account>> GetByCompany(Guid companyId)
+        public Task<ICollection<Account>> GetByCompany(Guid companyId)
         {
-            var definition = new QueryDefinition(@"
-select value a[""Value""] 
-from a 
-where a.Type = @type")
-                .WithParameter("@type", DocumentType);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<Account>>()
+                .Where(x => x.Type == DocumentType && x.Value.CompanyId == companyId);
 
-            using var iterator = _container.GetItemQueryIterator<Account>(definition, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(companyId.ToString())
-            });
-
-            var accounts = new List<Account>();
-
-            while (iterator.HasMoreResults)
-            {
-                accounts.AddRange(
-                    from result in await iterator.ReadNextAsync()
-                    select result
-                );
-            }
-
-            return accounts;
+            return queryable.ToListAsync();
         }
 
         private static TypedDocument<Account> ToDocument(Account account)

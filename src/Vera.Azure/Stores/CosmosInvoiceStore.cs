@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Vera.Audits;
+using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
 
@@ -30,61 +30,30 @@ namespace Vera.Azure.Stores
             await _container.CreateItemAsync(byNumber, new PartitionKey(byNumber.PartitionKey));
         }
 
-        public async Task<Invoice> GetByNumber(Guid accountId, string number)
+        public Task<Invoice> GetByNumber(Guid accountId, string number)
         {
-            var definition = new QueryDefinition(@"select value c[""Value""] from c");
+            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>(true)
+                .Where(x => x.Value.Number == number && x.Value.AccountId == accountId);
 
-            using var iterator = _container.GetItemQueryIterator<Invoice>(definition, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(PartitionKeyByNumber(accountId, number))
-            });
-
-            var response = await iterator.ReadNextAsync();
-
-            return response.FirstOrDefault();
+            return queryable.FirstOrDefault();
         }
 
-        public async Task<ICollection<Invoice>> List(AuditCriteria criteria)
+
+        public Task<ICollection<Invoice>> List(AuditCriteria criteria)
         {
-            // TODO(kevin): filter on fiscal period(s) instead of start/end date
-            var query = new StringBuilder(@"
-select value i
- from c[""Value""] i
-where i.AccountId = @accountId
-  and i.Supplier.SystemId = @supplierSystemId
-  and i.Date >= @startDate
-  and i.Date <= @endDate
-");
-            QueryDefinition definition;
+            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>(true)
+                .Where(x => x.Value.AccountId == criteria.AccountId
+                && x.Value.Supplier.SystemId == criteria.SupplierSystemId
+                && x.Value.Date >= criteria.StartDate
+                && x.Value.Date <= criteria.EndDate);
+
             if (!string.IsNullOrEmpty(criteria.RegisterId))
             {
-                query.Append("and i.RegisterId = @registerId");
-
-                definition = new QueryDefinition(query.ToString());
-                definition.WithParameter("@registerId", criteria.RegisterId);
-            }
-            else
-            {
-                definition = new QueryDefinition(query.ToString());
+                queryable = queryable
+                    .Where(x => x.Value.RegisterId == criteria.RegisterId);
             }
 
-            definition
-                .WithParameter("@accountId", criteria.AccountId)
-                .WithParameter("@supplierSystemId", criteria.SupplierSystemId)
-                .WithParameter("@startDate", criteria.StartDate)
-                .WithParameter("@endDate", criteria.EndDate);
-
-            var iterator = _container.GetItemQueryIterator<Invoice>(definition);
-
-            var invoices = new List<Invoice>();
-
-            while (iterator.HasMoreResults)
-            {
-                var results = await iterator.ReadNextAsync();
-                invoices.AddRange(results);
-            }
-
-            return invoices;
+            return queryable.ToListAsync();
         }
 
         public async Task Delete(Invoice invoice)
@@ -97,7 +66,6 @@ where i.AccountId = @accountId
             response.EnsureSuccessStatusCode();
         }
 
-        private static string PartitionKeyByBucket(Guid accountId, string bucket) => $"{accountId}#B#{bucket}";
         private static string PartitionKeyByNumber(Guid accountId, string invoiceNumber) => $"{accountId}#N#{invoiceNumber}";
     }
 }

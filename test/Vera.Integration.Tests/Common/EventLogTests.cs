@@ -30,6 +30,7 @@ namespace Vera.Integration.Tests.Common
             {
                 SupplierSystemId = supplier.SystemId,
                 Timestamp = Timestamp.FromDateTime(DateTime.UtcNow),
+                RegisterId = "1234",
                 Type = EventLogType.ReceiptPrinted
             };
 
@@ -42,7 +43,10 @@ namespace Vera.Integration.Tests.Common
             Assert.NotNull(reply);
 
             var listAllEventsReply =
-                await client.EventLog.ListAsync(new ListEventLogRequest(), client.AuthorizedMetadata);
+                await client.EventLog.ListAsync(new ListEventLogRequest
+                {
+                    RegisterId = "1234"
+                }, client.AuthorizedMetadata);
 
             Assert.NotNull(listAllEventsReply);
             var matchingEventLog = listAllEventsReply.EventLogs.SingleOrDefault(x => x.Id == reply.Id);

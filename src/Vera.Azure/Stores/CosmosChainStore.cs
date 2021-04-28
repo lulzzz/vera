@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Vera.Stores;
 
 namespace Vera.Azure.Stores
@@ -17,16 +18,11 @@ namespace Vera.Azure.Stores
         public async Task<IChainable> Last(ChainContext context)
         {
             var partitionKeyValue = context.AccountId + ";" + context.Bucket;
+            var queryable = _container.GetItemLinqQueryable<ChainDocument>()
+                .Where(x => x.Next == null)
+                .Where(x => x.PartitionKey == partitionKeyValue);
 
-            var definition = new QueryDefinition("select top 1 * from c where c.Next = null");
-
-            var iterator = _container.GetItemQueryIterator<ChainDocument>(definition,
-                requestOptions: new QueryRequestOptions
-                {
-                    PartitionKey = new PartitionKey(partitionKeyValue),
-                    MaxItemCount = 1
-                });
-
+            using var iterator = queryable.ToFeedIterator();
             var response = await iterator.ReadNextAsync();
 
             return new CosmosChainable(

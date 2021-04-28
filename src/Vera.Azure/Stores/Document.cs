@@ -3,11 +3,17 @@ using Newtonsoft.Json;
 
 namespace Vera.Azure.Stores
 {
+    public interface IDocument<out T>
+    {
+        T Value { get; }
+    }
+
+
     /// <summary>
     /// Generic wrapper for models so Cosmos' partition is abstracted away from the client.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Document<T> where T : class
+    public class Document<T>: IDocument<T> where T : class
     {
         // Constructor for deserialization
         public Document() { }

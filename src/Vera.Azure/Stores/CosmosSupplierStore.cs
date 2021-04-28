@@ -2,6 +2,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
 
@@ -25,44 +26,25 @@ namespace Vera.Azure.Stores
             await _container.CreateItemAsync(document, new PartitionKey(document.PartitionKey));
         }
 
-        public async Task<Supplier> Get(Guid accountId, string systemId)
+        public Task<Supplier> Get(Guid accountId, string systemId)
         {
-            var definition = new QueryDefinition(@"
-select top 1 value c['Value'] 
-from c 
-where c.Type = @type
-and c['Value'].SystemId = @systemId")
-                .WithParameter("@type", DocumentType)
-                .WithParameter("@systemId", systemId);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<Supplier>>()
+                .Where(x => x.Type == DocumentType
+                && x.Value.SystemId == systemId
+                && x.Value.AccountId == accountId);
 
-            using var iterator = _container.GetItemQueryIterator<Supplier>(definition, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(accountId.ToString())
-            });
-
-            var response = await iterator.ReadNextAsync();
-
-            return response.FirstOrDefault();
+            return queryable.FirstOrDefault();
         }
 
-        public async Task<Supplier> Get(Guid accountId, Guid supplierId)
+
+        public Task<Supplier> Get(Guid accountId, Guid supplierId)
         {
-            var definition = new QueryDefinition(@"
-select top 1 value c['Value'] 
-from c 
-where c.Type = @type
-and c['Value'].Id = @id")
-                .WithParameter("@type", DocumentType)
-                .WithParameter("@id", supplierId);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<Supplier>>()
+                .Where(x => x.Type == DocumentType
+                && x.Value.Id == supplierId
+                && x.Value.AccountId == accountId);
 
-            using var iterator = _container.GetItemQueryIterator<Supplier>(definition, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(accountId.ToString())
-            });
-
-            var response = await iterator.ReadNextAsync();
-
-            return response.FirstOrDefault();
+            return queryable.FirstOrDefault();
         }
 
         public Task Update(Supplier supplier)
@@ -80,7 +62,7 @@ and c['Value'].Id = @id")
             var document = ToDocument(supplier);
 
             return _container.DeleteItemAsync<TypedDocument<Supplier>>(
-                document.Id.ToString(), 
+                document.Id.ToString(),
                 new PartitionKey(document.PartitionKey));
         }
 

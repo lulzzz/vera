@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
+using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
 
@@ -53,22 +56,12 @@ namespace Vera.Azure.Stores
             return response.Resource.Value;
         }
 
-        public async Task<ICollection<PrintTrail>> GetByInvoice(Guid invoiceId)
+        public Task<ICollection<PrintTrail>> GetByInvoice(Guid invoiceId)
         {
-            var query = new QueryDefinition(@"select value c[""Value""] from c");
-            using var iterator = _container.GetItemQueryIterator<PrintTrail>(query, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(invoiceId.ToString())
-            });
+            var queryable = _container.GetItemLinqQueryable<Document<PrintTrail>>(true)
+                .Where(x => x.Value.InvoiceId == invoiceId);
 
-            var results = new List<PrintTrail>();
-
-            while (iterator.HasMoreResults)
-            {
-                results.AddRange(await iterator.ReadNextAsync());
-            }
-
-            return results;
+            return queryable.ToListAsync();
         }
 
         private static Document<PrintTrail> ToDocument(PrintTrail trail)
