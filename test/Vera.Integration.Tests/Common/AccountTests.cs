@@ -24,7 +24,6 @@ namespace Vera.Integration.Tests.Common
 
             var accountContext = new AccountContext
             {
-                CompanyName = faker.Company.CompanyName(),
                 AccountName = faker.Company.CompanyName(),
                 Certification = "LALA"
             };
@@ -48,7 +47,6 @@ namespace Vera.Integration.Tests.Common
         {
             var accountContext = new AccountContext
             {
-                CompanyName = "test-update-account",
                 AccountName = "test-update-account",
                 Certification = "LALA"
             };

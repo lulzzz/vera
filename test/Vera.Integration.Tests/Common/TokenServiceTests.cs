@@ -18,7 +18,7 @@ namespace Vera.Integration.Tests.Common
         [Fact]
         public async Task Should_be_able_to_request_token()
         {
-            var login = await _setup.CreateLoginIfNotExists("token");
+            var login = await _setup.CreateLogin();
 
             var tokenRequest = new TokenRequest
             {

@@ -60,7 +60,6 @@ namespace Vera.Integration.Tests.Common
         {
             var accountContext = new AccountContext
             {
-                CompanyName = _faker.Company.CompanyName(),
                 AccountName = _faker.Company.CompanyName(),
                 Certification = "123"
             };

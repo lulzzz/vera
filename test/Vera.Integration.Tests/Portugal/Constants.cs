@@ -24,7 +24,6 @@ tq4HEcmINDkh3fy0/V5XRqzAmGlH6dgxPMgEdddzdRrl
         
         public static AccountContext Account => new()
         {
-            CompanyName = "Pelican Theory",
             AccountName = "Store",
             Certification = "PT",
             Configuration =

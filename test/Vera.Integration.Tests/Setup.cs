@@ -12,7 +12,6 @@ namespace Vera.Integration.Tests
 {
     public class AccountContext
     {
-        public string CompanyName { get; set; }
         public string AccountName { get; set; }
         public string Certification { get; set; }
         public IDictionary<string, string> Configuration { get; } = new Dictionary<string, string>();
@@ -49,14 +48,14 @@ namespace Vera.Integration.Tests
 
         public async Task<SetupClient> CreateClient(AccountContext context)
         {
-            var loginEntry = await CreateLoginIfNotExists(context.CompanyName);
-            var (account, exists) = await CreateAccountIfNotExists(context, loginEntry.Token);
+            var loginEntry = await CreateLogin();
+            var (account, exists) = await CreateAccount(context, loginEntry.Token);
 
             var client = new SetupClient(this, _channel, loginEntry.Token, account);
 
             if (!string.IsNullOrEmpty(context.SupplierSystemId))
             {
-                client.SupplierSystemId = await CreateSupplierIfNotExists(context, client);
+                client.SupplierSystemId = await CreateSupplier(context, client);
             }
 
             if (exists)
@@ -80,7 +79,7 @@ namespace Vera.Integration.Tests
             return client;
         }
 
-        public async Task<LoginEntry> CreateLoginIfNotExists(string companyName)
+        public async Task<LoginEntry> CreateLogin()
         {
             var registerRequest = new RegisterUserRequest
             {
@@ -111,7 +110,7 @@ namespace Vera.Integration.Tests
             return entry;
         }
 
-        private async Task<(string, bool)> CreateAccountIfNotExists(AccountContext context, string token)
+        private async Task<(string, bool)> CreateAccount(AccountContext context, string token)
         {
             var address = _faker.Address;
 
@@ -137,7 +136,7 @@ namespace Vera.Integration.Tests
             return (createAccountReply.Id, false);
         }
 
-        private async Task<string> CreateSupplierIfNotExists(AccountContext context, SetupClient client)
+        private async Task<string> CreateSupplier(AccountContext context, SetupClient client)
         {
             var supplier = new CreateSupplierRequest
             {
