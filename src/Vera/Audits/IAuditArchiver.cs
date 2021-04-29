@@ -66,33 +66,40 @@ namespace Vera.Audits
 
         private async Task FillArchive(Account account, Audit audit, ZipArchive archive)
         {
-            var sequence = 1;
-            var ranges = GetDateRanges(audit).ToList();
-
-            var criteria = new AuditCriteria
+            try
             {
-                AccountId = account.Id,
-                SupplierSystemId = audit.SupplierSystemId,
-            };
+                var sequence = 1;
+                var ranges = GetDateRanges(audit).ToList();
 
-            var context = new AuditContext
+                var criteria = new AuditCriteria
+                {
+                    AccountId = account.Id,
+                    SupplierSystemId = audit.SupplierSystemId,
+                };
+
+                var context = new AuditContext
+                {
+                    Account = account
+                };
+
+                foreach (var (start, end) in ranges)
+                {
+                    criteria.StartDate = start;
+                    criteria.EndDate = end;
+
+                    context.Invoices = await _invoiceStore.List(criteria);
+
+                    // TODO(kevin): fetch print trail?
+
+                    var entryName = await _auditWriter.ResolveName(criteria, sequence++, ranges.Count);
+
+                    await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();
+                    await _auditWriter.Write(context, criteria, stream);
+                }
+            }
+            catch (Exception exception)
             {
-                Account = account
-            };
-
-            foreach (var (start, end) in ranges)
-            {
-                criteria.StartDate = start;
-                criteria.EndDate = end;
-
-                context.Invoices = await _invoiceStore.List(criteria);
-
-                // TODO(kevin): fetch print trail?
-
-                var entryName = await _auditWriter.ResolveName(criteria, sequence++, ranges.Count);
-
-                await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();
-                await _auditWriter.Write(context, criteria, stream);
+                throw;
             }
         }
 

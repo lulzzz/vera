@@ -178,8 +178,14 @@ namespace Vera.Norway
 
             // Physical locations (the shops)
             var invoicesBySupplier = context.Invoices
-              .Where(i => i.Supplier.SystemId == criteria.SupplierSystemId);
-            company.Location.Add(CreateLocation(context, invoicesBySupplier));
+              .Where(i => i.Supplier.SystemId == criteria.SupplierSystemId).ToList();
+
+            var location = CreateLocation(context, invoicesBySupplier);
+
+            if (location != null)
+            {
+                company.Location.Add(location);
+            }
 
             //continue HEREs
             company.Basics.AddRange(CreateBasics(context));
@@ -521,10 +527,15 @@ namespace Vera.Norway
         //    return cashRegisterEvent;
         //}
 
-        private AuditfileCompanyLocation CreateLocation(AuditContext context, IEnumerable<Invoice> invoice)
+        private AuditfileCompanyLocation CreateLocation(AuditContext context, ICollection<Invoice> invoices)
         {
+            if (!invoices.Any())
+            {
+                return null;
+            }
+
             // Grouped by supplier so this is legit to pick the correct supplier for the group of invoices
-            var supplier = invoice.First().Supplier;
+            var supplier = invoices.First().Supplier;
 
             var location = new AuditfileCompanyLocation
             {
@@ -541,7 +552,7 @@ namespace Vera.Norway
                 }
             };
 
-            var invoicesGroupedByCashRegister = invoice.ToLookup(i => i.RegisterId);
+            var invoicesGroupedByCashRegister = invoices.ToLookup(i => i.RegisterId);
             //TODO events are missing
             //var eventsGroupedByCashRegister = audit.MasterFiles.Events.ToLookup(e => e.TerminalID);
 
