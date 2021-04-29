@@ -34,7 +34,8 @@ namespace Vera.Azure.Extensions
         {
             using var iterator = queryable.ToFeedIterator();
             var response = await iterator.ReadNextAsync();
-            return response.Select(x => x.Value).FirstOrDefault();
+
+            return response.Any() ? response.Select(x => x.Value).FirstOrDefault() : null;
         }
 
         private static async Task<ICollection<T>> ToListAsync<T, TK>(this IQueryable<TK> queryable)
@@ -47,7 +48,11 @@ namespace Vera.Azure.Extensions
             while (iterator.HasMoreResults)
             {
                 var pagedResults = await iterator.ReadNextAsync();
-                all.AddRange(pagedResults.Select(item => item.Value));
+
+                if (pagedResults.Any())
+                {
+                    all.AddRange(pagedResults.Select(item => item.Value));
+                }
             }
 
             return all;
