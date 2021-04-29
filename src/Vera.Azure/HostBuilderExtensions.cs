@@ -132,8 +132,8 @@ namespace Vera.Azure
                 var cosmosClient = new CosmosClientBuilder(cosmosOptions.ConnectionString)
                     .WithContentResponseOnWrite(false)
                     .WithConnectionModeDirect()
-                    .WithRequestTimeout(TimeSpan.FromSeconds(1))
-                    .WithThrottlingRetryOptions(TimeSpan.FromSeconds(1), 5)
+                    .WithRequestTimeout(TimeSpan.FromSeconds(5))
+                    .WithThrottlingRetryOptions(TimeSpan.FromSeconds(5), 5)
                     .WithApplicationName("vera")
                     .Build();
 
