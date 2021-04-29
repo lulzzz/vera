@@ -133,7 +133,7 @@ namespace Vera.Azure
                     .WithContentResponseOnWrite(false)
                     .WithConnectionModeDirect()
                     .WithRequestTimeout(TimeSpan.FromSeconds(5))
-                    .WithThrottlingRetryOptions(TimeSpan.FromSeconds(5), 5)
+                    .WithThrottlingRetryOptions(TimeSpan.FromSeconds(6), 10)
                     .WithApplicationName("vera")
                     .Build();
 
