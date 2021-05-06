@@ -1,9 +1,18 @@
 using System;
 using System.Linq;
 using Google.Protobuf.WellKnownTypes;
+using Vera.Grpc;
 using Vera.Models;
+using CreditReference = Vera.Grpc.CreditReference;
+using Customer = Vera.Grpc.Customer;
+using Employee = Vera.Grpc.Employee;
+using Invoice = Vera.Grpc.Invoice;
+using InvoiceLine = Vera.Grpc.InvoiceLine;
+using Payment = Vera.Grpc.Payment;
+using Product = Vera.Grpc.Product;
+using Settlement = Vera.Grpc.Settlement;
 
-namespace Vera.Grpc.Models
+namespace Vera.Host.Mapping
 {
     public static class InvoiceExtensions
     {
@@ -163,12 +172,12 @@ namespace Vera.Grpc.Models
         {
             var category = p.Category switch
             {
-                Shared.PaymentCategory.Other => PaymentCategory.Other,
-                Shared.PaymentCategory.Debit => PaymentCategory.Debit,
-                Shared.PaymentCategory.Credit => PaymentCategory.Credit,
-                Shared.PaymentCategory.Cash => PaymentCategory.Cash,
-                Shared.PaymentCategory.Voucher => PaymentCategory.Voucher,
-                Shared.PaymentCategory.Online => PaymentCategory.Online,
+                Grpc.Shared.PaymentCategory.Other => PaymentCategory.Other,
+                Grpc.Shared.PaymentCategory.Debit => PaymentCategory.Debit,
+                Grpc.Shared.PaymentCategory.Credit => PaymentCategory.Credit,
+                Grpc.Shared.PaymentCategory.Cash => PaymentCategory.Cash,
+                Grpc.Shared.PaymentCategory.Voucher => PaymentCategory.Voucher,
+                Grpc.Shared.PaymentCategory.Online => PaymentCategory.Online,
                 _ => throw new ArgumentOutOfRangeException(nameof(p.Category), p.Category, null)
             };
 
@@ -201,11 +210,11 @@ namespace Vera.Grpc.Models
                     Rate = line.Tax.Rate,
                     Category = line.Tax.Category switch
                     {
-                        Shared.TaxCategory.High => TaxesCategory.High,
-                        Shared.TaxCategory.Low => TaxesCategory.Low,
-                        Shared.TaxCategory.Zero => TaxesCategory.Zero,
-                        Shared.TaxCategory.Exempt => TaxesCategory.Exempt,
-                        Shared.TaxCategory.Intermediate => TaxesCategory.Intermediate,
+                        Grpc.Shared.TaxCategory.High => TaxesCategory.High,
+                        Grpc.Shared.TaxCategory.Low => TaxesCategory.Low,
+                        Grpc.Shared.TaxCategory.Zero => TaxesCategory.Zero,
+                        Grpc.Shared.TaxCategory.Exempt => TaxesCategory.Exempt,
+                        Grpc.Shared.TaxCategory.Intermediate => TaxesCategory.Intermediate,
                         _ => throw new ArgumentOutOfRangeException(nameof(line.Tax.Category), line.Tax.Category,
                             "unknown tax category")
                     },

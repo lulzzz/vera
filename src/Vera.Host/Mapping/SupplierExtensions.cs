@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace Vera.Grpc.Models
+﻿namespace Vera.Host.Mapping
 {
     public static class SupplierExtensions
     {
-        public static Shared.Supplier Pack(this Vera.Models.Supplier supplier)
+        public static Grpc.Shared.Supplier Pack(this Vera.Models.Supplier supplier)
         {
-            var result = new Shared.Supplier
+            var result = new Grpc.Shared.Supplier
             {
                 Name = supplier.Name,
                 RegistrationNumber = supplier.RegistrationNumber ?? string.Empty,
@@ -18,7 +16,7 @@ namespace Vera.Grpc.Models
             return result;
         }
 
-        public static Vera.Models.Supplier Unpack(this Shared.Supplier supplier)
+        public static Vera.Models.Supplier Unpack(this Grpc.Shared.Supplier supplier)
         {
             var result = new Vera.Models.Supplier
             {

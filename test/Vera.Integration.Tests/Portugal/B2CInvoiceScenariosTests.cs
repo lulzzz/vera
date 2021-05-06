@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Vera.Extensions;
 using Vera.Grpc;
-using Vera.Grpc.Models;
+using Vera.Host.Mapping;
 using Vera.Host.Security;
 using Vera.Invoices;
 using Vera.Models;

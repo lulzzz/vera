@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Vera.Grpc;
-using Vera.Grpc.Models;
+using Vera.Host.Mapping;
 using Vera.Host.Security;
 using Vera.Models;
 using Vera.Tests.Scenario;

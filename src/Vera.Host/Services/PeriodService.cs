@@ -6,12 +6,12 @@ using Microsoft.AspNetCore.Authorization;
 using Vera.Concurrency;
 using Vera.Dependencies;
 using Vera.Grpc;
-using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
 using Vera.Stores;
 using Vera.Host.Security;
 using System.Linq;
 using Vera.Bootstrap;
+using Vera.Host.Mapping;
 
 namespace Vera.Host.Services
 {

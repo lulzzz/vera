@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Bogus;
 using Vera.Grpc;
-using Vera.Grpc.Models;
+using Vera.Host.Mapping;
 using Vera.Models;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;

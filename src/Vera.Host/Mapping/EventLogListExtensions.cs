@@ -1,7 +1,8 @@
 using System;
 using Vera.EventLogs;
+using Vera.Grpc;
 
-namespace Vera.Grpc.Models
+namespace Vera.Host.Mapping
 {
     public static class EventLogListExtensions
     {

@@ -1,7 +1,7 @@
 using System;
-using Vera.Models;
+using EventLogType = Vera.Grpc.EventLogType;
 
-namespace Vera.Grpc.Models
+namespace Vera.Host.Mapping
 {
     public static class EventLogTypeExtensions
     {

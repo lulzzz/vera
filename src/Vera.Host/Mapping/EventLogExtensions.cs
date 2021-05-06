@@ -1,10 +1,10 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Google.Protobuf.WellKnownTypes;
-using Vera.Models;
+using Vera.Grpc;
+using EventLog = Vera.Grpc.EventLog;
 
-namespace Vera.Grpc.Models
+namespace Vera.Host.Mapping
 {
     public static class EventLogExtensions
     {

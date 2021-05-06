@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Vera.Grpc;
-using Vera.Grpc.Models;
+using Vera.Host.Mapping;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Tests.Scenario;

@@ -1,4 +1,6 @@
-﻿namespace Vera.Grpc.Models
+﻿using Vera.Grpc;
+
+namespace Vera.Host.Mapping
 {
     public static class ReportExtensions
     {

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Grpc;
-using Vera.Grpc.Models;
+using Vera.Host.Mapping;
 using Vera.Host.Security;
 using Vera.Models;
 using Vera.Stores;

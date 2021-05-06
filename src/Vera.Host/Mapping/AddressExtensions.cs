@@ -1,6 +1,6 @@
 using Vera.Grpc.Shared;
 
-namespace Vera.Grpc.Models
+namespace Vera.Host.Mapping
 {
     public static class AddressExtensions
     {

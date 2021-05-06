@@ -1,10 +1,10 @@
 using System;
 
-namespace Vera.Grpc.Models
+namespace Vera.Host.Mapping
 {
     public static class RegisterExtensions
     {
-        public static Vera.Models.Register Unpack(this Shared.Register register)
+        public static Vera.Models.Register Unpack(this Grpc.Shared.Register register)
         {
             if (register == null) return null;
 

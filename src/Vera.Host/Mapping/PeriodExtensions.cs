@@ -1,7 +1,8 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using System;
+﻿using System;
+using Google.Protobuf.WellKnownTypes;
+using Vera.Grpc;
 
-namespace Vera.Grpc.Models
+namespace Vera.Host.Mapping
 {
     public static class PeriodExtensions
     {

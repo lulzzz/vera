@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Vera.Grpc;
-using Vera.Grpc.Models;
+using Vera.Host.Mapping;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
 using Xunit;

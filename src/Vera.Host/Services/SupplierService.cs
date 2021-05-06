@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 using Vera.Grpc;
-using Vera.Grpc.Models;
 using Vera.Grpc.Shared;
+using Vera.Host.Mapping;
 using Vera.Host.Security;
 using Vera.Stores;
 
