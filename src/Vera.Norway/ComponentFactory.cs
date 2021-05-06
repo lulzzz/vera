@@ -4,6 +4,7 @@ using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Models;
+using Vera.Reports;
 using Vera.Signing;
 using Vera.Thermal;
 
@@ -48,6 +49,11 @@ namespace Vera.Norway
         public IThermalReceiptGenerator CreateThermalReceiptGenerator()
         {
             return new ThermalReceiptGenerator();
+        }
+
+        public IReportReceiptGenerator CreateThermalReportGenerator()
+        {
+            return new ReportReceiptGenerator();
         }
 
         public IAuditWriter CreateAuditWriter()

@@ -13,6 +13,8 @@ namespace Vera.Dependencies
     {
         IConfigurationValidator CreateConfigurationValidator();
         IThermalReceiptGenerator CreateThermalReceiptGenerator();
+        IReportReceiptGenerator CreateThermalReportGenerator();
+
         IAuditWriter CreateAuditWriter();
     }
 }

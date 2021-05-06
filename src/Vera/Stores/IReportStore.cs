@@ -7,7 +7,7 @@ namespace Vera.Stores
     public interface IReportStore
     {
         Task Store(RegisterReport registerReport);
-        Task<RegisterReport> Get(Guid registerReportId);
+        Task<RegisterReport> GetByNumber(Guid accountId, string number);
         Task Delete(RegisterReport registerReport);
     }
 }

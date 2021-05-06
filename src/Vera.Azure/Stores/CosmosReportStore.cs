@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Cosmos;
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Vera.Models;
@@ -25,16 +26,21 @@ namespace Vera.Azure.Stores
             await _container.CreateItemAsync(document, new PartitionKey(document.PartitionKey));
         }
 
-        public async Task<RegisterReport> Get(Guid reportId)
+        public async Task<RegisterReport> GetByNumber(Guid accountId, string number)
         {
             try
             {
-                var document = await _container.ReadItemAsync<TypedDocument<RegisterReport>>(
-                    reportId.ToString(),
-                    new PartitionKey(reportId.ToString())
-                );
+                var definition = new QueryDefinition(@"select value c[""Value""] from c");
 
-                return document.Resource.Value;
+                using var iterator = _container.GetItemQueryIterator<RegisterReport>(definition,
+                    requestOptions: new QueryRequestOptions
+                    {
+                        PartitionKey = new PartitionKey(PartitionKeyByNumber(accountId, number))
+                    });
+
+                var response = await iterator.ReadNextAsync();
+
+                return response.FirstOrDefault();
             }
             catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -46,20 +52,23 @@ namespace Vera.Azure.Stores
         {
             var document = ToDocument(registerReport);
 
-            return _container.DeleteItemAsync<TypedDocument<RegisterReport>>(
+            return _container.DeleteItemStreamAsync(
                 document.Id.ToString(),
-                new PartitionKey(document.PartitionKey));
+                new PartitionKey(PartitionKeyByNumber(registerReport.Account.Id, registerReport.Number)));
         }
 
         private static TypedDocument<RegisterReport> ToDocument(RegisterReport report)
         {
-            return new(
+            var accountId = report.Account.Id;
+            return new TypedDocument<RegisterReport>(
                 s => s.Id,
-                s => s.Id.ToString(),
+                s => PartitionKeyByNumber(accountId, s.Number),
                 report,
                 DocumentType
             );
         }
 
+        private static string PartitionKeyByNumber(Guid accountId,
+            string reportNumber) => $"{accountId}#N#{reportNumber}";
     }
 }

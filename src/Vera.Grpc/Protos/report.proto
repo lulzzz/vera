@@ -7,7 +7,8 @@ import "google/protobuf/timestamp.proto";
 package vera.grpc;
 
 service ReportService {
-	rpc GenerateDailyXReport(GenerateDailyXReportRequest) returns(RegisterReport);
+    rpc GenerateDailyXReport(GenerateDailyXReportRequest) returns(RegisterReport);
+    rpc RenderReport(RenderReportRequest) returns (.vera.grpc.RenderReportReply);
 }
 
 message GenerateDailyXReportRequest{
@@ -86,4 +87,34 @@ message TotalsReport {
     vera.grpc.shared.DecimalValue gross = 2;
     vera.grpc.shared.DecimalValue return = 3;
     vera.grpc.shared.DecimalValue net = 4;
+}
+
+
+message RenderReportRequest {
+	// Number of the report to generate the data for
+	string reportNumber = 1;
+
+	// Type specifies the output type that the client is requesting
+	ReportOutputType type = 2;
+}
+
+message RenderReportReply {
+	string token = 1;
+
+	// Type of the output as requested in the RenderReportRequest
+	ReportOutputType type = 2;
+
+	// Content of the report in the requested type
+	bytes content = 3;
+}
+
+enum ReportOutputType {
+	// Output the report as a tree of commands that can be converted to the actual representation of the receipt
+	JSON = 0;
+
+	// Output as raw text, useful for debugging
+	TEXT = 1;
+
+	// Output as bytes that can directly be send to an Epson thermal printer
+	ESC = 2;
 }

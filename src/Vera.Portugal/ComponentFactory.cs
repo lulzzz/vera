@@ -6,6 +6,7 @@ using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Audits;
 using Vera.Portugal.Invoices;
+using Vera.Reports;
 using Vera.Signing;
 using Vera.Thermal;
 
@@ -55,6 +56,11 @@ namespace Vera.Portugal
                 _configuration.CertificateName,
                 _configuration.CertificateNumber
             );
+        }
+
+        public IReportReceiptGenerator CreateThermalReportGenerator()
+        {
+            throw new System.NotImplementedException();
         }
 
         public IAuditWriter CreateAuditWriter()
