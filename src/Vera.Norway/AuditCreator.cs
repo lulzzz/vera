@@ -285,8 +285,8 @@ namespace Vera.Norway
                 TransID = invoice.Number,
                 TransType = basic.BasicID,
 
-                TransAmntIn = invoice.Totals.Gross.RoundAwayFromZero(),
-                TransAmntEx = invoice.Totals.Net.RoundAwayFromZero(),
+                TransAmntIn = invoice.Totals.Gross.RoundAwayFromZero().Absolute(),
+                TransAmntEx = invoice.Totals.Net.RoundAwayFromZero().Absolute(),
 
                 AmntTp = AmountToCreditType(invoice.Totals.Net),
 
@@ -312,7 +312,7 @@ namespace Vera.Norway
             {
                 transaction.Discount.AddRange(invoice.Settlements.Select(s => new AuditfileCompanyLocationCashregisterCashtransactionDiscount
                 {
-                    DscAmnt = Math.Abs(s.Amount.RoundAwayFromZero()),
+                    DscAmnt = s.Amount.RoundAwayFromZero().Absolute(),
                     DscTp = s.SystemId
                 }));
             }
@@ -369,8 +369,8 @@ namespace Vera.Norway
 
                 Qnt = line.Quantity,
 
-                LineAmntIn = line.Gross.RoundAwayFromZero(),
-                LineAmntEx = line.Net.RoundAwayFromZero(),
+                LineAmntIn = line.Gross.RoundAwayFromZero().Absolute(),
+                LineAmntEx = line.Net.RoundAwayFromZero().Absolute(),
 
                 AmntTp = AmountToCreditType(line.Net),
 
@@ -381,8 +381,8 @@ namespace Vera.Norway
                 {
                     VatCode = vat.Code,
                     VatPerc = (vat.Rate * 100 - 100),
-                    VatAmnt = (line.Net / vat.Rate).RoundAwayFromZero(),
-                    VatBasAmnt = (line.UnitPrice / vat.Rate).RoundAwayFromZero(),
+                    VatAmnt = (line.Net / vat.Rate).RoundAwayFromZero().Absolute(),
+                    VatBasAmnt = (line.UnitPrice / vat.Rate).RoundAwayFromZero().Absolute(),
                     VatAmntTp = AmountToCreditType((line.Net / vat.Rate))
                 }
             };

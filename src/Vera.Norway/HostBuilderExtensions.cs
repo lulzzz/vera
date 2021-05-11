@@ -10,7 +10,7 @@ namespace Vera.Norway
         {
             builder.ConfigureServices((context, collection) =>
             {
-                collection.AddSingleton<IAccountComponentFactory>(_ => new AccountComponentFactory());
+                collection.AddSingleton<IAccountComponentFactory, AccountComponentFactory>();
             });
 
             return builder;

@@ -23,17 +23,17 @@ namespace Vera.Portugal.Invoices
         {
             const char separator = ';';
 
-            var invoiceDate = package.Timestamp.ToString("yyyy-MM-dd");
+            var date = package.Timestamp.ToString("yyyy-MM-dd");
             var systemEntryDate = package.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss");
-            var grossTotal = Math.Abs(package.Net).ToString("0.00", CultureInfo.InvariantCulture);
-            var invoiceNo = package.Number;
+            var grossTotal = Math.Abs(package.Gross).ToString("0.00", CultureInfo.InvariantCulture);
+            var number = package.Number;
 
             var signatureBuilder = new StringBuilder()
-                .Append(invoiceDate)
+                .Append(date)
                 .Append(separator)
                 .Append(systemEntryDate)
                 .Append(separator)
-                .Append(invoiceNo)
+                .Append(number)
                 .Append(separator)
                 .Append(grossTotal)
                 .Append(separator);

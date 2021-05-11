@@ -1,6 +1,7 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using System;
 using System.Threading.Tasks;
+using Vera.Dependencies;
 using Vera.Grpc;
 
 namespace Vera.Integration.Tests
@@ -33,14 +34,15 @@ namespace Vera.Integration.Tests
             return reply;
         }
 
-        public static async Task<GetAuditReply> GenerateAuditFile(this SetupClient client)
+        public static async Task<GetAuditReply> GenerateAuditFile(this SetupClient client, DateTime? startDate = null)
         {
+            var dateProvider = new RealLifeDateProvider();
             var createAuditRequest = new CreateAuditRequest
             {
                 AccountId = client.AccountId,
                 SupplierSystemId = client.SupplierSystemId,
-                StartDate = DateTime.UtcNow.AddDays(-1).ToTimestamp(),
-                EndDate = DateTime.UtcNow.ToTimestamp()
+                StartDate = startDate != null ? startDate.Value.ToTimestamp() : dateProvider.Now.AddDays(-1).ToTimestamp(),
+                EndDate = dateProvider.Now.ToTimestamp()
             };
             var createAuditReply = await client.Audit.CreateAsync(createAuditRequest, client.AuthorizedMetadata);
             var getAuditReply = await client.GetAuditReplyAsync(createAuditReply.AuditId);

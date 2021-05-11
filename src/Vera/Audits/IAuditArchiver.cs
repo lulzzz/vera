@@ -25,8 +25,7 @@ namespace Vera.Audits
             IInvoiceStore invoiceStore,
             IBlobStore blobStore,
             IAuditStore auditStore,
-            IAuditWriter auditWriter
-        )
+            IAuditWriter auditWriter)
         {
             _invoiceStore = invoiceStore;
             _blobStore = blobStore;

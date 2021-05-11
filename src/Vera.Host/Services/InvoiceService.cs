@@ -18,32 +18,30 @@ namespace Vera.Host.Services
     {
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
-        private readonly IInvoiceHandlerFactory _invoiceHandlerFactory;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
         public InvoiceService(
             IAccountStore accountStore,
             IInvoiceStore invoiceStore,
-            IInvoiceHandlerFactory invoiceHandlerFactory,
             IAccountComponentFactoryCollection accountComponentFactoryCollection)
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
-            _invoiceHandlerFactory = invoiceHandlerFactory;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
         public override async Task<CreateInvoiceReply> Create(CreateInvoiceRequest request, ServerCallContext context)
         {
+            var invoice = request.Invoice.Unpack();
             var account = await context.ResolveAccount(_accountStore);
 
             // TODO: validate invoice, very, very, very strict
             // TODO(kevin): NF525 - requires signature of original invoice on the returned line
             
-            var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
-            var invoice = request.Invoice.Unpack();
+            var componentFactory = _accountComponentFactoryCollection.GetComponentFactory(account);
+            var invoiceHandlerFactory = _accountComponentFactoryCollection.GetInvoiceHandlerFactory(account);
 
-            var handler = _invoiceHandlerFactory.Create(factory);
+            var handler = invoiceHandlerFactory.Create(componentFactory);
             await handler.Handle(invoice);
 
             return new CreateInvoiceReply

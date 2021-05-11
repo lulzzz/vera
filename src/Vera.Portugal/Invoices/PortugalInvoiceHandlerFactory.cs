@@ -1,18 +1,15 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Vera.Concurrency;
+using Vera.Dependencies;
 using Vera.Dependencies.Handlers;
+using Vera.Invoices;
 using Vera.Models;
+using Vera.Portugal.WorkingDocuments;
 using Vera.Stores;
 
-namespace Vera.Invoices
+namespace Vera.Portugal.Invoices
 {
-    public interface IInvoiceHandlerFactory
-    {
-        IHandlerChain<Invoice> Create(IInvoiceComponentFactory factory);
-        string Name { get; }
-    }
-
-    public sealed class InvoiceHandlerFactory : IInvoiceHandlerFactory
+    public sealed class PortugalInvoiceHandlerFactory : IInvoiceHandlerFactory
     {
         private readonly ILoggerFactory _loggerFactory;
         private readonly IInvoiceStore _invoiceStore;
@@ -20,15 +17,16 @@ namespace Vera.Invoices
         private readonly ILocker _locker;
         private readonly ISupplierStore _supplierStore;
         private readonly IPeriodStore _periodStore;
+        private readonly IWorkingDocumentStore _wdStore;
 
-        public InvoiceHandlerFactory(
+        public PortugalInvoiceHandlerFactory(
             ILoggerFactory loggerFactory,
             IInvoiceStore invoiceStore,
             IChainStore chainStore,
             ILocker locker,
-            ISupplierStore supplierStore, 
-            IPeriodStore periodStore
-        )
+            ISupplierStore supplierStore,
+            IPeriodStore periodStore,
+            IWorkingDocumentStore wdStore)
         {
             _loggerFactory = loggerFactory;
             _invoiceStore = invoiceStore;
@@ -36,29 +34,37 @@ namespace Vera.Invoices
             _locker = locker;
             _supplierStore = supplierStore;
             _periodStore = periodStore;
+            _wdStore = wdStore;
         }
 
         public IHandlerChain<Invoice> Create(IInvoiceComponentFactory factory)
         {
+            var signer = factory.CreatePackageSigner();
+            var bucketGenerator = factory.CreateInvoiceBucketGenerator();
             var head = new InvoiceSupplierHandler(_supplierStore);
-         
+
+            var wdHandler = new WorkingDocumentsHandler(_wdStore, _chainStore,
+                    signer, _loggerFactory.CreateLogger<WorkingDocumentsHandler>());
+
             var persistenceHandler = new InvoicePersistenceHandler(
                 _loggerFactory.CreateLogger<InvoicePersistenceHandler>(),
                 _chainStore,
                 _invoiceStore,
-                factory.CreatePackageSigner(),
+                signer,
                 factory.CreateInvoiceNumberGenerator(),
-                factory.CreateInvoiceBucketGenerator()
+                bucketGenerator
             );
-            
+
+            wdHandler.WithNext(persistenceHandler);
+
             head.WithNext(new InvoiceOpenPeriodHandler(_periodStore))
                 .WithNext(new InvoiceTotalsHandler())
                 .WithNext(new InvoiceValidationHandler(factory.CreateInvoiceValidator()))
-                .WithNext(new LockingHandler<Invoice>(persistenceHandler, _locker, factory.CreateInvoiceBucketGenerator()));
+                .WithNext(new LockingHandler<Invoice>(wdHandler, _locker, bucketGenerator));
 
             return head;
         }
 
-        public string Name => "default";
+        public string Name => "PT";
     }
 }

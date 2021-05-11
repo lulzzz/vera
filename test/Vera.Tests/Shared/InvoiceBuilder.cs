@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Bogus;
-using Microsoft.Extensions.Azure;
 using Vera.Invoices;
 using Vera.Models;
 
@@ -39,6 +37,28 @@ namespace Vera.Tests.Shared
                 SystemId = _faker.Random.Number(1, int.MaxValue).ToString(),
                 FirstName = _faker.Person.FirstName,
                 LastName = _faker.Person.LastName
+            };
+
+            return this;
+        }
+
+        public InvoiceBuilder WithCustomer()
+        {
+            _invoice.Customer = new Customer
+            {
+                FirstName = _faker.Name.FirstName(),
+                LastName = _faker.Name.LastName(),
+                Email = _faker.Person.Email,
+                SystemId = _faker.Random.AlphaNumeric(10),
+                BankAccount = new BankAccount
+                {
+                    Number = _faker.Finance.Iban(),
+                },
+                BillingAddress = CreateAddress(),
+                ShippingAddress = CreateAddress(),
+                CompanyName = _faker.Company.CompanyName(),
+                RegistrationNumber = _faker.Random.AlphaNumeric(10),
+                TaxRegistrationNumber = _faker.Random.AlphaNumeric(10)
             };
 
             return this;

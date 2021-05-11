@@ -114,8 +114,11 @@ namespace Vera.Host.Mapping
                 Description = line.Description,
                 Product = line.Product == null ? null : new Product
                 {
+                    // map the product type
                     Code = line.Product.Code,
-                    Description = line.Product.Description
+                    Description = line.Product.Description,
+                    Type = line.Product.Type.Map(),
+                    SystemId = line.Product.SystemId
                 },
                 Quantity = line.Quantity,
                 Tax = line.Taxes.Pack(),
@@ -232,7 +235,15 @@ namespace Vera.Host.Mapping
                     SystemId = product.SystemId,
                     Code = product.Code,
                     Barcode = product.Barcode,
-                    Description = product.Description
+                    Description = product.Description,
+                    Type = product.Type switch
+                    {
+                        Grpc.ProductType.ProductType.GiftCard => ProductType.GiftCard,
+                        Grpc.ProductType.ProductType.Goods => ProductType.Goods,
+                        Grpc.ProductType.ProductType.Other => ProductType.Other,
+                        _ => throw new ArgumentOutOfRangeException(nameof(product.Type), product.Type,
+                            "unknown product type")
+                    }
                 };
             }
 

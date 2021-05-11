@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Dependencies;
+using Vera.Invoices;
+using Vera.Portugal.Invoices;
 
 namespace Vera.Portugal
 {
@@ -10,7 +12,8 @@ namespace Vera.Portugal
         {
             builder.ConfigureServices((context, collection) =>
             {
-                collection.AddSingleton<IAccountComponentFactory>(_ => new AccountComponentFactory());
+                collection.AddSingleton<IAccountComponentFactory, AccountComponentFactory>();
+                collection.AddTransient<IInvoiceHandlerFactory, PortugalInvoiceHandlerFactory>();
             });
 
             return builder;

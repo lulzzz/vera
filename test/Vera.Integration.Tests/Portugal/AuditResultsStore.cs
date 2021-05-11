@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Vera.Grpc;
+using Vera.Models.Portugal;
 using Vera.Portugal.Models;
 using Invoice = Vera.Models.Invoice;
 
@@ -60,6 +62,39 @@ namespace Vera.Integration.Tests.Portugal
                     }
                 }
             }
+        }
+
+        public async Task<(IEnumerable<Invoice> invoices, IEnumerable<WorkingDocument> workingDocuments)> LoadInvoicesAndWorkingDocumentsFromAuditAsync(string accountId, string name)
+        {
+            var auditFiles = await GetAuditFileAsync(accountId, name);
+            var invoices = new List<Invoice>();
+            var workingDocuments = new List<WorkingDocument>();
+            
+            foreach (var file in auditFiles)
+            {
+                invoices.AddRange(file.SourceDocuments.SalesInvoices.Invoice.Select(inv => new Invoice
+                {
+                    Number = inv.InvoiceNo,
+                }));
+                workingDocuments.AddRange(file.SourceDocuments.WorkingDocuments.WorkDocument.Select(wd => new WorkingDocument
+                {
+                    Number = wd.DocumentNumber,
+                    Lines = wd.Line.Select(l => new Models.InvoiceLine
+                    {
+                        Description = l.Description,
+                        Quantity = Convert.ToInt32(l.Quantity),
+                        UnitPrice = l.UnitPrice,
+                        Gross = l.Item,
+                        Product = new Models.Product
+                        {
+                            Code = l.ProductCode,
+                            Description = l.ProductDescription,
+                        }
+                    }).ToArray()
+                }));
+            }
+
+            return (invoices, workingDocuments);
         }
 
         public async Task<IEnumerable<Models.Product>> LoadProductsFromAuditAsync(string accountId, string name)

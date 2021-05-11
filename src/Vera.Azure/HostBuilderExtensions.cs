@@ -169,6 +169,9 @@ namespace Vera.Azure
                 collection.AddSingleton<IReportStore>(_ => new CosmosReportStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Documents)));
 
+                collection.AddSingleton<IWorkingDocumentStore>(_ => new CosmosWorkingDocumentStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Documents)));
+
                 collection.AddSingleton<IEventLogStore>(_ => new CosmosEventLogStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.EventLogs)));
             });

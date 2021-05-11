@@ -8,6 +8,7 @@ using Vera.Portugal.Audits;
 using Vera.Portugal.Invoices;
 using Vera.Reports;
 using Vera.Signing;
+using Vera.Stores;
 using Vera.Thermal;
 
 namespace Vera.Portugal
@@ -16,11 +17,13 @@ namespace Vera.Portugal
     {
         private readonly RSA _rsa;
         private readonly Configuration _configuration;
+        private readonly IWorkingDocumentStore _wdStore;
 
-        public ComponentFactory(RSA rsa, Configuration configuration)
+        public ComponentFactory(RSA rsa, Configuration configuration, IWorkingDocumentStore wdStore)
         {
             _rsa = rsa;
             _configuration = configuration;
+            _wdStore = wdStore;
         }
 
         public IConfigurationValidator CreateConfigurationValidator()
@@ -68,7 +71,8 @@ namespace Vera.Portugal
             return new AuditWriter(
                 _configuration.ProductCompanyTaxId,
                 _configuration.CertificateName,
-                _configuration.CertificateNumber
+                _configuration.CertificateNumber,
+                _wdStore
             );
         }
     }

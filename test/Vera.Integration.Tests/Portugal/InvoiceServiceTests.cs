@@ -1,8 +1,11 @@
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Bogus;
+using Vera.Dependencies;
 using Vera.Grpc;
 using Vera.Host.Mapping;
+using Vera.Host.Security;
 using Vera.Models;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
@@ -13,10 +16,12 @@ namespace Vera.Integration.Tests.Portugal
     public class InvoiceServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
         private readonly Setup _setup;
+        private readonly ApiWebApplicationFactory _fixture;
 
         public InvoiceServiceTests(ApiWebApplicationFactory fixture)
         {
             _setup = fixture.CreateSetup();
+            _fixture = fixture;
         }
 
         [Fact]
@@ -199,6 +204,98 @@ namespace Vera.Integration.Tests.Portugal
             var getCurrentPeriodReply = await client.Period.GetCurrentPeriodAsync(getPeriodRequest, client.AuthorizedMetadata);
             
             Assert.Equal(getCurrentPeriodReply.Id, getInvoiceReply.PeriodId);
+        }
+
+        [Fact]
+        public async Task Should_create_invoice_with_working_document()
+        {
+            var dateProvider = new RealLifeDateProvider();
+            var startDate = dateProvider.Now;
+            var client = await _setup.CreateClient(Constants.Account);
+            var httpClient = _fixture.CreateClient();
+
+            httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue(MetadataKeys.Authorization));
+
+            var auditResultsStore = new AuditResultsStore(httpClient);
+
+            var product = new Models.Product
+            {
+                Code = "Gift",
+                Type = ProductType.GiftCard,
+                SystemId = "ean",
+                Description = "desc"
+            };
+
+            await client.OpenPeriod();
+            var openRegisterReply = await client.OpenRegister(100m);
+
+            var builder = new InvoiceBuilder();
+            var invoice = builder
+                .Reset()
+                .WithAccount(Guid.Parse(client.AccountId))
+                .WithRegister("1.1")
+                .WithEmployee()
+                .WithCustomer()
+                .WithSupplier(client.SupplierSystemId)
+                .WithProductLine(1, 1.99m, 1.23m, TaxesCategory.High, product)
+                .WithPayment(PaymentCategory.Cash)
+                .WithSignature(new Signature
+                {
+                    Input = "test",
+                    Output = Encoding.ASCII.GetBytes("test"),
+                    Version = 1
+                })
+                .Build();
+
+            invoice.RegisterId = openRegisterReply.Id;
+
+            var createInvoiceRequest = new CreateInvoiceRequest
+            {
+                Invoice = invoice.Pack()
+            };
+
+            await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+
+            var invoice2 = builder
+               .Reset()
+               .WithAccount(Guid.Parse(client.AccountId))
+               .WithRegister("1.1")
+               .WithEmployee()
+               .WithCustomer()
+               .WithSupplier(client.SupplierSystemId)
+               .WithProductLine(1, 1.99m, 1.23m, TaxesCategory.High, ProductFactory.CreateRandomProduct())
+               .WithPayment(PaymentCategory.Cash)
+               .WithSignature(new Signature
+               {
+                   Input = "test",
+                   Output = Encoding.ASCII.GetBytes("test"),
+                   Version = 1
+               })
+               .Build();
+
+            invoice2.RegisterId = openRegisterReply.Id;
+
+            var createInvoiceRequest2 = new CreateInvoiceRequest
+            {
+                Invoice = invoice2.Pack()
+            };
+
+            var createInvoiceReply2 = await client.Invoice.CreateAsync(createInvoiceRequest2, client.AuthorizedMetadata);
+
+
+            // should exists 2 invoices and 1 working document
+            var getAuditReply = await client.GenerateAuditFile(startDate);
+            var (invoices, workingDocuments) = await auditResultsStore.LoadInvoicesAndWorkingDocumentsFromAuditAsync(client.AccountId, getAuditReply.Location);
+
+            Assert.True(invoices.Count() == 2);
+            Assert.True(workingDocuments.Count() == 1);
+            Assert.Contains(invoices, i => i.Number == createInvoiceReply2.Number);
+
+            var wdGiftCardLine = workingDocuments.First().Lines.First();
+            var invoiceGiftCardLine = invoice.Lines.First();
+
+            Assert.True(wdGiftCardLine.Gross == invoiceGiftCardLine.Gross);
+            Assert.True(wdGiftCardLine.Product.Code == invoiceGiftCardLine.Product.Code);
         }
     }
 }

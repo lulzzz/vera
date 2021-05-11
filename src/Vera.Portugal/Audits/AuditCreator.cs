@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Vera.Audits;
 using Vera.Extensions;
 using Vera.Models;
 using Vera.Portugal.Invoices;
 using Vera.Portugal.Models;
+using Vera.Stores;
 using Invoice = Vera.Models.Invoice;
 using ProductType = Vera.Portugal.Models.ProductType;
 
@@ -25,14 +27,18 @@ namespace Vera.Portugal.Audits
         private readonly string _certificateName;
         private readonly string _certificateNumber;
 
-        public AuditCreator(string productCompanyTaxId, string certificateName, string certificateNumber)
+        private readonly IWorkingDocumentStore _wdStore;
+
+        public AuditCreator(string productCompanyTaxId, string certificateName, string certificateNumber, 
+            IWorkingDocumentStore wdStore)
         {
             _productCompanyTaxId = productCompanyTaxId;
             _certificateName = certificateName;
             _certificateNumber = certificateNumber;
+            _wdStore = wdStore;
         }
 
-        public AuditFile Create(AuditContext context, AuditCriteria criteria)
+        public async Task<AuditFile> Create(AuditContext context, AuditCriteria criteria)
         {
             var taxCountryRegion = context.Account.Address.Country;
 
@@ -42,6 +48,7 @@ namespace Vera.Portugal.Audits
             ApplyProducts(context.Invoices, auditFile);
             ApplyTaxTable(context.Invoices, auditFile, taxCountryRegion);
             ApplyInvoices(context.Invoices, auditFile, taxCountryRegion);
+            await ApplyWorkingDocumentsAsync(context.Invoices, auditFile, taxCountryRegion);
 
             return auditFile;
         }
@@ -285,6 +292,75 @@ namespace Vera.Portugal.Audits
             sourceDocumentsSalesInvoices.NumberOfEntries = invoices.Count().ToString();
             sourceDocumentsSalesInvoices.TotalDebit = totalDebitExTax.Round(2);
             sourceDocumentsSalesInvoices.TotalCredit = totalCreditExTax.Round(2);
+        }
+
+        private async Task ApplyWorkingDocumentsAsync(ICollection<Invoice> invoices, AuditFile auditFile, string taxCountryRegion)
+        {
+            var auditDocuments = new List<SourceDocumentsWorkingDocumentsWorkDocument>();
+
+            foreach (var invoice in invoices)
+            {
+                var workingDocuments = await _wdStore.List(invoice.Id);
+                if (!workingDocuments.Any())
+                {
+                    continue;
+                }
+
+                auditDocuments.AddRange(workingDocuments.Select(document => new SourceDocumentsWorkingDocumentsWorkDocument
+                {
+                    DocumentNumber = document.Number,
+                    ATCUD = Constants.ATCUD,
+                    DocumentStatus = new SourceDocumentsWorkingDocumentsWorkDocumentDocumentStatus
+                    {
+                        WorkStatus = WorkStatus.F,
+                        WorkStatusDate = GetDateTime(document.CreationTime),
+                        SourceID = invoice.Employee.SystemId,
+                        SourceBilling = SAFTPTSourceBilling.P
+                    },
+                    Hash = document.Signature.Output.ToString(),
+                    HashControl = document.Signature.Version.ToString(),
+                    WorkDate = GetDateTime(document.CreationTime),
+                    WorkType = (WorkType.CM),
+                    SourceID = invoice.Employee.SystemId,
+                    SystemEntryDate = GetDateTime(document.CreationTime),
+                    CustomerID = ComputeCustomerID(invoice.Customer.SystemId, invoice.Customer.RegistrationNumber),
+                    Line = document.Lines.Select((l, index) => new SourceDocumentsWorkingDocumentsWorkDocumentLine
+                    {
+                        LineNumber = (index + 1).ToString(),
+                        ProductCode = l.Product.Code,
+                        ProductDescription = l.Product.Description,
+                        Description = l.Description,
+                        Quantity = l.Quantity,
+                        UnitOfMeasure = UnitOfMeasure,
+                        UnitPrice = l.UnitPrice,
+                        TaxPointDate = GetDateTime(document.CreationTime),
+                        Item = l.Gross.RoundAwayFromZero().Absolute(),
+                        ItemElementName = l.Gross > 0 ? ItemChoiceType7.CreditAmount : ItemChoiceType7.DebitAmount,
+                        Tax = new Tax
+                        {
+                            TaxType = TaxType.IVA,
+                            TaxCountryRegion = taxCountryRegion,
+                            TaxCode = GetTaxCode(l.Taxes.Category),
+                            Item = GetTaxPercentage(l.Taxes.Rate),
+                            ItemElementName = ItemChoiceType1.TaxPercentage
+                        }
+                    }).ToArray(),
+                    DocumentTotals = new SourceDocumentsWorkingDocumentsWorkDocumentDocumentTotals
+                    {
+                        TaxPayable = document.Lines.Sum(l => l.Gross - l.Net).RoundAwayFromZero().Absolute(),
+                        NetTotal = document.Lines.Sum(l => l.Net).RoundAwayFromZero().Absolute(),
+                        GrossTotal = document.Lines.Sum(l => l.Gross).RoundAwayFromZero().Absolute()
+                    }
+                }));
+            }
+
+            auditFile.SourceDocuments.WorkingDocuments = new SourceDocumentsWorkingDocuments
+            {
+                WorkDocument = auditDocuments.ToArray(),
+                TotalDebit = auditDocuments.Where(a => a.DocumentTotals.NetTotal > 0).Sum(a => a.DocumentTotals.NetTotal),
+                TotalCredit = auditDocuments.Where(a => a.DocumentTotals.NetTotal < 0).Sum(a => a.DocumentTotals.NetTotal),
+                NumberOfEntries = auditDocuments.Count().ToString()
+            };
         }
 
         private static SourceDocumentsSalesInvoicesInvoiceLine MapInvoiceLine(

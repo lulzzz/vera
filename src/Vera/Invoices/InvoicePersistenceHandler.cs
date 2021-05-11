@@ -22,7 +22,7 @@ namespace Vera.Invoices
             ILogger<InvoicePersistenceHandler> logger,
             IChainStore chainStore,
             IInvoiceStore invoiceStore, 
-            IPackageSigner signer, 
+            IPackageSigner signer,
             IInvoiceNumberGenerator invoiceNumberGenerator,
             IBucketGenerator<Invoice> invoiceBucketGenerator
         )

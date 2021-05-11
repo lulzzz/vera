@@ -20,7 +20,9 @@ namespace Vera.Tests.Shared
         {
             Code = "COCA",
             Description = "Coca Cola",
-            Type = ProductType.Goods
+            Type = ProductType.Goods,
+            SystemId = Faker.Random.Number(1, 9999).ToString(),
+            Barcode = Faker.Commerce.Ean13()
         };
     }
 }

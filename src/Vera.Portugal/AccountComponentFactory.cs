@@ -4,12 +4,20 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using Vera.Dependencies;
+using Vera.Stores;
 using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
 
 namespace Vera.Portugal
 {
     public class AccountComponentFactory : AbstractAccountComponentFactory<Configuration>
     {
+        private readonly IWorkingDocumentStore _wdStore;
+
+        public AccountComponentFactory(IWorkingDocumentStore wdStore)
+        {
+            _wdStore = wdStore;
+        }
+
         protected override IComponentFactory Create(Configuration config)
         {
             RSA rsa = null;
@@ -27,7 +35,7 @@ namespace Vera.Portugal
                 rsa = RSA.Create(rsaParameters);
             }
 
-            return new ComponentFactory(rsa, config);
+            return new ComponentFactory(rsa, config, _wdStore);
         }
 
         public override string Name => "PT";
