@@ -59,7 +59,7 @@ namespace Vera.Portugal.Invoices
 
             head.WithNext(new InvoiceOpenPeriodHandler(_periodStore))
                 .WithNext(new InvoiceTotalsHandler())
-                .WithNext(new InvoiceValidationHandler(factory.CreateInvoiceValidator()))
+                .WithNext(new InvoiceValidationHandler(factory.CreateInvoiceValidators()))
                 .WithNext(new LockingHandler<Invoice>(wdHandler, _locker, bucketGenerator));
 
             return head;

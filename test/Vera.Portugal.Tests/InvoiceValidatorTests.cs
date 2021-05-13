@@ -184,8 +184,14 @@ namespace Vera.Portugal.Tests
 
         private static IEnumerable<ValidationResult> RunValidator(Invoice invoice)
         {
-            var validator = new InvoiceValidator();
-            var results = validator.Validate(invoice);
+            var validators = new PortugalInvoiceValidators();
+            var results = new List<ValidationResult>();
+
+            foreach (var val in validators)
+            {
+                results.AddRange(val.Validate(invoice));
+            }
+
             return results;
         }
     }

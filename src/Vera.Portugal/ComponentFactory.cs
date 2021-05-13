@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
@@ -31,9 +32,9 @@ namespace Vera.Portugal
             return new ConfigurationValidator();
         }
 
-        public IInvoiceValidator CreateInvoiceValidator()
+        public IEnumerable<IInvoiceValidator> CreateInvoiceValidators()
         {
-            return new InvoiceValidator();
+            return new PortugalInvoiceValidators();
         }
 
         public IBucketGenerator<Invoice> CreateInvoiceBucketGenerator()

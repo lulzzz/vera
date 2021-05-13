@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Vera.Dependencies.Handlers;
@@ -8,22 +9,26 @@ namespace Vera.Invoices
 {
     public class InvoiceValidationHandler : HandlerChain<Invoice>
     {
-        private readonly IInvoiceValidator _validator;
+        private readonly IEnumerable<IInvoiceValidator> _validator;
 
-        public InvoiceValidationHandler(IInvoiceValidator validator)
+        public InvoiceValidationHandler(IEnumerable<IInvoiceValidator> validator)
         {
             _validator = validator;
         }
 
         public override Task Handle(Invoice invoice)
         {
-            var results = _validator.Validate(invoice);
-
-            if (results.Any())
+            foreach (var val in _validator)
             {
-                throw new ValidationException(results.First().ErrorMessage);
+                var results = val.Validate(invoice);
+
+                if (results.Any())
+                {
+                    throw new ValidationException(results.First().ErrorMessage);
+                }
             }
-            
+
+
             return base.Handle(invoice);
         }
     }

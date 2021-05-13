@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Collections.Generic;
+using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
@@ -26,9 +27,9 @@ namespace Vera.Norway
             return new ConfigurationValidator();
         }
 
-        public IInvoiceValidator CreateInvoiceValidator()
+        public IEnumerable<IInvoiceValidator> CreateInvoiceValidators()
         {
-            return new NullInvoiceValidator();
+            return new List<IInvoiceValidator> { new NullInvoiceValidator() };
         }
 
         public IBucketGenerator<Invoice> CreateInvoiceBucketGenerator()

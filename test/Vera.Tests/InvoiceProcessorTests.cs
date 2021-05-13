@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -41,8 +42,8 @@ namespace Vera.Tests
             factory.Setup(f => f.CreatePackageSigner())
                 .Returns(signer.Object);
 
-            factory.Setup(f => f.CreateInvoiceValidator())
-                .Returns(new NullInvoiceValidator());
+            factory.Setup(f => f.CreateInvoiceValidators())
+                .Returns(new List<IInvoiceValidator> { new NullInvoiceValidator() });
             
             bucketGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
                 .Returns(expectedBucket);

@@ -73,14 +73,17 @@ namespace Vera.Host.Services
         {
             var account = await context.ResolveAccount(_accountStore);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
+            var validators = factory.CreateInvoiceValidators();
             var invoice = request.Invoice.Unpack();
 
-            var results = factory.CreateInvoiceValidator().Validate(invoice);
-
             var reply = new ValidateInvoiceReply();
-            foreach (var result in results)
+            foreach (var val in validators)
             {
-                reply.Results[result.MemberNames.First()] = result.ErrorMessage;
+                var results = val.Validate(invoice);
+                foreach (var result in results)
+                {
+                    reply.Results[result.MemberNames.First()] = result.ErrorMessage;
+                }
             }
 
             return reply;
