@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-using Vera.Norway;
+using Vera.Norway.Audit;
 
 namespace Vera.Integration.Tests.Norway
 {

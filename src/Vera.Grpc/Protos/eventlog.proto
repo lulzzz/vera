@@ -27,6 +27,8 @@ message ListEventLogRequest {
 	string registerId = 3;
 
 	EventLogType type = 4;
+
+	string supplierSystemId = 5;
 }
 
 message ListEventLogReply {

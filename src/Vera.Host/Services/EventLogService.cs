@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using Vera.Grpc;
@@ -15,12 +14,15 @@ namespace Vera.Host.Services
     {
         private readonly IEventLogStore _eventLogStore;
         private readonly ISupplierStore _supplierStore;
+        private readonly IPeriodStore _periodStore;
 
-        public EventLogService(IEventLogStore eventLogStore, 
-            ISupplierStore supplierStore)
+        public EventLogService(IEventLogStore eventLogStore,
+            ISupplierStore supplierStore, 
+            IPeriodStore periodStore)
         {
             _eventLogStore = eventLogStore;
             _supplierStore = supplierStore;
+            _periodStore = periodStore;
         }
 
         public override async Task<CreateEventLogReply> Create(CreateEventLogRequest request, ServerCallContext context)

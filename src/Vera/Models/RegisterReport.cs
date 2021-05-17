@@ -12,11 +12,12 @@ namespace Vera.Models
         }
 
         public Guid Id { get; set; }
-
-        public string RegisterId { get; set; }
-
         public DateTime Date { get; set; }
         public Guid SupplierId { get; set; }
+        public string RegisterId { get; set; }
+        public decimal RegisterOpeningAmount { get; set; }
+        public int CashDrawerOpenings { get; set; }
+        public string EmployeeId { get; set; }
         public AccountReport Account { get; set; }
         public ICollection<PaymentReport> Payments { get; set; }
         public ICollection<TaxesReport> Taxes { get; set; }
@@ -57,6 +58,7 @@ namespace Vera.Models
             public decimal TaxRate { get; set; }
             public TaxesCategory TaxesCategory { get; set; }
             public decimal Amount { get; set; }
+            public decimal Base { get; set; }
         }
 
         public class ProductReport

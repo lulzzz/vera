@@ -6,7 +6,9 @@ namespace Vera.EventLogs
     public class EventLogCriteria
     {
         public Guid AccountId { get; set; }
-        
+
+        public string SupplierSystemId { get; set; }
+
         public DateTime? StartDate { get; set; }
         
         public DateTime? EndDate { get; set; }

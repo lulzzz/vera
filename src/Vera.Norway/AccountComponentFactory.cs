@@ -4,12 +4,20 @@ using Org.BouncyCastle.Security;
 using System.IO;
 using System.Security.Cryptography;
 using Vera.Dependencies;
+using Vera.Stores;
 using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
 
 namespace Vera.Norway
 {
     public class AccountComponentFactory : AbstractAccountComponentFactory<Configuration>
     {
+        private readonly IReportStore _reportStore;
+
+        public AccountComponentFactory(IReportStore reportStore)
+        {
+            _reportStore = reportStore;
+        }
+
         protected override IComponentFactory Create(Configuration config)
         {
             RSA rsa = null;
@@ -27,7 +35,7 @@ namespace Vera.Norway
                 rsa = RSA.Create(rsaParameters);
             }
 
-            return new ComponentFactory(rsa, config);
+            return new ComponentFactory(rsa, config, _reportStore);
         }
 
         public override string Name => "NO";

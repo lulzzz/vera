@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using Vera.EventLogs;
 using Vera.Models;
 using Vera.Stores;
 
@@ -19,17 +20,20 @@ namespace Vera.Audits
         private readonly IInvoiceStore _invoiceStore;
         private readonly IBlobStore _blobStore;
         private readonly IAuditStore _auditStore;
+        private readonly IEventLogStore _eventLogStore;
         private readonly IAuditWriter _auditWriter;
 
         public AuditArchiver(
             IInvoiceStore invoiceStore,
             IBlobStore blobStore,
             IAuditStore auditStore,
+            IEventLogStore eventLogStore,
             IAuditWriter auditWriter)
         {
             _invoiceStore = invoiceStore;
             _blobStore = blobStore;
             _auditStore = auditStore;
+            _eventLogStore = eventLogStore;
             _auditWriter = auditWriter;
         }
 
@@ -68,10 +72,16 @@ namespace Vera.Audits
             var sequence = 1;
             var ranges = GetDateRanges(audit).ToList();
 
-            var criteria = new AuditCriteria
+            var auditCriteria = new AuditCriteria
             {
                 AccountId = account.Id,
                 SupplierSystemId = audit.SupplierSystemId,
+            };
+            var eventLogCriteria = new EventLogCriteria
+            {
+                AccountId = account.Id,
+                SupplierSystemId = audit.SupplierSystemId
+
             };
 
             var context = new AuditContext
@@ -81,17 +91,18 @@ namespace Vera.Audits
 
             foreach (var (start, end) in ranges)
             {
-                criteria.StartDate = start;
-                criteria.EndDate = end;
+                eventLogCriteria.StartDate = auditCriteria.StartDate = start;
+                eventLogCriteria.EndDate = auditCriteria.EndDate = end;
 
-                context.Invoices = await _invoiceStore.List(criteria);
+                context.Invoices = await _invoiceStore.List(auditCriteria);
+                context.Events = await _eventLogStore.List(eventLogCriteria);
 
                 // TODO(kevin): fetch print trail?
 
-                var entryName = await _auditWriter.ResolveName(criteria, sequence++, ranges.Count);
+                var entryName = await _auditWriter.ResolveName(auditCriteria, sequence++, ranges.Count);
 
                 await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();
-                await _auditWriter.Write(context, criteria, stream);
+                await _auditWriter.Write(context, auditCriteria, stream);
             }
         }
 

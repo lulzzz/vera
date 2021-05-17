@@ -53,7 +53,9 @@ namespace Vera.EventLogs
                     ReportType.X => EventLogType.XReport,
                     ReportType.Z => EventLogType.ZReport,
                     _ => throw new ArgumentOutOfRangeException()
-                }
+                },
+                ReportNumber = entity.Number,
+                EmployeeId = entity.EmployeeId
             };
 
             await _eventLogStore.Store(eventLog);

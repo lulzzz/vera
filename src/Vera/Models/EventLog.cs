@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Vera.Models
 {
@@ -28,5 +25,11 @@ namespace Vera.Models
         /// Date that the event log was created.
         /// </summary>
         public DateTime Date { get; set; }
+
+        public string ReportNumber { get; set; }
+
+        public string EmployeeId { get; set; }
+
+        public IDictionary<string, string> Data { get; set; }
     }
 }

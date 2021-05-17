@@ -5,8 +5,10 @@ using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Models;
+using Vera.Norway.Audit;
 using Vera.Reports;
 using Vera.Signing;
+using Vera.Stores;
 using Vera.Thermal;
 
 namespace Vera.Norway
@@ -16,10 +18,13 @@ namespace Vera.Norway
         private readonly RSA _rsa;
         private readonly Configuration _configuration;
 
-        public ComponentFactory(RSA rsa, Configuration configuration)
+        private readonly IReportStore _reportStore;
+
+        public ComponentFactory(RSA rsa, Configuration configuration, IReportStore reportStore)
         {
             _rsa = rsa;
             _configuration = configuration;
+            _reportStore = reportStore;
         }
 
         public IConfigurationValidator CreateConfigurationValidator()
@@ -59,7 +64,7 @@ namespace Vera.Norway
 
         public IAuditWriter CreateAuditWriter()
         {
-            return new AuditWriter(new RealLifeDateProvider());
+            return new AuditWriter(new RealLifeDateProvider(), _reportStore);
         }
     }
 }

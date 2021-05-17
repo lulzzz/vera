@@ -58,6 +58,8 @@ namespace Vera.Integration.Tests
                 client.SupplierSystemId = await CreateSupplier(context, client);
             }
 
+            // Creates supplier if the supplier system id is available on the context, 
+            // or is it up to the caller to create the supplier
             if (exists)
             {
                 // Nothing else to configure or client exists already

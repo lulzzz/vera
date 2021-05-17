@@ -1,4 +1,4 @@
-﻿namespace Vera.Norway
+﻿namespace Vera.Norway.Audit
 {
     /// <summary>
     /// <para>Two-letter country code according to ISO 3166-1 alpha 2 standard. Example: NO for the Norway.</para>

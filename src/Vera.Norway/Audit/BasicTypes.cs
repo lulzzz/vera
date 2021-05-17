@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Vera.Models;
 
-namespace Vera.Norway
+namespace Vera.Norway.Audit
 {
     public enum BasicTypes
     {
@@ -99,24 +99,24 @@ namespace Vera.Norway
 
     public static class BasicsMapper
     {
-        //public static AuditfileCompanyBasicsBasic FromEvent(Event e, IStringTranslationProvider stringTranslationProvider)
-        //{
-        //    return new AuditfileCompanyBasicsBasic
-        //    {
-        //        BasicType = FormatBasicType(BasicTypes.Event),
-        //        PredefinedBasicID = TranslateEventToBasicID(e),
-        //        BasicID = e.Type.ToUpper(),
-        //        BasicDesc = GetEventDescription(e, stringTranslationProvider)
-        //    };
-        //}
+        public static AuditfileCompanyBasicsBasic FromEvent(EventLog e)
+        {
+            return new AuditfileCompanyBasicsBasic
+            {
+                BasicType = FormatBasicType(BasicTypes.Event),
+                PredefinedBasicID = TranslateEventToBasicID(e.Type).ToString(),
+                BasicID = e.Type.ToString().ToUpper(),
+                BasicDesc = GetEventDescription(e.Type)
+            };
+        }
 
         public static AuditfileCompanyBasicsBasic FromPayment(Payment p)
         {
             return new AuditfileCompanyBasicsBasic
             {
                 BasicType = FormatBasicType(BasicTypes.Payment),
-                PredefinedBasicID = TranslatePaymentToBasicID(p),
-                //BasicID = p.Method,
+                PredefinedBasicID = TranslatePaymentToBasicID(p.Category),
+                BasicID = p.Category.ToString(),
                 BasicDesc = p.Description
             };
         }
@@ -137,7 +137,7 @@ namespace Vera.Norway
             return new AuditfileCompanyBasicsBasic
             {
                 BasicType = FormatBasicType(BasicTypes.Discount),
-                //BasicID = discount.SystemID,
+                BasicID = discount.SystemId,
                 BasicDesc = discount.Description
             };
         }
@@ -192,82 +192,60 @@ namespace Vera.Norway
             return basic;
         }
 
-        //public static string TranslateEventToBasicID(Event e)
-        //{
-        //    return TranslateEventToBasicID(e.Type).ToString();
-        //}
-
-        //public static string GetEventDescription(Event e, IStringTranslationProvider stringTranslationProvider)
-        //{
-        //    var translationKey = $"Event:Types:{e.Type}";
-        //    var defaultValue = e.Type.CamelFriendly().ToLower().UppercaseFirst();
-
-        //    return stringTranslationProvider.Translate("no", "NO", (translationKey, defaultValue));
-        //}
-
-        public static int TranslateEventToBasicID(string eventType)
-        {
-            // events are not available
-            //switch (eventType)
-            //{
-            //    case EventLedgerTypes.EVAInstanceStarted:
-            //        return PredefinedEventBasics.ApplicationStart;
-            //    case EventLedgerTypes.Login:
-            //        return PredefinedEventBasics.EmployeeLogin;
-            //    case EventLedgerTypes.Logout:
-            //        return PredefinedEventBasics.EmployeeLogout;
-            //    case EventLedgerTypes.CashDrawerOpened:
-            //        return PredefinedEventBasics.OpenCashDrawer;
-            //    case EventLedgerTypes.CashDrawerClosed:
-            //        return PredefinedEventBasics.CloseCashDrawer;
-            //    case EventLedgerTypes.XReport:
-            //        return PredefinedEventBasics.XReport;
-            //    case EventLedgerTypes.ZReport:
-            //        return PredefinedEventBasics.ZReport;
-
-            //    // TODO (kevin) receipt events
-            //    //          13013	Return receipt
-            //    //          13014	Copy receipt
-            //    //          13015	Pro forma receipt
-            //    //          13016	Delivery receipt
-
-            //    case EventLedgerTypes.ReceiptPrinted:
-            //        return PredefinedEventBasics.SalesReceipt;
-
-            //    case EventLedgerTypes.ReceiptReprinted:
-            //        return PredefinedEventBasics.CopyReceipt;
-            //}
-
-            return PredefinedEventBasics.Other;
-        }
-
-        public static string TranslatePaymentToBasicID(Payment p)
-        {
-            // TODO (kevin) check if this is correct
-
-            // payment method is not mapped
-            switch (p.Category)
+        public static string GetEventDescription(EventLogType eventLogType) =>
+            eventLogType switch
             {
-                case PaymentCategory.Cash:
-                    return "12001";
-                case PaymentCategory.Debit:
-                    return "12002";
-                case PaymentCategory.Credit:
-                    return "12003";
-                default:
-                    return "12999";
+                EventLogType.AppStart => "App was started",
+                EventLogType.Login => "User has logged in",
+                EventLogType.Logout => "User has logged out",
+                EventLogType.OpenCashDrawer => "Cash drawer was opened",
+                EventLogType.CloseCashDrawer => "Cash drawer was closed",
+                EventLogType.XReport => "XReport generated",
+                EventLogType.ZReport => "ZReport generated",
+                EventLogType.ReceiptPrinted => "Receipt was printed",
+                EventLogType.ReceiptReprinted => "Receipt was reprinted",
+                _ => throw new NotSupportedException($"{eventLogType} not supported")
+            };
 
-                    // TODO (kevin) map these
-                    //          12004	Bank account
-                    //          12005	Gift token
-                    //          12006	Customer card
-                    //          12007	Loyalty, stamps
-                    //          12008	Bottle deposit
-                    //          12009	Check
-                    //          12010	Credit note
-                    //          12011	Mobile phone apps
-            }
-        }
+        public static int TranslateEventToBasicID(EventLogType eventType) =>
+            eventType switch
+            {
+                EventLogType.AppStart => PredefinedEventBasics.ApplicationStart,
+                EventLogType.Login => PredefinedEventBasics.EmployeeLogin,
+                EventLogType.Logout => PredefinedEventBasics.EmployeeLogout,
+                EventLogType.OpenCashDrawer => PredefinedEventBasics.OpenCashDrawer,
+                EventLogType.CloseCashDrawer => PredefinedEventBasics.CloseCashDrawer,
+                EventLogType.XReport => PredefinedEventBasics.XReport,
+                EventLogType.ZReport => PredefinedEventBasics.ZReport,
+                EventLogType.ReceiptPrinted => PredefinedEventBasics.SalesReceipt,
+                EventLogType.ReceiptReprinted => PredefinedEventBasics.CopyReceipt,
+                _ => PredefinedEventBasics.Other
+
+                // TODO (kevin) receipt events
+                //          13013	Return receipt\
+                //          13014	Copy receipt
+                //          13015	Pro forma receipt
+                //          13016	Delivery receipt
+            };
+
+        public static string TranslatePaymentToBasicID(PaymentCategory paymentCategory) =>
+            paymentCategory switch
+            {
+                PaymentCategory.Cash => "12001",
+                PaymentCategory.Debit => "12002",
+                PaymentCategory.Credit => "12003",
+                _ => "12999"
+
+                // TODO (kevin) map these
+                //          12004	Bank account
+                //          12005	Gift token
+                //          12006	Customer card
+                //          12007	Loyalty, stamps
+                //          12008	Bottle deposit
+                //          12009	Check
+                //          12010	Credit note
+                //          12011	Mobile phone apps
+            };
 
         private static string TranslateProductToBasicID(Product p)
         {

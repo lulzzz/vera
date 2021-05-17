@@ -12,6 +12,7 @@ using Vera.Host.Security;
 using System.Linq;
 using Vera.Bootstrap;
 using Vera.Host.Mapping;
+using static Vera.Bootstrap.PeriodManager;
 
 namespace Vera.Host.Services
 {
@@ -75,14 +76,13 @@ namespace Vera.Host.Services
 
         public override async Task<Empty> ClosePeriod(ClosePeriodRequest request, ServerCallContext context)
         {
-            var accountId = context.GetAccountId();
+            var account = await context.ResolveAccount(_accountStore);
             var period = await GetAndValidate(new PeriodValidationModel
             {
-                AccountId = accountId,
+                AccountId = account.Id,
                 SupplierSystemId = request.SupplierSystemId,
                 PeriodId = request.Id
             });
-            var account = await _accountStore.Get( context.GetCompanyId(), accountId);
             var registers = request.Registers.Select(r => new Models.Register 
             {
                 Id = Guid.Parse(r.Id),
@@ -91,7 +91,13 @@ namespace Vera.Host.Services
 
             try
             {
-                await periodManager.ClosePeriod(period, account, registers);
+                await periodManager.ClosePeriod(new ClosePeriodModel
+                {
+                    Account = account,
+                    Period = period,
+                    Registers = registers,
+                    EmployeeId = request.EmployeeId
+                });
             }
             catch (ValidationException validationException)
             {

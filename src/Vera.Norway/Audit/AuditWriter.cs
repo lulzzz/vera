@@ -5,16 +5,19 @@ using System.Xml;
 using System.Xml.Serialization;
 using Vera.Audits;
 using Vera.Dependencies;
+using Vera.Stores;
 
-namespace Vera.Norway
+namespace Vera.Norway.Audit
 {
     public class AuditWriter : IAuditWriter
     {
         private readonly IDateProvider _dateProvider;
+        private readonly IReportStore _reportStore;
 
-        public AuditWriter(IDateProvider dateProvider)
+        public AuditWriter(IDateProvider dateProvider, IReportStore reportStore)
         {
             _dateProvider = dateProvider;
+            _reportStore = reportStore;
         }
 
         public Task<string> ResolveName(AuditCriteria criteria, int sequence, int total)
@@ -29,10 +32,10 @@ namespace Vera.Norway
             return Task.FromResult($"{type}_{criteria.SupplierSystemId}_{creationTime}_{sequence}_{total}.xml");
         }
 
-        public Task Write(AuditContext context, AuditCriteria criteria, Stream stream)
+        public async Task Write(AuditContext context, AuditCriteria criteria, Stream stream)
         {
-            var creator = new AuditCreator();
-            var file = creator.Create(context, criteria);
+            var creator = new AuditCreator(_reportStore);
+            var file = await creator.CreateAsync(context, criteria);
 
             var settings = new XmlWriterSettings
             {
@@ -46,8 +49,6 @@ namespace Vera.Norway
                 var serializer = new XmlSerializer(typeof(Auditfile));
                 serializer.Serialize(writer, file);
             }
-
-            return Task.CompletedTask;
         }
 
         public bool WillOutput => true;

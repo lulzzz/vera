@@ -24,5 +24,7 @@ namespace Vera.Audits
         public string SoftwareVersion { get; set; } = "0.1.0";
 
         public ICollection<Invoice> Invoices { get; set; }
+
+        public ICollection<EventLog> Events { get; set; }
     }
 }

@@ -78,18 +78,17 @@ namespace Vera.Norway.Tests
                     Return = -2.41m
                 },
                 Number = "354",
-                ReportType = ReportType.X
+                ReportType = ReportType.X,
+                RegisterId = registerId,
+                CashDrawerOpenings = 6 
             };
 
             var context = new ReceiptReportContext
             {
                 RegisterReport = report,
                 Signature = Encoding.ASCII.GetBytes("signature"),
-                CashDrawerOpenings = 2,
-                Change = 0m,
                 Header = "TEST",
                 Original = false,
-                RegisterId = registerId,
                 Prints = new List<PrintTrail>
                 {
                     new PrintTrail{},

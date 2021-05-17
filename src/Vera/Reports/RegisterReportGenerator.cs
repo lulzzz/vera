@@ -21,17 +21,23 @@ namespace Vera.Reports
         private readonly IInvoiceStore _invoiceStore;
         private readonly ISupplierStore _supplierStore;
         private readonly IAccountStore _accountStore;
+        private readonly IPeriodStore _periodStore;
+        private readonly IEventLogStore _eventLogStore;
 
         public RegisterReportGenerator(
-            IDateProvider dateProvider, 
-            IInvoiceStore invoiceStore, 
-            ISupplierStore supplierStore, 
-            IAccountStore accountStore)
+            IDateProvider dateProvider,
+            IInvoiceStore invoiceStore,
+            ISupplierStore supplierStore,
+            IAccountStore accountStore,
+            IPeriodStore periodStore, 
+            IEventLogStore eventLogStore)
         {
             _dateProvider = dateProvider;
             _invoiceStore = invoiceStore;
             _supplierStore = supplierStore;
             _accountStore = accountStore;
+            _periodStore = periodStore;
+            _eventLogStore = eventLogStore;
         }
 
         public async Task<RegisterReport> Generate(RegisterReportContext context)
@@ -48,15 +54,36 @@ namespace Vera.Reports
                 throw new ValidationException("Failed preconditions, supplier does not exist");
             }
 
+            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
+            if (period == null)
+            {
+                throw new ValidationException("Failed preconditions, an open period does not exist");
+            }
+
             var today = _dateProvider.Now.Date;
+            var tomorrow = today.AddDays(1);
+            
             var invoicesByRegister = await _invoiceStore.List(new Audits.AuditCriteria
             {
                 AccountId = account.Id,
                 StartDate = today,
-                EndDate = today.AddDays(1),
+                EndDate = tomorrow,
                 SupplierSystemId = supplier.SystemId,
                 RegisterId = context.RegisterId
             });
+
+            var events = await _eventLogStore.List(new EventLogs.EventLogCriteria
+            {
+                AccountId = account.Id,
+                SupplierSystemId = supplier.SystemId,
+                StartDate = today,
+                EndDate = tomorrow,
+                RegisterId = context.RegisterId,
+                Type = EventLogType.OpenCashDrawer
+            });
+            var cashDrawerOpenings = events?.Count ?? 0;
+
+            var register = period.Registers.FirstOrDefault(r => r.Id == Guid.Parse(context.RegisterId));
 
             if (invoicesByRegister == null || !invoicesByRegister.Any())
             {
@@ -66,7 +93,9 @@ namespace Vera.Reports
                     SupplierId = supplier.Id,
                     Date = _dateProvider.Now,
                     ReportType = context.ReportType,
-                    RegisterId = context.RegisterId
+                    RegisterId = context.RegisterId,
+                    RegisterOpeningAmount = register.OpeningAmount,
+                    CashDrawerOpenings = cashDrawerOpenings
                 };
             }
 
@@ -89,7 +118,8 @@ namespace Vera.Reports
                 {
                     TaxRate = g.Key,
                     TaxesCategory = g.First().Taxes.Category,
-                    Amount = g.Sum(l => l.Gross - l.Net)
+                    Amount = g.Sum(l => l.Gross - l.Net),
+                    Base = g.Sum(l => l.Net)
                 });
 
             var productsReport = invoicesByRegister
@@ -166,6 +196,8 @@ namespace Vera.Reports
             return new RegisterReport
             {
                 RegisterId = context.RegisterId,
+                RegisterOpeningAmount = register.OpeningAmount,
+                CashDrawerOpenings = cashDrawerOpenings,
                 Date = _dateProvider.Now,
                 Account = AccountReport.FromAccount(account),
                 SupplierId = supplier.Id,
@@ -202,5 +234,6 @@ namespace Vera.Reports
         public string SupplierSystemId { get; set; }
         public string RegisterId { get; set; }
         public ReportType ReportType { get; set; }
+        public string EmployeeId { get; set; }
     }
 }

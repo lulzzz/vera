@@ -25,6 +25,7 @@ namespace Vera.Austria.Tests
                     TaxRegistrationNumber = "12345"
                 },
                 SupplierId = Guid.NewGuid(),
+                RegisterId = registerId,
                 Date = DateTime.Now,
                 Discount = new RegisterReport.DiscountReport { Amount = -10m, Count = 1 },
                 Payments = new List<PaymentReport>
@@ -78,18 +79,16 @@ namespace Vera.Austria.Tests
                     Return = -2.41m
                 },
                 Number = "354",
-                ReportType = ReportType.X
+                ReportType = ReportType.X,
+                CashDrawerOpenings = 6
             };
 
             var context = new ReceiptReportContext
             {
                 RegisterReport = report,
                 Signature = Encoding.ASCII.GetBytes("signature"),
-                CashDrawerOpenings = 6,
-                Change = 0m,
                 Header = "TEST",
                 Original = false,
-                RegisterId = registerId,
                 Prints = new List<PrintTrail>
                 {
                     new PrintTrail{},

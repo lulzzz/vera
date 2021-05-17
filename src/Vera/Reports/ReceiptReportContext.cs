@@ -10,8 +10,6 @@ namespace Vera.Reports
         /// </summary>
         public RegisterReport RegisterReport { get; set; }
 
-        public string RegisterId { get; set; }
-
         // Static text to be printed up top
         public string Header { get; set; }
 
@@ -25,8 +23,6 @@ namespace Vera.Reports
         /// </summary>
         public bool Original { get; set; }
 
-        public decimal Change { get; set; } = 0m;
-        public int CashDrawerOpenings { get; set; } = 6;
         public byte[] Signature { get; set; }
     }
 }

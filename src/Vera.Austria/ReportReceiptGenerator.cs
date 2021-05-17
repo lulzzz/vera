@@ -59,7 +59,7 @@ namespace Vera.Austria
             sb.AppendFormat(
                 format,
                 "Change",
-                context.Change.FormatCurrency(Culture)
+                context.RegisterReport.RegisterOpeningAmount.FormatCurrency(Culture)
             );
 
             yield return new TextThermalNode(sb.ToString());
@@ -68,7 +68,7 @@ namespace Vera.Austria
             sb.AppendFormat(
                 format,
                 "Cash drawer openings",
-                context.CashDrawerOpenings
+                context.RegisterReport.CashDrawerOpenings
             );
 
             yield return new TextThermalNode(sb.ToString());
@@ -239,7 +239,7 @@ namespace Vera.Austria
 
         private IEnumerable<IThermalNode> GenerateFooter(ReceiptReportContext context)
         {
-            yield return new TextThermalNode($"KassenID: {context.RegisterId}");
+            yield return new TextThermalNode($"KassenID: {context.RegisterReport.RegisterId}");
 
             yield return new SpacingThermalNode(1);
 

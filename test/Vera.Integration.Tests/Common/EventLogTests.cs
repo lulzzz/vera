@@ -45,7 +45,8 @@ namespace Vera.Integration.Tests.Common
             var listAllEventsReply =
                 await client.EventLog.ListAsync(new ListEventLogRequest
                 {
-                    RegisterId = "1234"
+                    RegisterId = "1234",
+                    SupplierSystemId = supplier.SystemId
                 }, client.AuthorizedMetadata);
 
             Assert.NotNull(listAllEventsReply);

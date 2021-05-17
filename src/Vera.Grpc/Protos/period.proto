@@ -24,6 +24,7 @@ message ClosePeriodRequest {
 	string id = 1;
 	string supplierSystemId = 2;
 	repeated vera.grpc.shared.Register registers = 3;
+	string employeeId = 4;
 }
 
 message GetPeriodRequest {

@@ -31,16 +31,17 @@ namespace Vera.Bootstrap
             _dateProvider = dateProvider;
         }
 
-        public async Task ClosePeriod(Period period, Account account, IEnumerable<Register> registersToClose)
+        public async Task ClosePeriod(ClosePeriodModel closePeriodModel)
         {
+            var period = closePeriodModel.Period;
             if (period.Registers.Count == 0)
             {
                 await Update();
                 return;
             }
 
-            CheckAreValidRegisters(period.Registers, registersToClose);
-            await GenerateZReports(period, account);
+            CheckAreValidRegisters(period.Registers, closePeriodModel.Registers);
+            await GenerateZReports(closePeriodModel);
             await Update();
 
             Task Update()
@@ -51,8 +52,10 @@ namespace Vera.Bootstrap
             }
         }
 
-        private async Task GenerateZReports(Period period, Account account)
+        private async Task GenerateZReports(ClosePeriodModel model)
         {
+            var account = model.Account;
+            var period = model.Period;
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var handler = _reportHandlerFactory.Create(factory);
             var registerReportContext = new RegisterReportContext
@@ -60,7 +63,8 @@ namespace Vera.Bootstrap
                 AccountId = account.Id,
                 CompanyId = account.CompanyId,
                 SupplierSystemId = period.Supplier.SystemId,
-                ReportType = ReportType.Z
+                ReportType = ReportType.Z,
+                EmployeeId = model.EmployeeId
             };
 
             foreach (var register in period.Registers)
@@ -89,6 +93,14 @@ namespace Vera.Bootstrap
 
                 register.ClosingAmount = closingRegister.ClosingAmount;
             }
+        }
+
+        public class ClosePeriodModel
+        {
+            public Account Account { get; set; }
+            public Period Period { get; set; }
+            public IEnumerable<Register> Registers { get; set; }
+            public string EmployeeId { get; set; }
         }
     }
 }

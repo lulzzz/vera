@@ -16,6 +16,7 @@ namespace Vera.Host.Services
     {
         private readonly IAccountStore _accountStore;
         private readonly IInvoiceStore _invoiceStore;
+        private readonly IEventLogStore _eventsLogStore;
         private readonly IBlobStore _blobStore;
         private readonly IAuditStore _auditStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
@@ -27,8 +28,8 @@ namespace Vera.Host.Services
             IBlobStore blobStore,
             IAuditStore auditStore,
             IAccountComponentFactoryCollection accountComponentFactoryCollection,
-            IBackgroundTaskQueue backgroundTaskQueue
-        )
+            IBackgroundTaskQueue backgroundTaskQueue,
+            IEventLogStore eventsStore)
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
@@ -36,6 +37,7 @@ namespace Vera.Host.Services
             _auditStore = auditStore;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
             _backgroundTaskQueue = backgroundTaskQueue;
+            _eventsLogStore = eventsStore;
         }
 
         public override async Task<CreateAuditReply> Create(CreateAuditRequest request, ServerCallContext context)
@@ -57,6 +59,7 @@ namespace Vera.Host.Services
                 _invoiceStore,
                 _blobStore,
                 _auditStore,
+                _eventsLogStore,
                 factory.CreateAuditWriter()
             );
 

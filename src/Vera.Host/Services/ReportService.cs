@@ -32,7 +32,7 @@ namespace Vera.Host.Services
         public ReportService(IRegisterReportGenerator registerReportGenerator,
             IAccountStore accountStore,
             IReportStore reportStore,
-            IAccountComponentFactoryCollection accountComponentFactoryCollection, 
+            IAccountComponentFactoryCollection accountComponentFactoryCollection,
             IReportHandlerFactory reportHandlerFactory)
         {
             _registerReportGenerator = registerReportGenerator;
@@ -54,7 +54,9 @@ namespace Vera.Host.Services
                 AccountId = context.GetAccountId(),
                 CompanyId = context.GetCompanyId(),
                 SupplierSystemId = request.SupplierSystemId,
-                RegisterId = request.RegisterId
+                RegisterId = request.RegisterId,
+                EmployeeId = request.EmployeeId,
+                ReportType = Models.ReportType.X
             };
 
             var report = await _registerReportGenerator.Generate(registerReportContext);
@@ -109,13 +111,12 @@ namespace Vera.Host.Services
         public override async Task<RenderReportReply> RenderReport(RenderReportRequest request, ServerCallContext context)
         {
             var account = await context.ResolveAccount(_accountStore);
-
             var report = await _reportStore.GetByNumber(account.Id, request.ReportNumber);
             if (report == null)
             {
                 throw new RpcException(new Status(StatusCode.NotFound, "report not found"));
             }
-
+            
 
             await using var ms = new MemoryStream(8192);
             await using var sw = new StreamWriter(ms, Encoding.UTF8);
@@ -131,9 +132,8 @@ namespace Vera.Host.Services
             var componentFactory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var receiptReportContext = new ReceiptReportContext
             {
-                RegisterId = report.RegisterId,
                 RegisterReport = report,
-                Signature = report.Signature.Output,
+                Signature = report.Signature.Output
             };
 
             var generator = componentFactory.CreateThermalReportGenerator();

@@ -1,35 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Vera.Audits;
 using Vera.Dependencies;
 using Vera.Extensions;
 using Vera.Models;
+using Vera.Stores;
 
-namespace Vera.Norway
+namespace Vera.Norway.Audit
 {
     public class AuditCreator
     {
         private const string TicketLineBasicIDSale = "SALE";
         private const string TicketLineBasicIDReturn = "RETURN";
-
         private const string ArticleGroupID = "OTHER";
 
+        private readonly IReportStore _reportStore;
         private readonly IDateProvider _dateProvider;
+
         private readonly ICollection<AuditfileCompanyBasicsBasic> _transactionBasics;
         private readonly Auditfile _auditfile;
 
-        public AuditCreator()
+        public AuditCreator(IReportStore reportStore)
         {
             _dateProvider = new RealLifeDateProvider();
             _transactionBasics = new List<AuditfileCompanyBasicsBasic>();
             _auditfile = new Auditfile();
+            _reportStore = reportStore;
         }
 
-        public Auditfile Create(AuditContext context, AuditCriteria criteria)
+        public async Task<Auditfile> CreateAsync(AuditContext context, AuditCriteria criteria)
         {
             CreateHeader(context, criteria);
-            CreateCompany(context, criteria);
+            await CreateCompanyAsync(context, criteria);
 
             return _auditfile;
         }
@@ -52,7 +56,7 @@ namespace Vera.Norway
             };
         }
 
-        private void CreateCompany(AuditContext context, AuditCriteria criteria)
+        private async Task CreateCompanyAsync(AuditContext context, AuditCriteria criteria)
         {
             var companyAddress = context.Account.Address;
 
@@ -91,8 +95,8 @@ namespace Vera.Norway
             company.CustomersSuppliers.AddRange(
                 context.Invoices
                     .Where(i => i.Customer != null && i.Customer.SystemId != null)
-                    .Select(i => i.Customer).GroupBy(c => c.SystemId)
-                    .Select(g => g.First())
+                    .Select(i => i.Customer)
+                    .Distinct(c => c.SystemId)
                     .Select(c => 
                     {
                         var customer = new AuditfileCompanyCustomersSuppliersCustomerSupplier
@@ -117,8 +121,7 @@ namespace Vera.Norway
                 context.Invoices
                     .Where(e => e?.SystemId != null)
                     .Select(i => i.Employee)
-                    .GroupBy(e => e.SystemId)
-                    .Select(g => g.First())
+                    .Distinct(e => e.SystemId)
                     .Select(e => new AuditfileCompanyEmployeesEmployee
                     {
                         FirstName = e.FirstName,
@@ -129,8 +132,8 @@ namespace Vera.Norway
             company.Articles.AddRange(
                 context.Invoices.SelectMany(i => i.Lines)
                                 .Select(l => l.Product)
-                                .GroupBy(p => p.Code)
-                                .Select(g => g.First()).Select(p => new AuditfileCompanyArticlesArticle
+                                .Distinct(p => p.Code)
+                                .Select(p => new AuditfileCompanyArticlesArticle
             {
                 ArtGroupID = BasicsMapper.FormatPredefinedBasicID(PredefinedProductBasics.Other),
                 ArtID = p.SystemId,
@@ -167,8 +170,7 @@ namespace Vera.Norway
             company.VatCodeDetails.AddRange(
                 context.Invoices.SelectMany(i => i.Lines)
                                 .Select(l => l.Taxes)
-                                .GroupBy(t => t.Code)
-                                .Select(g => g.First())
+                                .Distinct(t => t.Code)
                                 .Select(t => new AuditfileCompanyVatCodeDetailsVatCodeDetail
                                 {
                                     VatCode = t.Code,
@@ -180,7 +182,7 @@ namespace Vera.Norway
             var invoicesBySupplier = context.Invoices
               .Where(i => i.Supplier.SystemId == criteria.SupplierSystemId).ToList();
 
-            var location = CreateLocation(context, invoicesBySupplier);
+            var location = await CreateLocationAsync(context, invoicesBySupplier);
 
             if (location != null)
             {
@@ -197,10 +199,10 @@ namespace Vera.Norway
 
         private IEnumerable<AuditfileCompanyBasicsBasic> CreateBasics(AuditContext context)
         {
-            //foreach (var e in audit.MasterFiles.Events.Distinct(e => e.Type))
-            //{
-            //    yield return BasicsMapper.FromEvent(e, _stringTranslationProvider);
-            //}
+            foreach (var e in context.Events.Distinct(e => e.Type))
+            {
+                yield return BasicsMapper.FromEvent(e);
+            }
 
             yield return new AuditfileCompanyBasicsBasic
             {
@@ -212,8 +214,7 @@ namespace Vera.Norway
 
             var payments = context.Invoices
                 .SelectMany(i => i.Payments)
-                .GroupBy(p => p.Category)
-                .Select(g => g.First());
+                .Distinct(p => p.Category);
 
             foreach (var p in payments)
             {
@@ -225,8 +226,7 @@ namespace Vera.Norway
               .Concat(context.Invoices
                   .SelectMany(i => i.Lines)
                   .SelectMany(l => l.Settlements))
-              .GroupBy(s => s.SystemId)
-              .Select(g => g.First());
+                  .Distinct(s => s.SystemId);
 
             foreach (var discount in discounts)
             {
@@ -249,22 +249,21 @@ namespace Vera.Norway
             };
         }
 
-        private AuditfileCompanyLocationCashregister CreateCashRegister(
+        private async Task<AuditfileCompanyLocationCashregister> CreateCashRegisterAsync(
           AuditContext context,
           string registerId,
-          IEnumerable<Invoice> invoices
-        )
+          IEnumerable<Invoice> invoices,
+          IEnumerable<EventLog> events)
         {
             var register = new AuditfileCompanyLocationCashregister
             {
                 RegisterID = registerId
             };
 
-            //TODO ignoring events for now
-            //foreach (var e in events)
-            //{
-            //    register.Event.Add(CreateEvent(audit, e));
-            //}
+            foreach (var e in events)
+                {
+                    register.Event.Add(await CreateEventAsync(context, e));
+                }
 
             foreach (var invoice in invoices)
             {
@@ -399,135 +398,138 @@ namespace Vera.Norway
             return ctLine;
         }
 
-        //private AuditfileCompanyLocationCashregisterEvent CreateEvent(Audit audit, Event e)
-        //{
-        //    // The event element stores activity not represented as a cash register transaction (cashtransaction) or transaction line (ctline).
-        //    var cashRegisterEvent = new AuditfileCompanyLocationCashregisterEvent
-        //    {
-        //        // Unique system specific identification of this event.
-        //        // Replacing to limit to 35 characters
-        //        EventID = e.SystemID.Replace("-", ""),
+        private async Task<AuditfileCompanyLocationCashregisterEvent> CreateEventAsync(AuditContext context, EventLog e)
+        {
+            // The event element stores activity not represented as a cash register transaction (cashtransaction) or transaction line (ctline).
+            var cashRegisterEvent = new AuditfileCompanyLocationCashregisterEvent
+            {
+                // Unique system specific identification of this event.
+                // Replacing to limit to 35 characters
+                EventID = e.Id.ToString().Replace("-", ""),
 
-        //        // Reference to the type of event. Description of the system specific code must be stated in the table 'Basics' (basicType 13)
-        //        EventType = BasicsMapper.TranslateEventToBasicID(e),
+                // Reference to the type of event. Description of the system specific code must be stated in the table 'Basics' (basicType 13)
+                EventType = BasicsMapper.TranslateEventToBasicID(e.Type).ToString(),
 
-        //        EventDate = e.Date,
-        //        EventTime = FormatTime(e.Date),
+                EventDate = e.Date,
+                EventTime = FormatTime(e.Date),
 
-        //        EventText = e.Type,
+                EventText = e.Type.ToString(),
 
-        //        // Reference to the employee. Employee must be included in the table "employees".
-        //        EmpID = e.SourceID,
-        //    };
+                // Reference to the employee. Employee must be included in the table "employees".
+                EmpID = e.EmployeeId,
+            };
 
-        //    if (e.Type == EventLedgerTypes.XReport || e.Type == EventLedgerTypes.ZReport)
-        //    {
-        //        cashRegisterEvent.EventReport = new AuditfileCompanyLocationCashregisterEventEventReport
-        //        {
-        //            ReportID = e.Number,
-        //            ReportType = e.Type == EventLedgerTypes.XReport
-        //            ? AuditfileCompanyLocationCashregisterEventEventReportReportType.X_Report
-        //            : AuditfileCompanyLocationCashregisterEventEventReportReportType.Z_Report,
-        //            CompanyIdent = audit.Header.Company.RegistrationNumber,
-        //            CompanyName = audit.Header.Company.Name,
-        //            ReportDate = e.Report.Date,
-        //            ReportTime = FormatTime(e.Report.Date),
-        //            RegisterID = e.TerminalID,
-        //            ReportOpeningChangeFloat = e.Report.Change,
-        //            ReportReceiptNum = e.Report.ReceiptsPrinted.ToString(),
-        //            ReportOpenCashBoxNum = e.Report.CashDrawerOpenings.ToString(),
-        //            ReportReceiptCopyNum = e.Report.CopyReceiptsPrinted.ToString(),
-        //            ReportReceiptCopyAmnt = e.Report.TotalCopyReceiptsAmount,
-        //            ReportReceiptProformaNum = "0",
-        //            ReportReceiptProformaAmnt = 0,
-        //            ReportReturnNum = e.Report.ReturnCount.ToString(),
-        //            ReportReturnAmnt = Math.Abs(e.Report.TotalReturnsAmount.RoundFor(audit.Header.DefaultCurrencyCode)),
-        //            ReportDiscountNum = e.Report.DiscountCount.ToString(),
-        //            ReportDiscountAmnt = Math.Abs(e.Report.TotalDiscounts.RoundFor(audit.Header.DefaultCurrencyCode)),
-        //            ReportVoidTransNum = "0",
-        //            ReportVoidTransAmnt = 0,
-        //            ReportReceiptDeliveryNum = "0",
-        //            ReportReceiptDeliveryAmnt = 0,
-        //            ReportTrainingNum = "0",
-        //            ReportGrandTotalReturn = Math.Abs(e.Report.GrandTotalReturns),
-        //            ReportGrandTotalSales = Math.Abs(e.Report.GrandTotal),
-        //            ReportGrandTotalSalesNet = Math.Abs(e.Report.GrandTotalNet)
-        //        };
+            if (e.Type == EventLogType.XReport || e.Type == EventLogType.ZReport)
+            {
+                var report = await _reportStore.GetByNumber(context.Account.Id, e.ReportNumber);
 
-        //        cashRegisterEvent.EventReport.ReportTotalCashSales = new AuditfileCompanyLocationCashregisterEventEventReportReportTotalCashSales
-        //        {
-        //            TotalCashSaleAmnt = Math.Abs(cashRegisterEvent.EventReport.ReportGrandTotalSales)
-        //        };
+                cashRegisterEvent.EventReport = new AuditfileCompanyLocationCashregisterEventEventReport
+                {
+                    ReportID = report.Number,
+                    ReportType = e.Type == EventLogType.XReport
+                    ? AuditfileCompanyLocationCashregisterEventEventReportReportType.X_Report
+                    : AuditfileCompanyLocationCashregisterEventEventReportReportType.Z_Report,
+                    CompanyIdent = context.Account.RegistrationNumber,
+                    CompanyName = context.Account.Name,
+                    ReportDate = report.Date,
+                    ReportTime = FormatTime(report.Date),
+                    RegisterID = e.RegisterId,
+                    ReportOpeningChangeFloat = report.RegisterOpeningAmount,
+                    ReportOpenCashBoxNum = report.CashDrawerOpenings.ToString(),
+                    //TODO(andrei) resolve these properties
+                    //ReportReceiptNum = e.Report.ReceiptsPrinted.ToString(),
+                    //ReportReceiptCopyNum = e.Report.CopyReceiptsPrinted.ToString(),
+                    //ReportReceiptCopyAmnt = e.Report.TotalCopyReceiptsAmount,
+                    ReportReceiptProformaNum = "0",
+                    ReportReceiptProformaAmnt = 0,
+                    ReportReturnNum = report.Return.Count.ToString(),
+                    ReportReturnAmnt = Math.Abs(report.Return.Amount.RoundAwayFromZero()),
+                    ReportDiscountNum = report.Discount.Count.ToString(),
+                    ReportDiscountAmnt = Math.Abs(report.Discount.Amount.RoundAwayFromZero()),
+                    ReportVoidTransNum = "0",
+                    ReportVoidTransAmnt = 0,
+                    ReportReceiptDeliveryNum = "0",
+                    ReportReceiptDeliveryAmnt = 0,
+                    ReportTrainingNum = "0",
+                    ReportGrandTotalReturn = Math.Abs(report.Totals.Return),
+                    ReportGrandTotalSales = Math.Abs(report.Totals.Gross),
+                    ReportGrandTotalSalesNet = Math.Abs(report.Totals.Net)
+                };
 
-        //        // Only have 1 article group, because we do not have this. Total is the sum of all the payments and the count is the number of payments -tada-
-        //        cashRegisterEvent.EventReport.ReportArtGroups.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportArtGroupsReportArtGroup
-        //        {
-        //            ArtGroupID = ArticleGroupID,
-        //            ArtGroupAmnt = Math.Abs(e.Report.GrandTotal),
-        //            ArtGroupNum = e.Report.Payments.Sum(p => p.Count)
-        //        });
+                cashRegisterEvent.EventReport.ReportTotalCashSales = new AuditfileCompanyLocationCashregisterEventEventReportReportTotalCashSales
+                {
+                    TotalCashSaleAmnt = Math.Abs(cashRegisterEvent.EventReport.ReportGrandTotalSales)
+                };
 
-        //        // Summary of payments per type
-        //        cashRegisterEvent.EventReport.ReportPayments.AddRange(e.Report.Payments.Select(p => new AuditfileCompanyLocationCashregisterEventEventReportReportPaymentsReportPayment
-        //        {
-        //            PaymentType = p.Code,
-        //            PaymentNum = p.Count.ToString(),
-        //            PaymentAmnt = Math.Abs(p.Amount.RoundFor(audit.Header.DefaultCurrencyCode))
-        //        }));
+                // Only have 1 article group, because we do not have this. Total is the sum of all the payments and the count is the number of payments -tada-
+                cashRegisterEvent.EventReport.ReportArtGroups.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportArtGroupsReportArtGroup
+                {
+                    ArtGroupID = ArticleGroupID,
+                    ArtGroupAmnt = Math.Abs(report.Totals.Gross),
+                    ArtGroupNum = report.Payments.Sum(p => p.Count)
+                });
 
-        //        cashRegisterEvent.EventReport.ReportCashSalesVat.AddRange(e.Report.Taxes
-        //          .GroupBy(t => t.Rate)
-        //          .Select(t =>
-        //          {
-        //              var amount = t.Sum(g => g.Amount);
+                // Summary of payments per type
+                cashRegisterEvent.EventReport.ReportPayments.AddRange(report.Payments.Select(p => new AuditfileCompanyLocationCashregisterEventEventReportReportPaymentsReportPayment
+                {
+                    PaymentType = p.PaymentCategory.ToString(),
+                    PaymentNum = p.Count.ToString(),
+                    PaymentAmnt = Math.Abs(p.Amount.RoundAwayFromZero())
+                }));
 
-        //              return new AuditfileCompanyLocationCashregisterEventEventReportReportCashSalesVatReportCashSaleVat
-        //              {
-        //                  VatPerc = ((t.Key - 1) * 100).RoundOn(3), // TODO RoundOn check (rounds to 3)
-        //                  CashSaleAmnt = Math.Abs(t.Sum(g => g.Base + g.Amount)),
-        //                  VatAmnt = Math.Abs(amount),
-        //                  VatAmntTp = AmountToCreditType(amount),
-        //                  VatAmntTpSpecified = true
-        //              };
-        //          }));
+                cashRegisterEvent.EventReport.ReportCashSalesVat.AddRange(report.Taxes
+                  .GroupBy(t => t.TaxRate)
+                  .Select(t =>
+                  {
+                      var amount = t.Sum(g => g.Amount);
 
-        //        cashRegisterEvent.EventReport.ReportEmpPayments.AddRange(e.Report.PaymentsPerUser.Select(p => new AuditfileCompanyLocationCashregisterEventEventReportReportEmpPaymentsReportEmpPayment
-        //        {
-        //            EmpID = p.UserID.ToString(),
-        //            PaymentType = p.Description,
-        //            PaymentNum = p.Count.ToString(),
-        //            PaymentAmnt = Math.Abs(p.Amount)
-        //        }));
+                      return new AuditfileCompanyLocationCashregisterEventEventReportReportCashSalesVatReportCashSaleVat
+                      {
+                          VatPerc = Math.Round((t.Key - 1) * 100, 3), // TODO RoundOn check (rounds to 3)
+                          CashSaleAmnt = Math.Abs(t.Sum(g => g.Base + g.Amount)),
+                          VatAmnt = Math.Abs(amount),
+                          VatAmntTp = AmountToCreditType(amount),
+                          VatAmntTpSpecified = true
+                      };
+                  }));
 
-        //        // Do not have this
-        //        cashRegisterEvent.EventReport.ReportCorrLines.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportCorrLinesReportCorrLine
-        //        {
-        //            CorrLineAmnt = 0,
-        //            CorrLineNum = "0",
-        //            CorrLineType = "Korriger"
-        //        });
+                cashRegisterEvent.EventReport.ReportEmpPayments.AddRange(report.PaymentsPerEmployee.Select(p => new AuditfileCompanyLocationCashregisterEventEventReportReportEmpPaymentsReportEmpPayment
+                {
+                    EmpID = p.Employee.SystemId,
+                    PaymentType = p.Payment.PaymentCategory.ToString(),
+                    PaymentNum = p.Payment.Count.ToString(),
+                    PaymentAmnt = Math.Abs(p.Payment.Amount)
+                }));
 
-        //        // Do not have this
-        //        cashRegisterEvent.EventReport.ReportPriceInquiries.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportPriceInquiriesReportPriceInquiry
-        //        {
-        //            PriceInquiryAmnt = 0,
-        //            PriceInquiryNum = "0",
-        //            PriceInquiryGroup = ArticleGroupID
-        //        });
+                // Do not have this
+                cashRegisterEvent.EventReport.ReportCorrLines.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportCorrLinesReportCorrLine
+                {
+                    CorrLineAmnt = 0,
+                    CorrLineNum = "0",
+                    CorrLineType = "Korriger"
+                });
 
-        //        // Do not have this
-        //        cashRegisterEvent.EventReport.ReportOtherCorrs.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportOtherCorrsReportOtherCorr
-        //        {
-        //            OtherCorrAmnt = 0,
-        //            OtherCorrNum = "0",
-        //            OtherCorrType = "Korriger"
-        //        });
-        //    }
+                // Do not have this
+                cashRegisterEvent.EventReport.ReportPriceInquiries.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportPriceInquiriesReportPriceInquiry
+                {
+                    PriceInquiryAmnt = 0,
+                    PriceInquiryNum = "0",
+                    PriceInquiryGroup = ArticleGroupID
+                });
 
-        //    return cashRegisterEvent;
-        //}
+                // Do not have this
+                cashRegisterEvent.EventReport.ReportOtherCorrs.Add(new AuditfileCompanyLocationCashregisterEventEventReportReportOtherCorrsReportOtherCorr
+                {
+                    OtherCorrAmnt = 0,
+                    OtherCorrNum = "0",
+                    OtherCorrType = "Korriger"
+                });
+            }
 
-        private AuditfileCompanyLocation CreateLocation(AuditContext context, ICollection<Invoice> invoices)
+            return cashRegisterEvent;
+        }
+
+        private async Task<AuditfileCompanyLocation> CreateLocationAsync(AuditContext context, ICollection<Invoice> invoices)
         {
             if (!invoices.Any())
             {
@@ -553,17 +555,18 @@ namespace Vera.Norway
             };
 
             var invoicesGroupedByCashRegister = invoices.ToLookup(i => i.RegisterId);
-            //TODO events are missing
-            //var eventsGroupedByCashRegister = audit.MasterFiles.Events.ToLookup(e => e.TerminalID);
+            var eventsGroupedByCashRegister = context.Events.ToLookup(e => e.RegisterId);
 
             var registerIds = new HashSet<string>();
             registerIds.AddRange(invoicesGroupedByCashRegister.Select(g => g.Key));
+            registerIds.AddRange(eventsGroupedByCashRegister.Select(g => g.Key));
 
             foreach (var registerId in registerIds)
             {
-                var invoicesForTerminal = invoicesGroupedByCashRegister[registerId];
+                var invoicesForRegister = invoicesGroupedByCashRegister[registerId];
+                var eventsForRegister = eventsGroupedByCashRegister[registerId];
 
-                location.Cashregister.Add(CreateCashRegister(context, registerId, invoicesForTerminal));
+                location.Cashregister.Add(await CreateCashRegisterAsync(context, registerId, invoicesForRegister, eventsForRegister));
             }
 
             return location;

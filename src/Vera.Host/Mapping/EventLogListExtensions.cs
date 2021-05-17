@@ -16,14 +16,11 @@ namespace Vera.Host.Mapping
             var criteria = new EventLogCriteria
             {
                 EndDate = request.EndDate?.ToDateTime(),
-
                 StartDate = request.StartDate?.ToDateTime(),
-
                 Type = type,
-
                 RegisterId = request.RegisterId,
-
-                AccountId = accountId
+                AccountId = accountId,
+                SupplierSystemId = request.SupplierSystemId
             };
 
             return criteria;

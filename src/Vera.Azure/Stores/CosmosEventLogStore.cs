@@ -34,7 +34,8 @@ namespace Vera.Azure.Stores
             var orderedQueryable = _container.GetItemLinqQueryable<Document<EventLog>>(true);
 
             var queryable = orderedQueryable
-                .Where(x => x.Value.Supplier.AccountId == eventLogCriteria.AccountId);
+                .Where(x => x.Value.Supplier.AccountId == eventLogCriteria.AccountId &&
+                            x.Value.Supplier.SystemId == eventLogCriteria.SupplierSystemId);
             
             if (eventLogCriteria.StartDate.HasValue)
             {
