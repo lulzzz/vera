@@ -5,7 +5,7 @@ using Vera.Invoices;
 using Vera.Models;
 using Xunit;
 
-namespace Vera.Tests
+namespace Vera.Tests.Invoices
 {
     // TODO(kevin): elaborate tests
     public class InvoiceTotalsCalculatorTests

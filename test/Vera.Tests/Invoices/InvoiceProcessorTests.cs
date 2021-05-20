@@ -12,7 +12,7 @@ using Vera.Stores;
 using Vera.Tests.Shared;
 using Xunit;
 
-namespace Vera.Tests
+namespace Vera.Tests.Invoices
 {
     public class InvoiceProcessorTests
     {
