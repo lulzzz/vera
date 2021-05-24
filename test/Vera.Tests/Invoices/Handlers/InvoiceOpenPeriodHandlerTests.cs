@@ -56,7 +56,7 @@ namespace Vera.Tests.Invoices.Handlers
                 RegisterId = registerId.ToString()
             };
             var period = new Models.Period();
-            period.Registers.Add(new Models.Register { Id = registerId });
+            period.Registers.Add(new Models.PeriodRegisterEntry { RegisterId = registerId });
 
             periodStore.Setup(s => s.GetOpenPeriodForSupplier(It.IsAny<Guid>()))
                 .ReturnsAsync(period);

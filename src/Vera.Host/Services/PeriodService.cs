@@ -1,18 +1,20 @@
 ﻿using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using Vera.Bootstrap;
 using Vera.Concurrency;
 using Vera.Dependencies;
 using Vera.Grpc;
 using Vera.Grpc.Shared;
-using Vera.Stores;
-using Vera.Host.Security;
-using System.Linq;
-using Vera.Bootstrap;
 using Vera.Host.Mapping;
+using Vera.Host.Security;
 using static Vera.Bootstrap.PeriodManager;
+using Vera.Stores;
+using System.Linq;
+using System.Diagnostics;
 
 namespace Vera.Host.Services
 {
@@ -22,6 +24,7 @@ namespace Vera.Host.Services
         private readonly ISupplierStore _supplierStore;
         private readonly IPeriodStore _periodStore;
         private readonly IAccountStore _accountStore;
+        private readonly IRegisterStore _registerStore;
         private readonly IDateProvider _dateProvider;
         private readonly ILocker _locker;
         private readonly PeriodManager periodManager;
@@ -30,13 +33,15 @@ namespace Vera.Host.Services
             ISupplierStore supplierStore,
             IPeriodStore periodStore,
             IAccountStore accountStore,
+            IRegisterStore registerStore,
             IDateProvider dateProvider,
-            ILocker locker,
+        ILocker locker,
             PeriodManager periodManager)
         {
             _supplierStore = supplierStore;
             _periodStore = periodStore;
             _accountStore = accountStore;
+            _registerStore = registerStore;
             _dateProvider = dateProvider;
             _locker = locker;
             this.periodManager = periodManager;
@@ -83,11 +88,32 @@ namespace Vera.Host.Services
                 SupplierSystemId = request.SupplierSystemId,
                 PeriodId = request.Id
             });
-            var registers = request.Registers.Select(r => new Models.Register 
+
+            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
+            if (supplier == null)
             {
-                Id = Guid.Parse(r.Id),
-                ClosingAmount = r.ClosingAmount
-            });
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+            }
+
+            var registersToClose = request.Registers.Select(x => Guid.Parse(x.Key));
+
+            var registers = await _registerStore.GetRegistersBasedOnSupplier(registersToClose, supplier.Id);
+
+            if (registers.Count != request.Registers.Count)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Registers do not exist"));
+            }
+
+            var periodRegisterEntries = new List<Models.PeriodRegisterEntry>();
+
+            foreach (var register in registers)
+            {
+                periodRegisterEntries.Add(new Models.PeriodRegisterEntry
+                {
+                    RegisterId = register.Id,
+                    ClosingAmount = request.Registers[register.Id.ToString()].ClosingAmount
+                });
+            }
 
             try
             {
@@ -95,7 +121,7 @@ namespace Vera.Host.Services
                 {
                     Account = account,
                     Period = period,
-                    Registers = registers,
+                    Registers = periodRegisterEntries,
                     EmployeeId = request.EmployeeId
                 });
             }
@@ -128,7 +154,7 @@ namespace Vera.Host.Services
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
             }
 
-            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id); 
+            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
             if (period == null)
             {
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Period does not exist"));

@@ -20,8 +20,8 @@ namespace Vera.Bootstrap
         public PeriodManager(
             IRegisterReportGenerator registerReportGenerator,
             IReportHandlerFactory reportHandlerFactory,
-            IAccountComponentFactoryCollection accountComponentFactoryCollection, 
-            IPeriodStore periodStore, 
+            IAccountComponentFactoryCollection accountComponentFactoryCollection,
+            IPeriodStore periodStore,
             IDateProvider dateProvider)
         {
             _registerReportGenerator = registerReportGenerator;
@@ -67,31 +67,31 @@ namespace Vera.Bootstrap
                 EmployeeId = model.EmployeeId
             };
 
-            foreach (var register in period.Registers)
+            foreach (var registerEntry in period.Registers)
             {
-                registerReportContext.RegisterId = register.Id.ToString();
+                registerReportContext.RegisterId = registerEntry.RegisterId.ToString();
                 var report = await _registerReportGenerator.Generate(registerReportContext);
 
                 await handler.Handle(report);
             }
         }
 
-        private void CheckAreValidRegisters(ICollection<Register> openRegisters, IEnumerable<Register> registersToClose)
+        private void CheckAreValidRegisters(ICollection<PeriodRegisterEntry> openRegisters, IEnumerable<PeriodRegisterEntry> registersToClose)
         {
             if (openRegisters.Count != registersToClose.Count())
             {
                 throw new ValidationException("Missing one or more registers in the closing");
             }
 
-            var closingRegistersIds = registersToClose.ToDictionary(r => r.Id);
-            foreach (var register in openRegisters)
+            var closingRegistersIds = registersToClose.ToDictionary(r => r.RegisterId);
+            foreach (var registerEntry in openRegisters)
             {
-                if (!closingRegistersIds.TryGetValue(register.Id, out var closingRegister))
+                if (!closingRegistersIds.TryGetValue(registerEntry.RegisterId, out var closingRegister))
                 {
-                    throw new ValidationException($"Unkown register {register.Id}");
+                    throw new ValidationException($"Unkown register {registerEntry.RegisterId}");
                 }
 
-                register.ClosingAmount = closingRegister.ClosingAmount;
+                registerEntry.ClosingAmount = closingRegister.ClosingAmount;
             }
         }
 
@@ -99,7 +99,7 @@ namespace Vera.Bootstrap
         {
             public Account Account { get; set; }
             public Period Period { get; set; }
-            public IEnumerable<Register> Registers { get; set; }
+            public IEnumerable<PeriodRegisterEntry> Registers { get; set; }
             public string EmployeeId { get; set; }
         }
     }

@@ -18,6 +18,11 @@ namespace Vera.Azure
         public string Companies { get; init; } = "companies";
 
         /// <summary>
+        /// Name of the registers container.
+        /// </summary>
+        public string Registers { get; set; } = "registers";
+
+        /// <summary>
         /// Name of the audits container.
         /// </summary>
         public string Audits { get; init; } = "audits";

@@ -1,0 +1,53 @@
+﻿syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+import "Protos/shared.proto";
+
+package vera.grpc;
+
+service RegisterService {
+	rpc OpenRegister(OpenRegisterRequest) returns (OpenRegisterReply);
+	rpc CreateRegister(CreateRegisterRequest) returns (CreateRegisterReply);
+	rpc Get(GetRegisterRequest) returns (GetRegisterReply);
+	rpc GetAll(GetAllRegistersRequest) returns (GetAllRegistersReply);
+}
+
+message OpenRegisterRequest {
+	string supplierSystemId = 1;
+	vera.grpc.shared.DecimalValue openingAmount = 2;
+	string registerId = 3;
+}
+
+message OpenRegisterReply {
+	string id = 1;
+}
+
+message CreateRegisterRequest {
+	string supplierSystemId = 1;
+	
+    // Identifier of the register in the external system
+    string systemId = 2;
+    
+	string name = 3;
+}
+
+message CreateRegisterReply {
+	string id = 1;
+}
+
+message GetRegisterRequest {
+	string id = 1;
+	string supplierSystemId = 2;
+}
+
+message GetAllRegistersRequest {
+	string supplierSystemId = 1;
+}
+
+message GetAllRegistersReply {
+	repeated vera.grpc.shared.Register registers = 1;
+}
+
+message GetRegisterReply {
+	vera.grpc.shared.Register register = 1;
+}

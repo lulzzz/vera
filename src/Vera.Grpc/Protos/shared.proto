@@ -33,8 +33,13 @@ message Supplier {
 message Register {
 	string id = 1;
 
-	vera.grpc.shared.DecimalValue openingAmount = 2;
-	vera.grpc.shared.DecimalValue closingAmount = 3;
+	string name = 2;
+	RegisterStatus status = 3;
+	map<string, string> data = 4;
+	string supplierId = 5;
+	
+    // Identifier of the register in the external system
+    string systemId = 6;
 }
 
 message Address {
@@ -85,4 +90,15 @@ enum PaymentCategory {
     CHANGE = 4;
     VOUCHER = 5;
     ONLINE = 6;
+}
+
+enum RegisterStatus {
+    // Additional steps required to open, no transactions allowed, yet
+    PENDING = 0;
+
+    // Ready for transactions
+    OPEN = 1;
+
+    // No longer accepting transactions
+    CLOSED = 2;
 }

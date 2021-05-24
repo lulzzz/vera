@@ -24,7 +24,7 @@ namespace Vera.Tests
         {
             var registerId = Guid.NewGuid();
             var period = new Period();
-            period.Registers.Add(new Register { Id = registerId, OpeningAmount = 10m });
+            period.Registers.Add(new PeriodRegisterEntry { RegisterId = registerId, OpeningAmount = 10m });
 
             var dateProvider = new Mock<RealLifeDateProvider>();
             var invoiceStore = new Mock<IInvoiceStore>();
@@ -70,7 +70,7 @@ namespace Vera.Tests
             var supplier = new Supplier();
             var registerId = Guid.NewGuid().ToString();
             var period = new Period();
-            period.Registers.Add(new Register { Id = Guid.Parse(registerId), OpeningAmount = 10m });
+            period.Registers.Add(new PeriodRegisterEntry { RegisterId = Guid.Parse(registerId), OpeningAmount = 10m });
 
             var calculator = new InvoiceTotalsCalculator();
             var builder = new InvoiceBuilder();
@@ -155,7 +155,7 @@ namespace Vera.Tests
             var supplier = new Supplier();
             var registerId = Guid.NewGuid();
             var period = new Period { Supplier = supplier };
-            period.Registers.Add(new Register { Id = registerId, OpeningAmount = 10m });
+            period.Registers.Add(new PeriodRegisterEntry { RegisterId = registerId, OpeningAmount = 10m });
 
             var calculator = new InvoiceTotalsCalculator();
             var builder = new InvoiceBuilder();

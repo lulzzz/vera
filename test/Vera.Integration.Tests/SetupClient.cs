@@ -1,5 +1,5 @@
-using System.Threading.Tasks;
 using Grpc.Core;
+using System.Threading.Tasks;
 using Vera.Grpc;
 using Vera.Host.Security;
 
@@ -15,7 +15,7 @@ namespace Vera.Integration.Tests
             _setup = setup;
             _loginToken = loginToken;
             AccountId = accountId;
-            
+
             Invoice = new InvoiceService.InvoiceServiceClient(channel);
             Audit = new AuditService.AuditServiceClient(channel);
             Receipt = new ReceiptService.ReceiptServiceClient(channel);
@@ -36,10 +36,18 @@ namespace Vera.Integration.Tests
 
         public async Task<OpenRegisterReply> OpenRegister(decimal amount)
         {
+            var createRegisterRequest = new CreateRegisterRequest()
+            {
+                SupplierSystemId = SupplierSystemId,
+            };
+
+            var register = await Register.CreateRegisterAsync(createRegisterRequest, AuthorizedMetadata);
+
             var reply = await Register.OpenRegisterAsync(new OpenRegisterRequest
             {
                 SupplierSystemId = SupplierSystemId,
-                OpeningAmount = amount
+                OpeningAmount = amount,
+                RegisterId = register.Id,
             }, AuthorizedMetadata);
 
             return reply;

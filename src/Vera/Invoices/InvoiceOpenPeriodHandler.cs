@@ -27,7 +27,7 @@ namespace Vera.Invoices
 
             invoice.PeriodId = period.Id;
 
-            var register = period.Registers.FirstOrDefault(r => r.Id.ToString() == invoice.RegisterId);
+            var register = period.Registers.FirstOrDefault(r => r.RegisterId.ToString() == invoice.RegisterId);
             if (register == null)
             {
                 throw new ValidationException("An open register is required");

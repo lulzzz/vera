@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vera.Grpc;
-using Vera.Grpc.Shared;
+using Vera.Tests.TestParameters;
 using Xunit;
 
 namespace Vera.Integration.Tests.Common
@@ -69,27 +69,38 @@ namespace Vera.Integration.Tests.Common
             var openPeriodRequest = new OpenPeriodRequest { SupplierSystemId = client.SupplierSystemId };
             var openPeriodReply = await client.Period.OpenPeriodAsync(openPeriodRequest, client.AuthorizedMetadata);
 
+            var createRegisterRequest = new CreateRegisterRequest()
+            {
+                SupplierSystemId = client.SupplierSystemId,
+            };
+
+            var register = await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
+
             var openRegisterRequest = new OpenRegisterRequest
             {
                 OpeningAmount = 10m,
-                SupplierSystemId = client.SupplierSystemId
+                SupplierSystemId = client.SupplierSystemId,
+                RegisterId = register.Id
             };
 
             var openRegisterReply = await client.Register.OpenRegisterAsync(openRegisterRequest, client.AuthorizedMetadata);
 
-            var registers = new RepeatedField<Register>
+            var registerEntries = new Dictionary<string, ClosePeriodRegisterEntry>
             {
-                new Register
                 {
-                    Id = openRegisterReply.Id,
-                    ClosingAmount = 100m
+                    openRegisterReply.Id,
+                    new ClosePeriodRegisterEntry
+                    {
+                        Id = openRegisterReply.Id,
+                        ClosingAmount = 100m,
+                    }
                 }
             };
             var closePeriodRequest = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId,
-                Registers = { registers }
+                Registers = { registerEntries }
             };
 
             await client.Period.ClosePeriodAsync(closePeriodRequest, client.AuthorizedMetadata);
@@ -104,13 +115,14 @@ namespace Vera.Integration.Tests.Common
             Assert.NotEqual(DateTime.MinValue, period.Closing.ToDateTime());
         }
 
-        [Fact]
-        public async Task Should_not_allow_closing_period()
+        [Theory]
+        [ClassData(typeof(CertificationKeys))]
+        public async Task Should_not_allow_closing_period(string certification)
         {
             var accountContext = new AccountContext
             {
                 AccountName = _faker.Company.CompanyName(),
-                Certification = "123",
+                Certification = certification,
                 SupplierSystemId = _faker.Random.AlphaNumeric(10)
             };
 
@@ -119,10 +131,18 @@ namespace Vera.Integration.Tests.Common
             var openPeriodRequest = new OpenPeriodRequest { SupplierSystemId = client.SupplierSystemId };
             var openPeriodReply = await client.Period.OpenPeriodAsync(openPeriodRequest, client.AuthorizedMetadata);
 
+            var createRegisterRequest = new CreateRegisterRequest()
+            {
+                SupplierSystemId = client.SupplierSystemId,
+            };
+
+            var register = await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
+
             var openRegisterRequest = new OpenRegisterRequest
             {
                 OpeningAmount = 10m,
-                SupplierSystemId = client.SupplierSystemId
+                SupplierSystemId = client.SupplierSystemId,
+                RegisterId = register.Id
             };
 
             var openRegisterReply = await client.Register.OpenRegisterAsync(openRegisterRequest, client.AuthorizedMetadata);
@@ -133,17 +153,23 @@ namespace Vera.Integration.Tests.Common
             };
 
             var scenarios = new List<ClosePeriodRequest>();
-            var registers = new RepeatedField<Register>
+            var registerEntries = new Dictionary<string, ClosePeriodRegisterEntry>
             {
-                new Register
                 {
-                    Id = openRegisterReply.Id,
-                    ClosingAmount = 100m
+                    openRegisterReply.Id,
+                    new ClosePeriodRegisterEntry
+                    {
+                        Id = openRegisterReply.Id,
+                        ClosingAmount = 100m,
+                    }
                 },
-                new Register
                 {
-                    Id = openPeriodReply.Id,
-                    ClosingAmount = 200m
+                    openPeriodReply.Id,
+                    new ClosePeriodRegisterEntry
+                    {
+                        Id = openPeriodReply.Id,
+                        ClosingAmount = 200m
+                    }
                 }
             };
 
@@ -154,22 +180,26 @@ namespace Vera.Integration.Tests.Common
                 SupplierSystemId = client.SupplierSystemId
             };
             scenarios.Add(closePeriodRequest1);
-            
+
             //more registers
             var closePeriodRequest2 = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId,
-                Registers = {registers}
+                Registers = { registerEntries }
             };
             scenarios.Add(closePeriodRequest2);
+
+            var lastRegisterItem = new Dictionary<string, ClosePeriodRegisterEntry> {
+                { registerEntries.Last().Key,registerEntries.Last().Value}
+            };
 
             //wrong register
             var closePeriodRequest3 = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId,
-                Registers = { registers.Skip(1) }
+                Registers = { lastRegisterItem }
             };
             scenarios.Add(closePeriodRequest3);
 

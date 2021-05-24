@@ -8,7 +8,7 @@ namespace Vera.Models
         public Period()
         {
             Id = Guid.NewGuid();
-            Registers = new List<Register>();
+            Registers = new List<PeriodRegisterEntry>();
         }
 
         public Guid Id { get; set; }
@@ -29,6 +29,6 @@ namespace Vera.Models
         /// <summary>
         /// A collection of registers in a certain period
         /// </summary>
-        public ICollection<Register> Registers { get; }
+        public ICollection<PeriodRegisterEntry> Registers { get; }
     }
 }

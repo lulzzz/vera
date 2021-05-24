@@ -1,8 +1,8 @@
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 using Vera.Concurrency;
 using Vera.Dependencies;
 using Vera.Invoices;
@@ -44,7 +44,7 @@ namespace Vera.Tests.Invoices
 
             factory.Setup(f => f.CreateInvoiceValidators())
                 .Returns(new List<IInvoiceValidator> { new NullInvoiceValidator() });
-            
+
             bucketGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
                 .Returns(expectedBucket);
 
@@ -56,7 +56,7 @@ namespace Vera.Tests.Invoices
 
             last.SetupGet(x => x.NextSequence)
                 .Returns(1);
-            
+
             chainStore.Setup(x => x.Last(It.IsAny<ChainContext>()))
                 .ReturnsAsync(last.Object);
 
@@ -64,7 +64,7 @@ namespace Vera.Tests.Invoices
                 .ReturnsAsync(new Supplier());
 
             var registerId = Guid.NewGuid();
-            var period = new Period { Registers = { new Register { Id = registerId } }};
+            var period = new Period { Registers = { new PeriodRegisterEntry { RegisterId = registerId } } };
             periodStore.Setup(x => x.GetOpenPeriodForSupplier(It.IsAny<Guid>()))
                 .ReturnsAsync(period);
 

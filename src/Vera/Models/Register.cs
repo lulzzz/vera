@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Vera.Models
 {
@@ -11,14 +12,14 @@ namespace Vera.Models
 
         public Guid Id { get; set; }
 
-        /// <summary>
-        /// Amount of cash that's phyiscally in the register when it was opening
-        /// </summary>
-        public decimal OpeningAmount { get; set; }
+        public string SystemId { get; set; }
 
-        /// <summary>
-        /// Amount of cash that's phyiscally in the register when it was closing
-        /// </summary>
-        public decimal ClosingAmount { get; set; }
+        public Guid SupplierId { get; set; }
+
+        public string Name { get; set; }
+
+        public RegisterStatus Status { get; set; }
+
+        public IDictionary<string, string> Data { get; set; }
     }
 }

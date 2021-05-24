@@ -3,11 +3,13 @@ using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
+using Vera.Dependencies.Handlers;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Audits;
 using Vera.Portugal.Invoices;
 using Vera.Portugal.Stores;
+using Vera.Registers;
 using Vera.Reports;
 using Vera.Signing;
 using Vera.Thermal;
@@ -75,6 +77,11 @@ namespace Vera.Portugal
                 _configuration.CertificateNumber,
                 _wdStore
             );
+        }
+
+        public IRegisterInitializer OpenRegisterInitializer()
+        {
+            return new OpenRegisterInitializer();
         }
     }
 }

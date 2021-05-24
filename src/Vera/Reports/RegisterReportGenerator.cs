@@ -83,7 +83,7 @@ namespace Vera.Reports
             });
             var cashDrawerOpenings = events?.Count ?? 0;
 
-            var register = period.Registers.FirstOrDefault(r => r.Id == Guid.Parse(context.RegisterId));
+            var register = period.Registers.FirstOrDefault(r => r.RegisterId == Guid.Parse(context.RegisterId));
 
             if (invoicesByRegister == null || !invoicesByRegister.Any())
             {

@@ -3,9 +3,11 @@ using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
+using Vera.Dependencies.Handlers;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Norway.Audit;
+using Vera.Registers;
 using Vera.Reports;
 using Vera.Signing;
 using Vera.Stores;
@@ -65,6 +67,11 @@ namespace Vera.Norway
         public IAuditWriter CreateAuditWriter()
         {
             return new AuditWriter(new RealLifeDateProvider(), _reportStore);
+        }
+
+        public IRegisterInitializer OpenRegisterInitializer()
+        {
+            return new OpenRegisterInitializer();
         }
     }
 }
