@@ -69,7 +69,7 @@ namespace Vera.Norway
             return new AuditWriter(new RealLifeDateProvider(), _reportStore);
         }
 
-        public IRegisterInitializer OpenRegisterInitializer()
+        public IRegisterInitializer CreateRegisterInitializer()
         {
             return new OpenRegisterInitializer();
         }

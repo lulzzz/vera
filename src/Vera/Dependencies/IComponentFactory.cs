@@ -19,6 +19,6 @@ namespace Vera.Dependencies
 
         IAuditWriter CreateAuditWriter();
 
-        IRegisterInitializer OpenRegisterInitializer();
+        IRegisterInitializer CreateRegisterInitializer();
     }
 }

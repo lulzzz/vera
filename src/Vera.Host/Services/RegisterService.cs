@@ -1,13 +1,12 @@
 ﻿using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Vera.Bootstrap;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
+using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.Host.Services
@@ -41,6 +40,7 @@ namespace Vera.Host.Services
             {
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
             }
+            
             var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
             if (period == null)
             {
@@ -58,11 +58,15 @@ namespace Vera.Host.Services
                 OpeningAmount = request.OpeningAmount,
                 RegisterId = register.Id
             };
+            
             period.Registers.Add(registerEntry);
 
             await _periodStore.Update(period);
 
-            return new OpenRegisterReply { Id = registerEntry.RegisterId.ToString() };
+            return new OpenRegisterReply
+            {
+                Id = registerEntry.RegisterId.ToString()
+            };
         }
 
         public override async Task<CreateRegisterReply> CreateRegister(CreateRegisterRequest request, ServerCallContext context)
@@ -73,18 +77,25 @@ namespace Vera.Host.Services
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
             }
 
-            var newRegister = request.Unpack(supplier.Id);
+            var newRegister = new Register
+            {
+                Name = request.Name,
+                SupplierId = supplier.Id,
+                SystemId = request.SystemId,
+                Status = RegisterStatus.Pending
+            };
 
             var account = await context.ResolveAccount(_accountStore);
-
+            
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
-            var openRegisterInitializer = factory.OpenRegisterInitializer();
-
-            await openRegisterInitializer.Initialize(newRegister);
+            await factory.CreateRegisterInitializer().Initialize(newRegister);
 
             await _registerStore.Store(newRegister);
 
-            return new CreateRegisterReply { Id = newRegister.Id.ToString() };
+            return new CreateRegisterReply
+            {
+                Id = newRegister.Id.ToString()
+            };
         }
 
         public override async Task<GetRegisterReply> Get(GetRegisterRequest request, ServerCallContext context)
@@ -117,24 +128,14 @@ namespace Vera.Host.Services
 
             var registers = await _registerStore.GetOpenRegistersForSupplier(supplier.Id);
 
-            if (registers != null && !registers.Any() || registers == null)
-            {
-                return new GetAllRegistersReply();
-            }
-
-            return PackRegisters(registers);
-        }
-
-        public GetAllRegistersReply PackRegisters(ICollection<Models.Register> registers)
-        {
-            var grpcRegisters = new GetAllRegistersReply();
+            var reply = new GetAllRegistersReply();
 
             foreach (var register in registers)
             {
-                grpcRegisters.Registers.Add(register.Pack());
+                reply.Registers.Add(register.Pack());
             }
 
-            return grpcRegisters;
+            return reply;
         }
     }
 }

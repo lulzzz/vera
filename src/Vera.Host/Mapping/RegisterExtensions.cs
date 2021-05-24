@@ -1,5 +1,4 @@
 using System;
-using Vera.Grpc;
 using Vera.Grpc.Shared;
 
 namespace Vera.Host.Mapping
@@ -18,21 +17,6 @@ namespace Vera.Host.Mapping
                 SupplierId = Guid.Parse(register.SupplierId),
                 SystemId = register.SystemId,
                 Data = register.Data
-            };
-
-            return result;
-        }
-
-        public static Models.Register Unpack(this CreateRegisterRequest register, Guid supplierId)
-        {
-            if (register == null) return null;
-
-            var result = new Models.Register
-            {
-                Name = register.Name,
-                SupplierId = supplierId,
-                SystemId = register.SystemId,
-                Status = Models.RegisterStatus.Pending,
             };
 
             return result;

@@ -79,7 +79,7 @@ namespace Vera.Portugal
             );
         }
 
-        public IRegisterInitializer OpenRegisterInitializer()
+        public IRegisterInitializer CreateRegisterInitializer()
         {
             return new OpenRegisterInitializer();
         }

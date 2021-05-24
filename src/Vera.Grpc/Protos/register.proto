@@ -1,6 +1,5 @@
 ﻿syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
 import "Protos/shared.proto";
 
 package vera.grpc;
