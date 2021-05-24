@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Vera.Concurrency;
-using Vera.Dependencies;
 using Vera.Dependencies.Handlers;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.WorkingDocuments;
+using Vera.Portugal.Stores;
 using Vera.Stores;
 
 namespace Vera.Portugal.Invoices

@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using Vera.Models;
 
-namespace Vera.Models.Portugal
+namespace Vera.Portugal.Models
 {
     public class WorkingDocument
     {

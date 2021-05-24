@@ -4,7 +4,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using Vera.Dependencies;
-using Vera.Stores;
+using Vera.Portugal.Stores;
 using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
 
 namespace Vera.Portugal

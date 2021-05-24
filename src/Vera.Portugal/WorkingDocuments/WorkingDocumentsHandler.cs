@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Vera.Dependencies.Handlers;
 using Vera.Extensions;
 using Vera.Models;
+using Vera.Portugal.Stores;
 using Vera.Signing;
 using Vera.Stores;
 
@@ -38,7 +39,7 @@ namespace Vera.Portugal.WorkingDocuments
                 return;
             }
 
-            var wd = new Vera.Models.Portugal.WorkingDocument
+            var wd = new Models.WorkingDocument
             {
                 InvoiceId = invoice.Id,
                 PeriodId = invoice.PeriodId,

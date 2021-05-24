@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
+    <ProjectReference Include="..\Vera.Azure\Vera.Azure.csproj" />
     <ProjectReference Include="..\Vera.Documents\Vera.Documents.csproj" />
     <ProjectReference Include="..\Vera\Vera.csproj" />
   </ItemGroup>

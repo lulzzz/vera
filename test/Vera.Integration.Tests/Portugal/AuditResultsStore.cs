@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Vera.Grpc;
-using Vera.Models.Portugal;
 using Vera.Portugal.Models;
 using Invoice = Vera.Models.Invoice;
 

@@ -7,7 +7,7 @@ using Vera.Extensions;
 using Vera.Models;
 using Vera.Portugal.Invoices;
 using Vera.Portugal.Models;
-using Vera.Stores;
+using Vera.Portugal.Stores;
 using Invoice = Vera.Models.Invoice;
 using ProductType = Vera.Portugal.Models.ProductType;
 

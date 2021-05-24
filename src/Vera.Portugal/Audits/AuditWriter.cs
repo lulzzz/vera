@@ -6,7 +6,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using Vera.Audits;
 using Vera.Portugal.Models;
-using Vera.Stores;
+using Vera.Portugal.Stores;
 
 namespace Vera.Portugal.Audits
 {

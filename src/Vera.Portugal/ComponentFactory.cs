@@ -7,9 +7,9 @@ using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Audits;
 using Vera.Portugal.Invoices;
+using Vera.Portugal.Stores;
 using Vera.Reports;
 using Vera.Signing;
-using Vera.Stores;
 using Vera.Thermal;
 
 namespace Vera.Portugal

@@ -47,8 +47,8 @@ namespace Vera.Host
             return Microsoft.Extensions.Hosting.Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(wb => wb.UseStartup<Startup>())
                 .UseSerilog()
-                .UseVera()
-                .UseAzure();
+                .UseAzure()
+                .UseVera();
         }
     }
 }

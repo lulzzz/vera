@@ -3,7 +3,7 @@ using Moq;
 using System.Text;
 using System.Threading.Tasks;
 using Vera.Models;
-using Vera.Models.Portugal;
+using Vera.Portugal.Stores;
 using Vera.Portugal.WorkingDocuments;
 using Vera.Signing;
 using Vera.Stores;
@@ -56,7 +56,7 @@ namespace Vera.Portugal.Tests
 
             await handler.Handle(invoice);
 
-            wdStore.Verify(w => w.Store(It.IsAny<WorkingDocument>()), Times.Exactly(1));
+            wdStore.Verify(w => w.Store(It.IsAny<Models.WorkingDocument>()), Times.Exactly(1));
         }
     }
 }

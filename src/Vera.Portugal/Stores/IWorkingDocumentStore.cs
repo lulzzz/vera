@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Vera.Models.Portugal;
+using Vera.Portugal.Models;
 
-namespace Vera.Stores
+namespace Vera.Portugal.Stores
 {
     public interface IWorkingDocumentStore
     {

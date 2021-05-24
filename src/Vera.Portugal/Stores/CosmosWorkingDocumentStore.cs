@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using Vera.Models.Portugal;
-using Vera.Stores;
+using Vera.Azure.Stores;
+using Vera.Portugal.Models;
 
-namespace Vera.Azure.Stores
+namespace Vera.Portugal.Stores
 {
     public class CosmosWorkingDocumentStore : IWorkingDocumentStore
     {
