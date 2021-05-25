@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <PackageReference Include="fiskaly-dotnet-sdk" Version="1.2.200" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Vera\Vera.csproj" />
+  </ItemGroup>
+</Project>
