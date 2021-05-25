@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\Vera.Poland\Vera.Poland.csproj" />
+      <ProjectReference Include="..\Vera.Tests\Vera.Tests.csproj" />
+    </ItemGroup>
+
+</Project>

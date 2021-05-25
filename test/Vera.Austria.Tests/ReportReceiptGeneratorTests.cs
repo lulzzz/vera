@@ -30,32 +30,32 @@ namespace Vera.Austria.Tests
                 Discount = new RegisterReport.DiscountReport { Amount = -10m, Count = 1 },
                 Payments = new List<PaymentReport>
                 {
-                    new PaymentReport
+                    new()
                     {
                         Amount = 2.4079m, Count = 1, PaymentCategory = PaymentCategory.Cash
                     },
-                    new PaymentReport
+                    new()
                     {
                         Amount = 100m, Count = 1, PaymentCategory = PaymentCategory.Debit
                     },
-                    new PaymentReport
+                    new()
                     {
                         Amount = 90m, Count = 1, PaymentCategory = PaymentCategory.Credit
                     }
                 },
                 PaymentsPerEmployee = new List<EmployeePaymentsReport>
                 {
-                    new EmployeePaymentsReport
+                    new()
                     {
                         Employee = employee,
                         Payment = new PaymentReport{Amount = 2.4079m, Count = 1, PaymentCategory = PaymentCategory.Cash}
                     },
-                    new EmployeePaymentsReport
+                    new()
                     {
                         Employee = employee,
                         Payment = new PaymentReport{Amount = 100m, Count = 1, PaymentCategory = PaymentCategory.Debit}
                     },
-                    new EmployeePaymentsReport
+                    new()
                     {
                         Employee = employee,
                         Payment = new PaymentReport{Amount = 90m, Count = 1, PaymentCategory = PaymentCategory.Credit}
@@ -63,13 +63,13 @@ namespace Vera.Austria.Tests
                 },
                 Products = new List<ProductReport>
                 {
-                    new ProductReport { Amount = 200m, Count = 4, Type = ProductType.Goods}
+                    new() { Amount = 200m, Count = 4, Type = ProductType.Goods}
                 },
                 Return = new ReturnReport { Count = 1, Amount = -2.41m },
                 Taxes = new List<TaxesReport>
                 {
-                    new TaxesReport{Amount = 17.78m, TaxesCategory = TaxesCategory.High, TaxRate = 1.21m},
-                    new TaxesReport{Amount = 14.53m, TaxesCategory = TaxesCategory.High, TaxRate = 1.17m}
+                    new() {Amount = 17.78m, TaxesCategory = TaxesCategory.High, TaxRate = 1.21m},
+                    new() {Amount = 14.53m, TaxesCategory = TaxesCategory.High, TaxRate = 1.17m}
                 },
                 Totals = new TotalsReport
                 {
@@ -91,7 +91,7 @@ namespace Vera.Austria.Tests
                 Original = false,
                 Prints = new List<PrintTrail>
                 {
-                    new PrintTrail{},
+                    new() {},
                 }
             };
 
