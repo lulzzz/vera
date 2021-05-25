@@ -8,6 +8,9 @@ using Vera.Signing;
 
 namespace Vera.Portugal.Invoices
 {
+    /// <summary>
+    /// Creates a signature for an invoice based on the document "Order No. 8632/2014 of the 3 of July".
+    /// </summary>
     public sealed class PackageSigner : IPackageSigner
     {
         private readonly RSA _rsa;
