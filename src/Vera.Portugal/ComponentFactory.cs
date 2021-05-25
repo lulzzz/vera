@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
-using Vera.Dependencies.Handlers;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Audits;
@@ -81,7 +80,12 @@ namespace Vera.Portugal
 
         public IRegisterInitializer CreateRegisterInitializer()
         {
-            return new OpenRegisterInitializer();
+            return new SimpleRegisterInitializer();
+        }
+
+        public IRegisterCloser CreateRegisterCloser()
+        {
+            return new SimpleRegisterCloser();
         }
     }
 }

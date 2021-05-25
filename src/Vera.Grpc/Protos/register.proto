@@ -6,6 +6,7 @@ package vera.grpc;
 
 service RegisterService {
 	rpc OpenRegister(OpenRegisterRequest) returns (OpenRegisterReply);
+	rpc CloseRegister(CloseRegisterRequest) returns (CloseRegisterReply);
 	rpc CreateRegister(CreateRegisterRequest) returns (CreateRegisterReply);
 	rpc Get(GetRegisterRequest) returns (GetRegisterReply);
 	rpc GetAll(GetAllRegistersRequest) returns (GetAllRegistersReply);
@@ -18,6 +19,15 @@ message OpenRegisterRequest {
 }
 
 message OpenRegisterReply {
+	string id = 1;
+}
+
+message CloseRegisterRequest {
+	string systemId = 1;
+	string supplierSystemId = 2;
+}
+
+message CloseRegisterReply {
 	string id = 1;
 }
 

@@ -37,6 +37,21 @@ namespace Vera.Azure.Stores
             }
         }
 
+        public async Task<Register> GetBySystemIdAndSupplierId(string systemId, Guid supplierId)
+        {
+            try
+            {
+                return await _container.GetItemLinqQueryable<Document<Register>>(true)
+                    .Where(x => x.Value.SystemId == systemId &&
+                                x.Value.SupplierId == supplierId)
+                    .FirstOrDefault();
+            }
+            catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+        }
+
         public async Task<ICollection<Register>> GetOpenRegistersForSupplier(Guid supplierId)
         {
             var queryable = _container.GetItemLinqQueryable<Document<Register>>(true)

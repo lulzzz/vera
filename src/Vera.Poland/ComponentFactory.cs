@@ -56,7 +56,12 @@ namespace Vera.Poland
 
         public IRegisterInitializer CreateRegisterInitializer()
         {
-            return new OpenRegisterInitializer();
+            return new SimpleRegisterInitializer();
+        }
+
+        public IRegisterCloser CreateRegisterCloser()
+        {
+            return new SimpleRegisterCloser();
         }
     }
 }

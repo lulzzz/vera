@@ -69,6 +69,33 @@ namespace Vera.Host.Services
             };
         }
 
+        public override async Task<CloseRegisterReply> CloseRegister(CloseRegisterRequest request, ServerCallContext context)
+        {
+            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
+            if (supplier == null)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+            }
+
+            var register = await _registerStore.GetBySystemIdAndSupplierId(request.SystemId, supplier.Id);
+            if (register == null)
+            {
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Register does not exist"));
+            }
+
+            var account = await context.ResolveAccount(_accountStore);
+
+            var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
+            await factory.CreateRegisterCloser().Close(register);
+
+            await _registerStore.Update(register);
+
+            return new CloseRegisterReply
+            {
+                Id = register.Id.ToString()
+            };
+        }
+
         public override async Task<CreateRegisterReply> CreateRegister(CreateRegisterRequest request, ServerCallContext context)
         {
             var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);

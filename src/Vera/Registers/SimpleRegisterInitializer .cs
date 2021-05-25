@@ -3,7 +3,7 @@ using Vera.Models;
 
 namespace Vera.Registers
 {
-    public class OpenRegisterInitializer : IRegisterInitializer
+    public class SimpleRegisterInitializer : IRegisterInitializer
     {
         public Task Initialize(Register register)
         {

@@ -1,6 +1,5 @@
 using Vera.Audits;
 using Vera.Configuration;
-using Vera.Dependencies.Handlers;
 using Vera.Invoices;
 using Vera.Registers;
 using Vera.Reports;
@@ -20,5 +19,7 @@ namespace Vera.Dependencies
         IAuditWriter CreateAuditWriter();
 
         IRegisterInitializer CreateRegisterInitializer();
+
+        IRegisterCloser CreateRegisterCloser();
     }
 }
