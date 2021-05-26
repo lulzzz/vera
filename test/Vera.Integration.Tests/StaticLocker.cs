@@ -11,7 +11,11 @@ namespace Vera.Integration.Tests
 
         public async Task<IAsyncDisposable> Lock(string resource, TimeSpan timeout)
         {
-            await Semaphore.WaitAsync(timeout);
+            if (!await Semaphore.WaitAsync(timeout))
+            {
+                throw new TimeoutException($"failed to get lock in time: {timeout}");
+            }
+
             return new StaticLockDisposable(Semaphore);
         }
         
