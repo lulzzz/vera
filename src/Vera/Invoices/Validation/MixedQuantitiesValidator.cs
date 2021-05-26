@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Vera.Models;
 
-namespace Vera.Invoices.InvoiceValidators
+namespace Vera.Invoices.Validation
 {
     public class MixedQuantitiesValidator : IInvoiceValidator
     {

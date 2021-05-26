@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Vera.Invoices;
-using Vera.Invoices.InvoiceValidators;
+using Vera.Invoices.Validation;
 using Vera.Portugal.Invoices.InvoiceValidators;
 
 namespace Vera.Portugal.Invoices

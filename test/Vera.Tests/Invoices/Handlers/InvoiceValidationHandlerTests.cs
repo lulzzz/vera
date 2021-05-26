@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Vera.Invoices;
-using Vera.Invoices.InvoiceValidators;
+using Vera.Invoices.Validation;
 using Xunit;
 
 namespace Vera.Tests.Invoices.Handlers
