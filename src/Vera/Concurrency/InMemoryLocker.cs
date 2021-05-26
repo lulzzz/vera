@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,18 +7,23 @@ namespace Vera.Concurrency
 {
     public sealed class InMemoryLocker : ILocker
     {
-        private readonly SemaphoreSlim _semaphore;
+        private readonly ConcurrentDictionary<string, SemaphoreSlim> _semaphores;
 
         public InMemoryLocker()
         {
-            _semaphore = new SemaphoreSlim(1, 1);
+            _semaphores = new();
         }
 
         public async Task<IAsyncDisposable> Lock(string resource, TimeSpan timeout)
         {
-            await _semaphore.WaitAsync(timeout);
+            var semaphore = _semaphores.GetOrAdd(resource, _ => new SemaphoreSlim(1, 1));
+            
+            if (!await semaphore.WaitAsync(timeout))
+            {
+                throw new TimeoutException($"failed to acquire lock in {timeout}");
+            }
 
-            return new InMemoryLockDisposable(_semaphore);
+            return new InMemoryLockDisposable(semaphore);
         }
 
         private class InMemoryLockDisposable : IAsyncDisposable
