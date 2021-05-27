@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,8 +37,7 @@ namespace Vera.Azure.Stores
             return queryable.FirstOrDefault();
         }
 
-
-        public Task<Supplier> Get(Guid accountId, Guid supplierId)
+        public  Task<Supplier> Get(Guid accountId, Guid supplierId)
         {
             var queryable = _container.GetItemLinqQueryable<TypedDocument<Supplier>>()
                 .Where(x => x.Type == DocumentType

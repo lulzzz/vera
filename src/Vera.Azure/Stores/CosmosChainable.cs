@@ -1,6 +1,6 @@
+using Microsoft.Azure.Cosmos;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
 using Vera.Models;
 using Vera.Stores;
 
@@ -13,8 +13,8 @@ namespace Vera.Azure.Stores
         private readonly ChainDocument? _last;
 
         public CosmosChainable(
-            Container container, 
-            string partitionKeyValue, 
+            Container container,
+            string partitionKeyValue,
             ChainDocument? last
         )
         {
@@ -37,12 +37,12 @@ namespace Vera.Azure.Stores
 
             var tx = _container.CreateTransactionalBatch(partitionKey);
             tx.CreateItem(next);
-            
+
             if (_last != null)
             {
                 next.Previous = _last.Id;
                 _last.Next = next.Id;
-                
+
                 // Next got updated so update the previous item in the chain to point to the new one
                 tx.ReplaceItem(_last.Id.ToString(), _last);
             }

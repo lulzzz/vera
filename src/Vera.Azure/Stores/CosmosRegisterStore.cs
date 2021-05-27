@@ -37,14 +37,15 @@ namespace Vera.Azure.Stores
             }
         }
 
-        public async Task<Register> GetBySystemIdAndSupplierId(string systemId, Guid supplierId)
+        public Task<Register> GetBySystemIdAndSupplierId(string systemId, Guid supplierId)
         {
             try
             {
-                return await _container.GetItemLinqQueryable<Document<Register>>(true)
+                var queryable = _container.GetItemLinqQueryable<Document<Register>>()
                     .Where(x => x.Value.SystemId == systemId &&
-                                x.Value.SupplierId == supplierId)
-                    .FirstOrDefault();
+                                x.Value.SupplierId == supplierId);
+
+                return queryable.FirstOrDefault();
             }
             catch (CosmosException e) when (e.StatusCode == HttpStatusCode.NotFound)
             {
@@ -52,12 +53,12 @@ namespace Vera.Azure.Stores
             }
         }
 
-        public async Task<ICollection<Register>> GetOpenRegistersForSupplier(Guid supplierId)
+        public Task<ICollection<Register>> GetOpenRegistersForSupplier(Guid supplierId)
         {
-            var queryable = _container.GetItemLinqQueryable<Document<Register>>(true)
+            var queryable = _container.GetItemLinqQueryable<Document<Register>>()
                 .Where(x => x.Value.Status == RegisterStatus.Open && x.Value.SupplierId == supplierId);
 
-            return await queryable.ToListAsync();
+            return queryable.ToListAsync();
         }
 
         public async Task<ICollection<Register>> GetRegistersBasedOnSupplier(IEnumerable<Guid> registersIds, Guid supplierId)

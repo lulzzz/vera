@@ -1,9 +1,9 @@
+using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
 using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
@@ -59,7 +59,7 @@ namespace Vera.Azure.Stores
         public Task<ICollection<Account>> GetByCompany(Guid companyId)
         {
             var queryable = _container.GetItemLinqQueryable<TypedDocument<Account>>()
-                .Where(x => x.Type == DocumentType && x.Value.CompanyId == companyId);
+                      .Where(x => x.Type == DocumentType && x.Value.CompanyId == companyId);
 
             return queryable.ToListAsync();
         }

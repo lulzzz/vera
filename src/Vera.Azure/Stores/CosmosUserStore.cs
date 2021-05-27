@@ -1,8 +1,7 @@
+using Microsoft.Azure.Cosmos;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 using Vera.Azure.Extensions;
 using Vera.Stores;
 using User = Vera.Models.User;
@@ -44,7 +43,7 @@ namespace Vera.Azure.Stores
         public Task<User> GetByCompany(Guid companyId, string username)
         {
             var queryable = _container.GetItemLinqQueryable<TypedDocument<User>>()
-                .Where(x => x.Value.CompanyId == companyId 
+                .Where(x => x.Value.CompanyId == companyId
                             && x.Value.Username == username
                             && x.Type == DocumentType);
 

@@ -1,9 +1,8 @@
+using Microsoft.Azure.Cosmos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
-using Microsoft.Azure.Cosmos.Linq;
 using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
@@ -38,7 +37,7 @@ namespace Vera.Azure.Stores
         public Task Update(PrintTrail trail)
         {
             var document = ToDocument(trail);
-            
+
             return _container.ReplaceItemAsync(
                 document,
                 document.Id.ToString(),
@@ -58,7 +57,7 @@ namespace Vera.Azure.Stores
 
         public Task<ICollection<PrintTrail>> GetByInvoice(Guid invoiceId)
         {
-            var queryable = _container.GetItemLinqQueryable<Document<PrintTrail>>(true)
+            var queryable = _container.GetItemLinqQueryable<Document<PrintTrail>>()
                 .Where(x => x.Value.InvoiceId == invoiceId);
 
             return queryable.ToListAsync();

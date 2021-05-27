@@ -1,7 +1,7 @@
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.Cosmos.Linq;
+using System.Linq;
+using System.Threading.Tasks;
 using Vera.Stores;
 
 namespace Vera.Azure.Stores

@@ -1,6 +1,6 @@
+using Microsoft.Azure.Cosmos;
 using System;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
 using Vera.Audits;
 using Vera.Models;
 using Vera.Stores;

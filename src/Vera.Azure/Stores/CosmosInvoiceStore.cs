@@ -1,8 +1,9 @@
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Cosmos;
 using Vera.Audits;
 using Vera.Azure.Extensions;
 using Vera.Models;
@@ -32,16 +33,15 @@ namespace Vera.Azure.Stores
 
         public Task<Invoice> GetByNumber(Guid accountId, string number)
         {
-            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>(true)
+            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>()
                 .Where(x => x.Value.Number == number && x.Value.AccountId == accountId);
 
             return queryable.FirstOrDefault();
         }
 
-
         public Task<ICollection<Invoice>> List(AuditCriteria criteria)
         {
-            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>(true)
+            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>()
                 .Where(x => x.Value.AccountId == criteria.AccountId
                 && x.Value.Supplier.SystemId == criteria.SupplierSystemId
                 && x.Value.Date >= criteria.StartDate
