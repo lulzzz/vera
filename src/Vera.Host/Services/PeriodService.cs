@@ -49,19 +49,14 @@ namespace Vera.Host.Services
 
         public override async Task<OpenPeriodReply> OpenPeriod(OpenPeriodRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
             await using (await _locker.Lock(supplier.Id.ToString(), TimeSpan.FromSeconds(5)))
             {
                 var currentPeriod = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
                 if (currentPeriod != null)
                 {
-                    throw new RpcException(new Status(StatusCode.AlreadyExists, "Open period already exists"));
+                    throw new RpcException(new Status(StatusCode.AlreadyExists, "period is already open"));
                 }
 
                 var period = new Models.Period
@@ -89,11 +84,7 @@ namespace Vera.Host.Services
                 PeriodId = request.Id
             });
 
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
             var registersToClose = request.Registers.Select(x => Guid.Parse(x.Key));
 
@@ -101,19 +92,17 @@ namespace Vera.Host.Services
 
             if (registers.Count != request.Registers.Count)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Registers do not exist"));
+                throw new RpcException(new Status(
+                    StatusCode.FailedPrecondition, 
+                    $"expected {registers.Count} register(s) but got {request.Registers.Count}"
+                ));
             }
 
-            var periodRegisterEntries = new List<Models.PeriodRegisterEntry>();
-
-            foreach (var register in registers)
+            var periodRegisterEntries = registers.Select(r => new Models.PeriodRegisterEntry
             {
-                periodRegisterEntries.Add(new Models.PeriodRegisterEntry
-                {
-                    RegisterId = register.Id,
-                    ClosingAmount = request.Registers[register.Id.ToString()].ClosingAmount
-                });
-            }
+                RegisterId = r.Id, 
+                ClosingAmount = request.Registers[r.Id.ToString()].ClosingAmount
+            }).ToList();
 
             try
             {
@@ -127,8 +116,7 @@ namespace Vera.Host.Services
             }
             catch (ValidationException validationException)
             {
-                throw new RpcException(
-                    new Status(StatusCode.FailedPrecondition, validationException.Message));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, validationException.Message));
             }
 
             return new Empty();
@@ -148,16 +136,12 @@ namespace Vera.Host.Services
 
         public override async Task<Period> GetCurrentPeriod(GetCurrentPeriodRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
             var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
             if (period == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Period does not exist"));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "no open period"));
             }
 
             return period.Pack();
@@ -168,13 +152,13 @@ namespace Vera.Host.Services
             var supplier = await _supplierStore.Get(model.AccountId, model.SupplierSystemId);
             if (supplier == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "supplier does not exist"));
             }
 
             var period = await _periodStore.Get(Guid.Parse(model.PeriodId), supplier.Id);
             if (period == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Period does not exist"));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "period does not exist"));
             }
 
             return period;

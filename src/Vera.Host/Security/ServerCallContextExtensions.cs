@@ -1,7 +1,7 @@
+using Grpc.Core;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Grpc.Core;
 using Vera.Models;
 using Vera.Stores;
 
@@ -28,6 +28,21 @@ namespace Vera.Host.Security
             return account ?? throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthenticated"));
         }
 
+        /// <summary>
+        /// Attempts to resolve the supplier based on the given parameters.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="store"></param>
+        /// <param name="supplierSystemId"></param>
+        /// <returns></returns>
+        /// <exception cref="RpcException">when the account cannot be resolved</exception>
+        public static async Task<Supplier> ResolveSupplier(this ServerCallContext context, ISupplierStore store, string supplierSystemId)
+        {
+            var supplier = await store.Get(context.GetAccountId(), supplierSystemId);
+            
+            return supplier ?? throw new RpcException(new Status(StatusCode.NotFound, "supplier does not exist"));
+        }
+
         public static Guid GetCompanyId(this ServerCallContext context)
         {
             return Guid.Parse(context.FindFirstValue(ClaimTypes.CompanyId));
@@ -36,8 +51,10 @@ namespace Vera.Host.Security
         public static Guid GetAccountId(this ServerCallContext context)
         {
             var accountId = context.RequestHeaders.GetValue(MetadataKeys.AccountId);
-            
-            return accountId != null ? Guid.Parse(accountId) : throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthenticated"));
+
+            return accountId != null 
+                ? Guid.Parse(accountId) 
+                : throw new RpcException(new Status(StatusCode.Unauthenticated, "unauthenticated"));
         }
 
         public static string GetUsername(this ServerCallContext context)

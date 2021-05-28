@@ -31,7 +31,7 @@ namespace Vera.Host.Services
 
             ValidateType(eventLog);
 
-            var supplier = await GetAndValidateSupplier(request.Eventlog.SupplierSystemId, context);
+            var supplier = await context.ResolveSupplier(_supplierStore, request.Eventlog.SupplierSystemId);
 
             eventLog.Supplier = supplier;
 
@@ -56,17 +56,6 @@ namespace Vera.Host.Services
             reply.EventLogs.AddRange(eventLogs.Pack());
 
             return reply;
-        }
-
-        private async Task<Supplier> GetAndValidateSupplier(string supplierSystemId, ServerCallContext context)
-        {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), supplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
-
-            return supplier;
         }
 
         private static void ValidateType(Models.EventLog eventLog)

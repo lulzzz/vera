@@ -22,7 +22,7 @@ namespace Vera.Host.Services
         public override async Task<CreateSupplierReply> CreateIfNotExists(CreateSupplierRequest request, ServerCallContext context)
         {
             var supplier = await _supplierStore.Get(context.GetAccountId(), request.Supplier.SystemId);
-            
+
             if (supplier == null)
             {
                 supplier = request.Supplier.Unpack();
@@ -91,11 +91,7 @@ namespace Vera.Host.Services
 
         private async Task<Models.Supplier> GetAndValidateSupplier(string supplierSystemId, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), supplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
+            var supplier = await context.ResolveSupplier(_supplierStore, supplierSystemId);
 
             var accountId = context.GetAccountId();
             if (supplier.AccountId != accountId)

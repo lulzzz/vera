@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Threading.Tasks;
 using Vera.Bootstrap;
+using Vera.Extensions;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
 using Vera.Models;
 using Vera.Stores;
+using Period = Vera.Models.Period;
 
 namespace Vera.Host.Services
 {
@@ -35,22 +37,18 @@ namespace Vera.Host.Services
 
         public override async Task<OpenRegisterReply> OpenRegister(OpenRegisterRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
-            
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
+
             var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
             if (period == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Period does not exist"));
+                throw new RpcException(new Status(StatusCode.FailedPrecondition, "no open period"));
             }
 
             var register = await _registerStore.Get(Guid.Parse(request.RegisterId), supplier.Id);
             if (register == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Register does not exist"));
+                throw new RpcException(new Status(StatusCode.NotFound, "register not found for supplier"));
             }
 
             var registerEntry = new Models.PeriodRegisterEntry
@@ -71,16 +69,12 @@ namespace Vera.Host.Services
 
         public override async Task<CloseRegisterReply> CloseRegister(CloseRegisterRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
-
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
+            
             var register = await _registerStore.GetBySystemIdAndSupplierId(request.SystemId, supplier.Id);
             if (register == null)
             {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Register does not exist"));
+                throw new RpcException(new Status(StatusCode.NotFound, "Register does not exist"));
             }
 
             var account = await context.ResolveAccount(_accountStore);
@@ -98,11 +92,7 @@ namespace Vera.Host.Services
 
         public override async Task<CreateRegisterReply> CreateRegister(CreateRegisterRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
             var newRegister = new Register
             {
@@ -127,11 +117,7 @@ namespace Vera.Host.Services
 
         public override async Task<GetRegisterReply> Get(GetRegisterRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
             var register = await _registerStore.Get(Guid.Parse(request.Id), supplier.Id);
             if (register == null)
@@ -147,11 +133,7 @@ namespace Vera.Host.Services
 
         public override async Task<GetAllRegistersReply> GetAll(GetAllRegistersRequest request, ServerCallContext context)
         {
-            var supplier = await _supplierStore.Get(context.GetAccountId(), request.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "Supplier does not exist"));
-            }
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
             var registers = await _registerStore.GetOpenRegistersForSupplier(supplier.Id);
 

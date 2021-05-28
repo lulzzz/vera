@@ -145,9 +145,9 @@ namespace Vera.Integration.Tests.Common
             {
                 await client.Supplier.GetAsync(getRequest, client.AuthorizedMetadata);
             }
-            catch(RpcException ex)
+            catch (RpcException ex)
             {
-                Assert.Equal(StatusCode.FailedPrecondition, ex.StatusCode);
+                Assert.Equal(StatusCode.NotFound, ex.StatusCode);
             }
         }
     }

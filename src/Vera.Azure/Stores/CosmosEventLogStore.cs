@@ -23,7 +23,8 @@ namespace Vera.Azure.Stores
             var byId = new Document<EventLog>(
                 document => document.Id,
                 document => document.Supplier.SystemId,
-                eventLog);
+                eventLog
+            );
 
             await _container.CreateItemAsync(byId);
         }
