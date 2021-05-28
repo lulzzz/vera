@@ -1,7 +1,9 @@
 # "Vera"
 Latin for true. We want this product to be the one and only source for all the auditing and certification needs.
 
-[![CI](https://github.com/new-black/vera/actions/workflows/vera-ci.yml/badge.svg)](https://github.com/new-black/vera/actions/workflows/vera-ci.yml)
+[![Unit tests](https://github.com/new-black/vera/actions/workflows/vera-unit-tests.yml/badge.svg)](https://github.com/new-black/vera/actions/workflows/vera-unit-tests.yml)
+
+[![Integration tests](https://github.com/new-black/vera/actions/workflows/vera-integration-tests.yml/badge.svg)](https://github.com/new-black/vera/actions/workflows/vera-integration-tests.yml)
 
 # Structure of the projects
 - Vera
