@@ -26,6 +26,7 @@
     <Protobuf Include="Protos/report.proto" Link="report.proto"/>
     <Protobuf Include="Protos/shared.proto" Link="shared.proto"/>
     <Protobuf Include="Protos/supplier.proto" Link="supplier.proto"/>
+    <Protobuf Include="Protos/printer.proto" Link="printer.proto"/>
   </ItemGroup>
   
   <ItemGroup>

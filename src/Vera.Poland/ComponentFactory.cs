@@ -5,6 +5,7 @@ using Vera.Configuration;
 using Vera.Dependencies;
 using Vera.Invoices;
 using Vera.Models;
+using Vera.Printing;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Signing;
@@ -62,6 +63,11 @@ namespace Vera.Poland
         public IRegisterCloser CreateRegisterCloser()
         {
             return new SimpleRegisterCloser();
+        }
+
+        public IThermalInvoicePrintActionFactory CreateThermalInvoicePrintActionFactory()
+        {
+            return new DoneThermalInvoicePrintActionFactory();
         }
     }
 }

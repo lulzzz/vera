@@ -1,6 +1,7 @@
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Invoices;
+using Vera.Printing;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Thermal;
@@ -15,11 +16,9 @@ namespace Vera.Dependencies
         IConfigurationValidator CreateConfigurationValidator();
         IThermalReceiptGenerator CreateThermalReceiptGenerator();
         IReportReceiptGenerator CreateThermalReportGenerator();
-
         IAuditWriter CreateAuditWriter();
-
         IRegisterInitializer CreateRegisterInitializer();
-
         IRegisterCloser CreateRegisterCloser();
+        IThermalInvoicePrintActionFactory CreateThermalInvoicePrintActionFactory();
     }
 }

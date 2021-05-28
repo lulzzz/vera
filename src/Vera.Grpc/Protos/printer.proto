@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package vera.grpc;
+
+service PrinterService {
+  rpc Print(stream PrintRequest) returns (stream PrintResponse);
+  // todo: Create additional methods for daily reports/stations and so on
+}
+
+message PrintRequest {
+  string invoiceNumber = 1;
+  bytes payload = 2;
+}
+
+message PrintResponse {
+  ClientAction action = 1;
+  bytes payload = 2;
+}
+
+enum ClientAction {
+  CLIENT_ACTION_READ = 0;
+  CLIENT_ACTION_WRITE = 1;
+  CLIENT_ACTION_DONE = 2;
+}

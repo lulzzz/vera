@@ -1,0 +1,12 @@
+﻿using Vera.Models;
+
+namespace Vera.Printing
+{
+    /// <summary>
+    /// Factory that creates the chain of actions needed for print operations
+    /// </summary>
+    public interface IThermalInvoicePrintActionFactory
+    {
+        IPrintAction Create(Account account, Invoice invoice);
+    }
+}

@@ -8,6 +8,7 @@ using Vera.Models;
 using Vera.Portugal.Audits;
 using Vera.Portugal.Invoices;
 using Vera.Portugal.Stores;
+using Vera.Printing;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Signing;
@@ -86,6 +87,11 @@ namespace Vera.Portugal
         public IRegisterCloser CreateRegisterCloser()
         {
             return new SimpleRegisterCloser();
+        }
+        
+        public IThermalInvoicePrintActionFactory CreateThermalInvoicePrintActionFactory()
+        {
+            return new DoneThermalInvoicePrintActionFactory();
         }
     }
 }

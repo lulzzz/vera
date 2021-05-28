@@ -3,10 +3,10 @@ using System.Security.Cryptography;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
-using Vera.Dependencies.Handlers;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Norway.Audit;
+using Vera.Printing;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Signing;
@@ -77,6 +77,11 @@ namespace Vera.Norway
         public IRegisterCloser CreateRegisterCloser()
         {
             return new SimpleRegisterCloser();
+        }
+        
+        public IThermalInvoicePrintActionFactory CreateThermalInvoicePrintActionFactory()
+        {
+            return new DoneThermalInvoicePrintActionFactory();
         }
     }
 }
