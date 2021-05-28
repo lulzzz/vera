@@ -12,7 +12,20 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <Protobuf Include="Protos\*.proto" />
+    <Protobuf Include="Protos/account.proto" Link="account.proto"/>
+    <Protobuf Include="Protos/audit.proto" Link="audit.proto"/>
+    <Protobuf Include="Protos/eventlog.proto" Link="eventlog.proto"/>
+    <Protobuf Include="Protos/invoice.proto" Link="invoice.proto"/>
+    <Protobuf Include="Protos/login.proto" Link="login.proto"/>
+    <Protobuf Include="Protos/messageTemplates.proto" Link="messageTemplates.proto"/>
+    <Protobuf Include="Protos/period.proto" Link="period.proto"/>
+    <Protobuf Include="Protos/productType.proto" Link="productType.proto"/>
+    <Protobuf Include="Protos/receipt.proto" Link="receipt.proto"/>
+    <Protobuf Include="Protos/register.proto" Link="register.proto"/>
+    <Protobuf Include="Protos/registerUser.proto" Link="registerUser.proto"/>
+    <Protobuf Include="Protos/report.proto" Link="report.proto"/>
+    <Protobuf Include="Protos/shared.proto" Link="shared.proto"/>
+    <Protobuf Include="Protos/supplier.proto" Link="supplier.proto"/>
   </ItemGroup>
   
   <ItemGroup>

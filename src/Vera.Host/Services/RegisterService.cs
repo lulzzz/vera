@@ -109,7 +109,7 @@ namespace Vera.Host.Services
                 Name = request.Name,
                 SupplierId = supplier.Id,
                 SystemId = request.SystemId,
-                Status = RegisterStatus.Pending
+                Status = RegisterStatus.Pending,
             };
 
             var account = await context.ResolveAccount(_accountStore);

@@ -24,6 +24,7 @@ namespace Vera.Integration.Tests
             Register = new RegisterService.RegisterServiceClient(channel);
             Report = new ReportService.ReportServiceClient(channel);
             EventLog = new EventLogService.EventLogServiceClient(channel);
+            MessageTemplateClient = new MessageTemplateService.MessageTemplateServiceClient(channel);
         }
 
         public async Task OpenPeriod()
@@ -72,5 +73,7 @@ namespace Vera.Integration.Tests
         public ReportService.ReportServiceClient Report { get; set; }
 
         public EventLogService.EventLogServiceClient EventLog { get; set; }
+        
+        public MessageTemplateService.MessageTemplateServiceClient MessageTemplateClient { get; }
     }
 }

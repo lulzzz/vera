@@ -32,5 +32,10 @@ namespace Vera.Models
         /// The id of the account that can operate on this supplier
         /// </summary>
         public Guid AccountId { get; set; }
+        
+        /// <summary>
+        /// The id of the supplier timezone (ISO standard)
+        /// </summary>
+        public string TimeZone { get; set; }
     }
 }

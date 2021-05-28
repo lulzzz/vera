@@ -46,26 +46,14 @@ namespace Vera.Host.Services
             // TODO: limit the certification values to existing ones
             // _accountComponentFactoryCollection.Names
 
-            var accountId = Guid.NewGuid();
 
-            var account = new Vera.Models.Account
-            {
-                Id = accountId,
-                CompanyId = companyId,
-                Certification = request.Certification,
-                Name = request.Name,
-                Address = request.Address.Unpack(),
-                Email = request.Email,
-                Telephone = request.Telephone,
-                RegistrationNumber = request.RegistrationNumber,
-                TaxRegistrationNumber = request.TaxRegistrationNumber
-            };
+            var account = request.Unpack(companyId);
 
             await _accountStore.Store(account);
 
             return new CreateAccountReply
             {
-                Id = accountId.ToString()
+                Id = account.Id.ToString()
             };
         }
 
@@ -73,18 +61,7 @@ namespace Vera.Host.Services
         {
             var companyId = context.GetCompanyId();
             var account = await _accountStore.Get(companyId, Guid.Parse(request.Id));
-
-            return new GetAccountReply
-            {
-                Id = account.Id.ToString(),
-                Name = account.Name,
-                Currency = account.Currency,
-                Email = account.Email,
-                Telephone = account.Telephone,
-                RegistrationNumber = account.RegistrationNumber,
-                TaxRegistrationNumber = account.TaxRegistrationNumber,
-                Address = account.Address.Pack()
-            };
+            return account == null ? new GetAccountReply() : account.Pack();
         }
 
         public override async Task<Empty> Update(UpdateAccountRequest request, ServerCallContext context)
@@ -99,7 +76,7 @@ namespace Vera.Host.Services
 
             // TODO(kevin): more validation on the new state of the account (attributes?)
 
-            if (request.Name != null) account.Name = request.Name;
+            if (request.Name != null) account.Name = request.Name;      
 
             // TODO(kevin): check if this is allowed, if so, what should happen when it does?
             if (request.RegistrationNumber != null) account.RegistrationNumber = request.RegistrationNumber;

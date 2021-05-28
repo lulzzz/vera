@@ -239,7 +239,6 @@ namespace Vera.Integration.Tests.Portugal
                 var result = scenario.Execute();
                 var invoice = result.Invoice;
                 invoice.RegisterId = openRegisterReply.Id;
-
                 var createInvoiceRequest = new CreateInvoiceRequest
                 {
                     Invoice = invoice.Pack()

@@ -31,14 +31,14 @@ namespace Vera.Integration.Tests.Common
 
             var client = await _setup.CreateClient(accountContext);
 
-            var createRegisterRequest = new CreateRegisterRequest()
+            var createRegisterRequest = new CreateRegisterRequest
             {
                 SupplierSystemId = client.SupplierSystemId,
             };
 
             var register = await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
 
-            var getRegisterRequest = new GetRegisterRequest()
+            var getRegisterRequest = new GetRegisterRequest
             {
                 Id = register.Id,
                 SupplierSystemId = client.SupplierSystemId,
@@ -64,7 +64,7 @@ namespace Vera.Integration.Tests.Common
 
             var client = await _setup.CreateClient(accountContext);
 
-            var createRegisterRequest = new CreateRegisterRequest()
+            var createRegisterRequest = new CreateRegisterRequest
             {
                 SupplierSystemId = client.SupplierSystemId,
                 SystemId = systemId
@@ -72,7 +72,7 @@ namespace Vera.Integration.Tests.Common
 
             var register = await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
 
-            var closeRegisterRequest = new CloseRegisterRequest()
+            var closeRegisterRequest = new CloseRegisterRequest
             {
                 SupplierSystemId = client.SupplierSystemId,
                 SystemId = systemId
@@ -80,7 +80,7 @@ namespace Vera.Integration.Tests.Common
 
             await client.Register.CloseRegisterAsync(closeRegisterRequest, client.AuthorizedMetadata);
 
-            var getRegisterRequestAfterClosing = new GetRegisterRequest()
+            var getRegisterRequestAfterClosing = new GetRegisterRequest
             {
                 Id = register.Id,
                 SupplierSystemId = client.SupplierSystemId,
@@ -104,21 +104,21 @@ namespace Vera.Integration.Tests.Common
 
             var client = await _setup.CreateClient(accountContext);
 
-            var createRegisterRequest1 = new CreateRegisterRequest()
+            var createRegisterRequest1 = new CreateRegisterRequest
             {
                 SupplierSystemId = client.SupplierSystemId,
             };
 
             var createRegisterReply1 = await client.Register.CreateRegisterAsync(createRegisterRequest1, client.AuthorizedMetadata);
 
-            var createRegisterRequest2 = new CreateRegisterRequest()
+            var createRegisterRequest2 = new CreateRegisterRequest
             {
                 SupplierSystemId = client.SupplierSystemId,
             };
 
             var createRegisterReply2 = await client.Register.CreateRegisterAsync(createRegisterRequest2, client.AuthorizedMetadata);
 
-            var getAllRegistersRequest = new GetAllRegistersRequest()
+            var getAllRegistersRequest = new GetAllRegistersRequest
             {
                 SupplierSystemId = client.SupplierSystemId,
             };
@@ -153,21 +153,21 @@ namespace Vera.Integration.Tests.Common
             var client1 = await _setup.CreateClient(accountContext1);
             var client2 = await _setup.CreateClient(accountContext2);
 
-            var createRegisterRequest1 = new CreateRegisterRequest()
+            var createRegisterRequest1 = new CreateRegisterRequest
             {
                 SupplierSystemId = client1.SupplierSystemId,
             };
 
             var createRegisterReply1 = await client1.Register.CreateRegisterAsync(createRegisterRequest1, client1.AuthorizedMetadata);
 
-            var createRegisterRequest2 = new CreateRegisterRequest()
+            var createRegisterRequest2 = new CreateRegisterRequest
             {
                 SupplierSystemId = client2.SupplierSystemId,
             };
 
             var createRegisterReply2 = await client2.Register.CreateRegisterAsync(createRegisterRequest2, client2.AuthorizedMetadata);
 
-            var getRegisterRequest1 = new GetRegisterRequest()
+            var getRegisterRequest1 = new GetRegisterRequest
             {
                 Id = createRegisterReply1.Id,
                 SupplierSystemId = client2.SupplierSystemId,
@@ -175,7 +175,7 @@ namespace Vera.Integration.Tests.Common
 
             var getRegisterReply1 = await client2.Register.GetAsync(getRegisterRequest1, client2.AuthorizedMetadata);
 
-            var getRegisterRequest2 = new GetRegisterRequest()
+            var getRegisterRequest2 = new GetRegisterRequest
             {
                 Id = createRegisterReply2.Id,
                 SupplierSystemId = client1.SupplierSystemId,

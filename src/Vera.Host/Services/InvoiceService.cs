@@ -8,7 +8,6 @@ using Vera.Grpc;
 using Vera.Grpc.Shared;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
-using Vera.Invoices;
 using Vera.Stores;
 
 namespace Vera.Host.Services

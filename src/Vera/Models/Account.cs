@@ -67,5 +67,7 @@ namespace Vera.Models
         /// the "social capital" is required.
         /// </summary>
         public IDictionary<string, string> Configuration { get; set; }
+        
+        public ICollection<TaxRate> TaxRates { get; set; }
     }
 }

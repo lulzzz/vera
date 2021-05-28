@@ -175,6 +175,9 @@ namespace Vera.Azure
 
                 collection.AddSingleton<IRegisterStore>(_ => new CosmosRegisterStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Registers)));
+
+                collection.AddSingleton<IMessageTemplateStore>(_ => new CosmosMessageTemplateStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
             });
         }
 

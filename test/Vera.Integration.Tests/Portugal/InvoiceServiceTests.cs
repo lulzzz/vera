@@ -38,7 +38,6 @@ namespace Vera.Integration.Tests.Portugal
             
             var invoice = builder.Result;
             invoice.RegisterId = openRegisterReply.Id;
-
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -64,7 +63,6 @@ namespace Vera.Integration.Tests.Portugal
 
             var invoice = builder.Result;
             invoice.RegisterId = openRegisterReply.Id;
-            
             // Create same transaction twice to verify sequence is incremented
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
@@ -92,7 +90,6 @@ namespace Vera.Integration.Tests.Portugal
 
             var result = scenario.Execute();
             var invoice = result.Invoice;
-            
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
                 AccountId = client.AccountId,
@@ -128,7 +125,7 @@ namespace Vera.Integration.Tests.Portugal
                     Code = "IVA"
                 },
             });
-
+            
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
                 AccountId = client.AccountId,
@@ -152,7 +149,6 @@ namespace Vera.Integration.Tests.Portugal
 
             var invoice = builder.Result;
             invoice.RegisterId = openRegisterReply.Id;
-
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -184,7 +180,6 @@ namespace Vera.Integration.Tests.Portugal
 
             var invoice = builder.Result;
             invoice.RegisterId = openRegisterReply.Id;
-
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -248,7 +243,6 @@ namespace Vera.Integration.Tests.Portugal
                 .Build();
 
             invoice.RegisterId = openRegisterReply.Id;
-
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -274,7 +268,7 @@ namespace Vera.Integration.Tests.Portugal
                .Build();
 
             invoice2.RegisterId = openRegisterReply.Id;
-
+            
             var createInvoiceRequest2 = new CreateInvoiceRequest
             {
                 Invoice = invoice2.Pack()

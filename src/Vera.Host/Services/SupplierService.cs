@@ -72,6 +72,7 @@ namespace Vera.Host.Services
             supplier.RegistrationNumber = requestSupplier.RegistrationNumber;
             supplier.TaxRegistrationNumber = requestSupplier.TaxRegistrationNumber;
             supplier.Address = requestSupplier.Address.Unpack();
+            supplier.TimeZone = requestSupplier.TimeZone;
             // systemId is not updated
 
             await _supplierStore.Update(supplier);

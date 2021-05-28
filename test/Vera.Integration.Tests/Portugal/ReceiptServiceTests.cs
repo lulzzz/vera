@@ -30,7 +30,6 @@ namespace Vera.Integration.Tests.Portugal
 
             var invoice = builder.Result;
             invoice.RegisterId = openRegisterReply.Id;
-
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -66,7 +65,6 @@ namespace Vera.Integration.Tests.Portugal
 
             var invoice = builder.Result;
             invoice.RegisterId = openRegisterReply.Id;
-
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {

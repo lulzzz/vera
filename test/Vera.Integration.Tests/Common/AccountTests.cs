@@ -1,7 +1,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Bogus;
-using Grpc.Net.Client;
 using Vera.Grpc;
 using Vera.Grpc.Shared;
 using Xunit;

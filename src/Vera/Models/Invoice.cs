@@ -108,5 +108,10 @@ namespace Vera.Models
         /// Payments that were made to pay the invoice.
         /// </summary>
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+        /// <summary>
+        /// List of merchant pin receipt lines
+        /// </summary>
+        public ICollection<PinReceipt> PinReceipts { get; set; } = new List<PinReceipt>();
     }
 }

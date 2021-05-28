@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Vera.Grpc;
 using Vera.Models;
@@ -9,6 +10,7 @@ using Employee = Vera.Grpc.Employee;
 using Invoice = Vera.Grpc.Invoice;
 using InvoiceLine = Vera.Grpc.InvoiceLine;
 using Payment = Vera.Grpc.Payment;
+using PinReceipt = Vera.Models.PinReceipt;
 using Product = Vera.Grpc.Product;
 using Settlement = Vera.Grpc.Settlement;
 
@@ -28,7 +30,7 @@ namespace Vera.Host.Mapping
                 RegisterId = invoice.RegisterId,
                 Supplier = new Supplier
                 {
-                    SystemId  = invoice.SupplierSystemId
+                    SystemId = invoice.SupplierSystemId
                 },
                 Employee = new Vera.Models.Employee
                 {
@@ -57,6 +59,7 @@ namespace Vera.Host.Mapping
             result.Lines = invoice.Lines.Select(Unpack).ToList();
             result.Payments = invoice.Payments.Select(Unpack).ToList();
             result.Settlements = invoice.Settlements.Select(Unpack).ToList();
+            result.PinReceipts = invoice.PinReceipts.Select(Unpack).ToList();
 
             return result;
         }
@@ -85,6 +88,7 @@ namespace Vera.Host.Mapping
             result.Lines.AddRange(invoice.Lines.Select(Pack));
             result.Payments.AddRange(invoice.Payments.Select(Pack));
             result.Settlements.AddRange(invoice.Settlements.Select(Pack));
+            result.PinReceipts.AddRange(invoice.PinReceipts.Select(Pack));
 
             if (invoice.Customer != null)
             {
@@ -112,14 +116,16 @@ namespace Vera.Host.Mapping
             var result = new InvoiceLine
             {
                 Description = line.Description,
-                Product = line.Product == null ? null : new Product
-                {
-                    // map the product type
-                    Code = line.Product.Code,
-                    Description = line.Product.Description,
-                    Type = line.Product.Type.Map(),
-                    SystemId = line.Product.SystemId
-                },
+                Product = line.Product == null
+                    ? null
+                    : new Product
+                    {
+                        // map the product type
+                        Code = line.Product.Code,
+                        Description = line.Product.Description,
+                        Type = line.Product.Type.Map(),
+                        SystemId = line.Product.SystemId
+                    },
                 Quantity = line.Quantity,
                 Tax = line.Taxes.Pack(),
                 Unit = line.UnitOfMeasure ?? string.Empty,
@@ -128,15 +134,17 @@ namespace Vera.Host.Mapping
 
             result.Settlements.AddRange(line.Settlements.Select(Pack));
 
-            result.CreditReference = line.CreditReference == null ? null : new CreditReference
-            {
-                Number = line.CreditReference.Number,
-                Reason = line.CreditReference.Reason
-            };
-            
+            result.CreditReference = line.CreditReference == null
+                ? null
+                : new CreditReference
+                {
+                    Number = line.CreditReference.Number,
+                    Reason = line.CreditReference.Reason
+                };
+
             return result;
         }
-        
+
         public static TaxValue Pack(this Taxes taxes)
         {
             return new()
@@ -171,6 +179,19 @@ namespace Vera.Host.Mapping
             };
         }
 
+        public static Vera.Grpc.PinReceipt Pack(this Vera.Models.PinReceipt pinReceipt)
+        {
+            var result = new Vera.Grpc.PinReceipt()
+            {
+                SignatureData = ByteString.CopyFrom(pinReceipt.SignatureData),
+                SignatureMimeType = pinReceipt.SignatureMimeType
+            };
+
+            result.Lines.AddRange(pinReceipt.Lines);
+
+            return result;
+        }
+
         private static Vera.Models.Payment Unpack(Payment p)
         {
             var category = p.Category switch
@@ -197,6 +218,13 @@ namespace Vera.Host.Mapping
             Amount = s.Amount,
             Description = s.Description,
             SystemId = s.SystemId
+        };
+
+        private static PinReceipt Unpack(Vera.Grpc.PinReceipt pinReceipt) => new()
+        {
+            Lines = pinReceipt.Lines,
+            SignatureData = pinReceipt.SignatureData.ToByteArray(),
+            SignatureMimeType = pinReceipt.SignatureMimeType
         };
 
         private static Vera.Models.InvoiceLine Unpack(InvoiceLine line)
@@ -229,7 +257,7 @@ namespace Vera.Host.Mapping
             if (line.Product != null)
             {
                 var product = line.Product;
-                
+
                 result.Product = new Vera.Models.Product
                 {
                     SystemId = product.SystemId,
@@ -252,11 +280,13 @@ namespace Vera.Host.Mapping
                 result.Settlements = line.Settlements.Select(Unpack).ToList();
             }
 
-            result.CreditReference = line.CreditReference == null ? null : new Vera.Models.CreditReference
-            {
-                Number = line.CreditReference.Number,
-                Reason = line.CreditReference.Reason
-            };
+            result.CreditReference = line.CreditReference == null
+                ? null
+                : new Vera.Models.CreditReference
+                {
+                    Number = line.CreditReference.Number,
+                    Reason = line.CreditReference.Reason
+                };
 
             return result;
         }

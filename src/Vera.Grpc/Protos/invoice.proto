@@ -79,6 +79,17 @@ message Invoice {
     repeated InvoiceLine lines = 12;
     repeated Settlement settlements = 13;
     repeated Payment payments = 14;
+    repeated PinReceipt pinReceipts = 15;
+}
+
+message PinReceipt {
+    // Lines as received from the payment service provider.
+    repeated string lines = 1;
+    
+    string signatureMimeType = 2;
+    
+    // Base64 encoded signature (if any).
+    bytes signatureData = 3;
 }
 
 message InvoiceLine {

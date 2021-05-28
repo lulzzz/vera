@@ -15,7 +15,7 @@ namespace Vera.Models
         public string SystemId { get; set; }
 
         public Guid SupplierId { get; set; }
-
+        
         public string Name { get; set; }
 
         public RegisterStatus Status { get; set; }

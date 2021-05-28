@@ -28,6 +28,8 @@ message Supplier {
 
     // Address is the physical location of the supplier
     Address address = 5;
+    
+    string timeZone = 6;
 }
 
 message Register {
@@ -40,6 +42,8 @@ message Register {
 	
     // Identifier of the register in the external system
     string systemId = 6;
+    
+    string fiscalSystemId = 7;
 }
 
 message Address {

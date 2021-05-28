@@ -34,6 +34,8 @@ message CreateAccountRequest {
 
     // Address of the account. Where can it be found on the map?
     vera.grpc.shared.Address address = 8;
+    
+    repeated TaxRate taxRates = 9;
 }
 
 message CreateAccountReply {
@@ -66,6 +68,8 @@ message GetAccountReply {
 
     // Contact phone number
     string telephone = 8;
+    
+    repeated TaxRate taxRates = 9;
 }
 
 message UpdateAccountRequest {
@@ -80,7 +84,7 @@ message UpdateAccountRequest {
     string taxRegistrationNumber = 4;
 
     // Location of the company
-    vera.grpc.shared.Address address = 5;
+    grpc.shared.Address address = 5;
 
     // ISO 4217 of the currency that's used by the company
     string currency = 6;
@@ -104,5 +108,12 @@ message ListAccountReply {
 
     repeated Account accounts = 1;
 }
+
+message TaxRate {
+    vera.grpc.shared.DecimalValue rate = 1;
+    string code = 2;
+    vera.grpc.shared.TaxCategory category = 3;
+}
+
 
 

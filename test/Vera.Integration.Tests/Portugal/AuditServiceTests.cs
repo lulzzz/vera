@@ -41,7 +41,6 @@ namespace Vera.Integration.Tests.Portugal
             var openRegisterReply = await client.OpenRegister(100m);
             var invoice = result.Invoice;
             invoice.RegisterId = openRegisterReply.Id;
-
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -103,7 +102,6 @@ namespace Vera.Integration.Tests.Portugal
 
                 var invoice = result.Invoice;
                 invoice.RegisterId = openRegisterReply.Id;
-
                 await client.Invoice.CreateAsync(new CreateInvoiceRequest
                 {
                     Invoice = invoice.Pack()

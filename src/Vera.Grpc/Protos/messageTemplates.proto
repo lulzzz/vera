@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package vera.grpc;
+
+service MessageTemplateService {
+    rpc Create (CreateMessageTemplateRequest) returns (CreateMessageTemplateReply);
+    rpc Update(UpdateMessageTemplateRequest) returns (UpdateMessageTemplateReply);
+    rpc Get(GetMessageTemplateByIdRequest) returns (GetMessageTemplateByIdReply);
+}
+
+message CreateMessageTemplateReply {
+    string id = 1;
+}
+
+message UpdateMessageTemplateReply {
+    string id = 1;
+}
+
+message GetMessageTemplateByIdRequest{
+    string id = 1;
+}
+
+message CreateMessageTemplateRequest {
+    MessageTemplate messageTemplate = 1;
+}
+
+message UpdateMessageTemplateRequest {
+    string id = 1;
+    MessageTemplate messageTemplate = 2;
+}
+
+message GetMessageTemplateByIdReply {
+    MessageTemplate messageTemplate = 1;
+}
+
+message MessageTemplate {
+    string accountId = 1;
+
+    bytes logo = 2;
+    
+    repeated string footer = 3;
+}
+
+
