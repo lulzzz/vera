@@ -41,9 +41,11 @@ namespace Vera.Azure.Stores
         {
             try
             {
-                var queryable = _container.GetItemLinqQueryable<Document<Register>>()
-                    .Where(x => x.Value.SystemId == systemId &&
-                                x.Value.SupplierId == supplierId);
+                var queryable = _container.GetItemLinqQueryable<Document<Register>>(requestOptions: new QueryRequestOptions
+                    {
+                        PartitionKey = new PartitionKey(supplierId.ToString())
+                    })
+                    .Where(x => x.Value.SystemId == systemId);
 
                 return queryable.FirstOrDefault();
             }
@@ -55,8 +57,11 @@ namespace Vera.Azure.Stores
 
         public Task<ICollection<Register>> GetOpenRegistersForSupplier(Guid supplierId)
         {
-            var queryable = _container.GetItemLinqQueryable<Document<Register>>()
-                .Where(x => x.Value.Status == RegisterStatus.Open && x.Value.SupplierId == supplierId);
+            var queryable = _container.GetItemLinqQueryable<Document<Register>>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(supplierId.ToString())
+                })
+                .Where(x => x.Value.Status == RegisterStatus.Open);
 
             return queryable.ToListAsync();
         }
@@ -67,24 +72,26 @@ namespace Vera.Azure.Stores
                 SELECT value c[""Value""] 
                 FROM c 
                 WHERE 
-                    c[""Value""].SupplierId = @supplierId AND
-                    ARRAY_CONTAINS(@registersIds, c[""Value""].Id)");
+                    ARRAY_CONTAINS(@registersIds, c[""Value""].Id)"
+            );
 
-            var definition = new QueryDefinition(query.ToString());
-            definition.WithParameter("@supplierId", supplierId);
-            definition.WithParameter("@registersIds", registersIds);
+            var definition = new QueryDefinition(query.ToString())
+                .WithParameter("@registersIds", registersIds);
 
-            var iterator = _container.GetItemQueryIterator<Register>(definition);
+            var iterator = _container.GetItemQueryIterator<Register>(definition, requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(supplierId.ToString())
+            });
 
-            var regiters = new List<Register>();
+            var registers = new List<Register>();
 
             while (iterator.HasMoreResults)
             {
                 var results = await iterator.ReadNextAsync();
-                regiters.AddRange(results);
+                registers.AddRange(results);
             }
 
-            return regiters;
+            return registers;
         }
 
         public async Task Store(Register register)

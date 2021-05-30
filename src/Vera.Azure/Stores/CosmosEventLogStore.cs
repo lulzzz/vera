@@ -31,11 +31,11 @@ namespace Vera.Azure.Stores
 
         public Task<ICollection<EventLog>> List(EventLogCriteria eventLogCriteria)
         {
-            var orderedQueryable = _container.GetItemLinqQueryable<Document<EventLog>>();
-
-            var queryable = orderedQueryable
-                .Where(x => x.Value.Supplier.AccountId == eventLogCriteria.AccountId &&
-                            x.Value.Supplier.SystemId == eventLogCriteria.SupplierSystemId);
+            var queryable = _container.GetItemLinqQueryable<Document<EventLog>>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(eventLogCriteria.SupplierSystemId)
+                })
+                .Where(x => x.Value.Supplier.AccountId == eventLogCriteria.AccountId);
 
             if (eventLogCriteria.StartDate.HasValue)
             {

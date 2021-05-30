@@ -32,8 +32,11 @@ namespace Vera.Azure.Stores
 
         public Task<Invoice> GetByNumber(Guid accountId, string number)
         {
-            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>()
-                .Where(x => x.Value.Number == number && x.Value.AccountId == accountId);
+            var queryable = _container.GetItemLinqQueryable<Document<Invoice>>(requestOptions: new QueryRequestOptions
+            {
+                PartitionKey = new PartitionKey(PartitionKeyByNumber(accountId, number)),
+                MaxItemCount = 1
+            });
 
             return queryable.FirstOrDefault();
         }
@@ -41,15 +44,16 @@ namespace Vera.Azure.Stores
         public Task<ICollection<Invoice>> List(AuditCriteria criteria)
         {
             var queryable = _container.GetItemLinqQueryable<Document<Invoice>>()
-                .Where(x => x.Value.AccountId == criteria.AccountId
-                && x.Value.Supplier.SystemId == criteria.SupplierSystemId
-                && x.Value.Date >= criteria.StartDate
-                && x.Value.Date <= criteria.EndDate);
+                .Where(x => 
+                    x.Value.AccountId == criteria.AccountId && 
+                    x.Value.Supplier.SystemId == criteria.SupplierSystemId && 
+                    x.Value.Date >= criteria.StartDate && 
+                    x.Value.Date <= criteria.EndDate
+                );
 
             if (!string.IsNullOrEmpty(criteria.RegisterId))
             {
-                queryable = queryable
-                    .Where(x => x.Value.RegisterId == criteria.RegisterId);
+                queryable = queryable.Where(x => x.Value.RegisterId == criteria.RegisterId);
             }
 
             return queryable.ToListAsync();

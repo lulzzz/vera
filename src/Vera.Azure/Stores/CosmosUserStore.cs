@@ -42,10 +42,12 @@ namespace Vera.Azure.Stores
 
         public Task<User> GetByCompany(Guid companyId, string username)
         {
-            var queryable = _container.GetItemLinqQueryable<TypedDocument<User>>()
-                .Where(x => x.Value.CompanyId == companyId
-                            && x.Value.Username == username
-                            && x.Type == DocumentType);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<User>>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(companyId.ToString()),
+                    MaxItemCount = 1
+                })
+                .Where(x => x.Type == DocumentType && x.Value.Username == username);
 
             return queryable.FirstOrDefault();
         }

@@ -35,7 +35,8 @@ namespace Vera.Azure.Stores
                 using var iterator = _container.GetItemQueryIterator<RegisterReport>(definition,
                     requestOptions: new QueryRequestOptions
                     {
-                        PartitionKey = new PartitionKey(PartitionKeyByNumber(accountId, number))
+                        PartitionKey = new PartitionKey(PartitionKeyByNumber(accountId, number)),
+                        MaxItemCount = 1
                     });
 
                 var response = await iterator.ReadNextAsync();

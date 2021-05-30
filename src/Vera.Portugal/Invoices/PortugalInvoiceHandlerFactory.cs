@@ -43,8 +43,12 @@ namespace Vera.Portugal.Invoices
             var bucketGenerator = factory.CreateInvoiceBucketGenerator();
             var head = new InvoiceSupplierHandler(_supplierStore);
 
-            var wdHandler = new WorkingDocumentsHandler(_wdStore, _chainStore,
-                    signer, _loggerFactory.CreateLogger<WorkingDocumentsHandler>());
+            var wdHandler = new WorkingDocumentsHandler(
+                _wdStore, 
+                _chainStore, 
+                signer, 
+                _loggerFactory.CreateLogger<WorkingDocumentsHandler>()
+            );
 
             var persistenceHandler = new InvoicePersistenceHandler(
                 _loggerFactory.CreateLogger<InvoicePersistenceHandler>(),

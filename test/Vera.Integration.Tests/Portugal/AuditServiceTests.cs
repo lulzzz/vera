@@ -60,9 +60,19 @@ namespace Vera.Integration.Tests.Portugal
 
             Assert.NotNull(createAuditReply.AuditId);
 
-            var reply = await client.GetAuditReplyAsync(createAuditReply.AuditId);
+            var location = string.Empty;
+            for (var i = 0; i < 5 && string.IsNullOrEmpty(location); i++)
+            {
+                var reply = await client.GetAuditReplyAsync(createAuditReply.AuditId);
+                location = reply.Location;
 
-            Assert.False(string.IsNullOrEmpty(reply.Location));
+                if (string.IsNullOrEmpty(location))
+                {
+                    await Task.Delay(100);
+                }
+            }
+            
+            Assert.False(string.IsNullOrEmpty(location));
         }
 
         /// <summary>

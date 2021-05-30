@@ -29,22 +29,24 @@ namespace Vera.Azure.Stores
 
         public Task<Supplier> Get(Guid accountId, string systemId)
         {
-            var queryable = _container.GetItemLinqQueryable<TypedDocument<Supplier>>()
-                .Where(x => x.Type == DocumentType
-                && x.Value.SystemId == systemId
-                && x.Value.AccountId == accountId);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<Supplier>>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(accountId.ToString()),
+                    MaxItemCount = 1,
+                    
+                })
+                .Where(x => x.Type == DocumentType && x.Value.SystemId == systemId);
 
             return queryable.FirstOrDefault();
         }
 
-        public  Task<Supplier> Get(Guid accountId, Guid supplierId)
+        public async Task<Supplier> Get(Guid accountId, Guid supplierId)
         {
-            var queryable = _container.GetItemLinqQueryable<TypedDocument<Supplier>>()
-                .Where(x => x.Type == DocumentType
-                && x.Value.Id == supplierId
-                && x.Value.AccountId == accountId);
+            var result = await _container.ReadItemAsync<TypedDocument<Supplier>>(
+                supplierId.ToString(), new PartitionKey(accountId.ToString())
+            );
 
-            return queryable.FirstOrDefault();
+            return result.Resource.Value;
         }
 
         public Task Update(Supplier supplier)

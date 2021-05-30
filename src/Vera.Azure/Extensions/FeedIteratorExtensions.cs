@@ -8,25 +8,25 @@ namespace Vera.Azure.Extensions
 {
     public static class FeedIteratorExtensions
     {
-        public static async Task<T> FirstOrDefault<T>(this IQueryable<Document<T>> queryable)
-            where T: class
-            => await queryable
+        public static Task<T> FirstOrDefault<T>(this IQueryable<Document<T>> queryable)
+            where T : class
+            => queryable
                 .Take(1)
                 .FirstOrDefault<T, Document<T>>();
 
-        public static async Task<T> FirstOrDefault<T>(this IQueryable<TypedDocument<T>> queryable)
+        public static Task<T> FirstOrDefault<T>(this IQueryable<TypedDocument<T>> queryable)
             where T : class
-            => await queryable
+            => queryable
                 .Take(1)
                 .FirstOrDefault<T, TypedDocument<T>>();
 
-        public static async Task<ICollection<T>> ToListAsync<T>(this IQueryable<Document<T>> queryable)
+        public static Task<ICollection<T>> ToListAsync<T>(this IQueryable<Document<T>> queryable)
             where T : class
-            => await queryable.ToListAsync<T, Document<T>>();
+            => queryable.ToListAsync<T, Document<T>>();
 
-        public static async Task<ICollection<T>> ToListAsync<T>(this IQueryable<TypedDocument<T>> queryable)
+        public static Task<ICollection<T>> ToListAsync<T>(this IQueryable<TypedDocument<T>> queryable)
             where T : class
-            => await queryable.ToListAsync<T, TypedDocument<T>>();
+            => queryable.ToListAsync<T, TypedDocument<T>>();
 
         private static async Task<T?> FirstOrDefault<T, TK>(this IQueryable<TK> queryable)
             where T : class
@@ -35,12 +35,12 @@ namespace Vera.Azure.Extensions
             using var iterator = queryable.ToFeedIterator();
             var response = await iterator.ReadNextAsync();
 
-            return response.Any() ? response.Select(x => x.Value).FirstOrDefault() : null;
+            return response.FirstOrDefault()?.Value;
         }
 
         private static async Task<ICollection<T>> ToListAsync<T, TK>(this IQueryable<TK> queryable)
             where T : class
-        where TK : IDocument<T>
+            where TK : IDocument<T>
         {
             using var iterator = queryable.ToFeedIterator();
             var all = new List<T>();

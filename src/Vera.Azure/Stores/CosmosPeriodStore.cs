@@ -47,8 +47,12 @@ namespace Vera.Azure.Stores
 
         public Task<Period> GetOpenPeriodForSupplier(Guid supplierId)
         {
-            var queryable = _container.GetItemLinqQueryable<TypedDocument<Period>>()
-                .Where(x => x.Type == DocumentType && !x.Value.IsClosed && x.Value.Supplier.Id == supplierId);
+            var queryable = _container.GetItemLinqQueryable<TypedDocument<Period>>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(supplierId.ToString()),
+                    MaxItemCount = 1
+                })
+                .Where(x => x.Type == DocumentType && !x.Value.IsClosed);
 
             return queryable.FirstOrDefault();
         }

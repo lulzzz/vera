@@ -18,7 +18,12 @@ namespace Vera.Azure.Stores
         public async Task<IChainable> Last(ChainContext context)
         {
             var partitionKeyValue = context.AccountId + ";" + context.Bucket;
-            var queryable = _container.GetItemLinqQueryable<ChainDocument>()
+            
+            var queryable = _container.GetItemLinqQueryable<ChainDocument>(requestOptions: new QueryRequestOptions
+                {
+                    PartitionKey = new PartitionKey(partitionKeyValue),
+                    MaxItemCount = 1
+                })
                 .Where(x => x.Next == null)
                 .Where(x => x.PartitionKey == partitionKeyValue);
 
