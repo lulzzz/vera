@@ -36,6 +36,7 @@ message GetInvoiceReply {
     string number = 1;
     vera.grpc.shared.Supplier supplier = 2;
     string periodId = 3;
+    string remark = 4;
 }
 
 message ValidateInvoiceRequest {

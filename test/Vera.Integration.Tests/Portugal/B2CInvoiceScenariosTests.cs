@@ -5,6 +5,7 @@ using Vera.Extensions;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
+using Vera.Integration.Tests.Common;
 using Vera.Invoices;
 using Vera.Models;
 using Vera.Portugal.Models;
@@ -228,6 +229,8 @@ namespace Vera.Integration.Tests.Portugal
             await client.OpenPeriod();
             var openRegisterReply = await client.OpenRegister(100m);
 
+            var invoiceNumbers = new List<string>();
+
             foreach (var test in scenarios)
             {
                 var scenario = test.Scenario;
@@ -247,6 +250,8 @@ namespace Vera.Integration.Tests.Portugal
                 var reply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
                 Assert.Contains(expected.Type.ToString(), reply.Number);
+
+                invoiceNumbers.Add(reply.Number);
 
                 _auditResultsStore.AddExpectedEntry(new InvoiceResult
                 {
@@ -279,8 +284,11 @@ namespace Vera.Integration.Tests.Portugal
                 Assert.Equal(totals.Gross.Round(2), got.GrossTotal);
                 Assert.Equal(totals.Net.Round(2), got.NetTotal);
             }
+
+            var auditersOutput = new AuditersOutput(client, httpClient, Constants.Account.Certification);
+            await auditersOutput.StoreAuditFilesInAuditersOutput(getAuditReply.Location, "Test_B2C_Scenarios", invoiceNumbers);
         }
-        
+
         public class Test
         {
             public Scenario Scenario { get; set; }

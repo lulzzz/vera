@@ -1,10 +1,12 @@
 ﻿using Google.Protobuf.WellKnownTypes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
+using Vera.Integration.Tests.Common;
 using Vera.Models;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
@@ -91,6 +93,8 @@ namespace Vera.Integration.Tests.Norway
 
             var openRegisterReply = await client.OpenRegister(100m);
 
+            var invoiceNumbers = new List<string>();
+
             foreach (var product in products)
             {
                 var scenario = new SellProductScenario(product)
@@ -104,14 +108,19 @@ namespace Vera.Integration.Tests.Norway
                 var invoice = result.Invoice;
                 invoice.RegisterId = openRegisterReply.Id;
 
-                await client.Invoice.CreateAsync(new CreateInvoiceRequest
+                var createdInvoiceReply = await client.Invoice.CreateAsync(new CreateInvoiceRequest
                 {
                     Invoice = invoice.Pack()
                 }, client.AuthorizedMetadata);
+
+                invoiceNumbers.Add(createdInvoiceReply.Number);
             }
 
             var getAuditReply = await client.GenerateAuditFile();
             var auditProducts = await invoiceResolver.LoadProductsFromAuditAsync(client.AccountId, getAuditReply.Location);
+
+            var auditersOutput = new AuditersOutput(client, httpClient, Constants.Account.Certification);
+            await auditersOutput.StoreAuditFilesInAuditersOutput(getAuditReply.Location, "Should_validate_total_products_added", invoiceNumbers);
 
             Assert.Equal(2, auditProducts.Count());
         }
