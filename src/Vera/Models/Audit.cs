@@ -23,7 +23,7 @@ namespace Vera.Models
         /// <summary>
         /// Supplier for whom the audit was generated. Part of the criteria.
         /// </summary>
-        public string SupplierSystemId { get; init; }
+        public Guid SupplierId { get; init; }
 
         /// <summary>
         /// Start date range of the audit. Part of the criteria.

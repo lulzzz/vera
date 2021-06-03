@@ -16,7 +16,7 @@ namespace Vera.Tests
         [Fact]
         public async Task Should_throw_when_start_is_before_end()
         {
-            var archiver = new AuditArchiver(null, null, null, null, null);
+            var archiver = new AuditArchiver(null, null, null, null, null, null);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => archiver.Archive(new Account(), new Audit
             {
@@ -32,6 +32,7 @@ namespace Vera.Tests
             var blobStore = new Mock<IBlobStore>();
             var auditStore = new Mock<IAuditStore>();
             var eventsStore = new Mock<IEventLogStore>();
+            var supplierStore = new Mock<ISupplierStore>();
             var writer = new Mock<IAuditWriter>();
 
             invoiceStore
@@ -48,8 +49,12 @@ namespace Vera.Tests
                     new() 
                 });
 
+            supplierStore
+                .Setup(store => store.Get(It.IsAny<Guid>(), It.IsAny<Guid>()))
+                .ReturnsAsync(new Supplier());
+
             writer
-                .Setup(w => w.ResolveName(It.IsAny<AuditCriteria>(), It.IsAny<int>(), It.IsAny<int>()))
+                .Setup(w => w.ResolveName(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(() => "abc.xml");
 
             var archiver = new AuditArchiver(
@@ -57,6 +62,7 @@ namespace Vera.Tests
                 blobStore.Object,
                 auditStore.Object,
                 eventsStore.Object,
+                supplierStore.Object,
                 writer.Object
             );
 

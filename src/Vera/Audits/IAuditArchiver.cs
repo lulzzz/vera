@@ -21,6 +21,7 @@ namespace Vera.Audits
         private readonly IBlobStore _blobStore;
         private readonly IAuditStore _auditStore;
         private readonly IEventLogStore _eventLogStore;
+        private readonly ISupplierStore _supplierStore;
         private readonly IAuditWriter _auditWriter;
 
         public AuditArchiver(
@@ -28,12 +29,14 @@ namespace Vera.Audits
             IBlobStore blobStore,
             IAuditStore auditStore,
             IEventLogStore eventLogStore,
+            ISupplierStore supplierStore,
             IAuditWriter auditWriter)
         {
             _invoiceStore = invoiceStore;
             _blobStore = blobStore;
             _auditStore = auditStore;
             _eventLogStore = eventLogStore;
+            _supplierStore = supplierStore;
             _auditWriter = auditWriter;
         }
 
@@ -69,19 +72,15 @@ namespace Vera.Audits
 
         private async Task FillArchive(Account account, Audit audit, ZipArchive archive)
         {
-            var sequence = 1;
-            var ranges = GetDateRanges(audit).ToList();
-
             var auditCriteria = new AuditCriteria
             {
                 AccountId = account.Id,
-                SupplierSystemId = audit.SupplierSystemId,
+                SupplierId = audit.SupplierId,
             };
             var eventLogCriteria = new EventLogCriteria
             {
                 AccountId = account.Id,
-                SupplierSystemId = audit.SupplierSystemId
-
+                SupplierId = audit.SupplierId
             };
 
             var context = new AuditContext
@@ -89,6 +88,9 @@ namespace Vera.Audits
                 Account = account
             };
 
+            var sequence = 1;
+            var ranges = GetDateRanges(audit).ToList();
+            var supplier = await _supplierStore.Get(account.Id, audit.SupplierId);
             foreach (var (start, end) in ranges)
             {
                 eventLogCriteria.StartDate = auditCriteria.StartDate = start;
@@ -99,7 +101,7 @@ namespace Vera.Audits
 
                 // TODO(kevin): fetch print trail?
 
-                var entryName = await _auditWriter.ResolveName(auditCriteria, sequence++, ranges.Count);
+                var entryName = await _auditWriter.ResolveName(supplier.SystemId, sequence++, ranges.Count);
 
                 await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();
                 await _auditWriter.Write(context, auditCriteria, stream);

@@ -33,7 +33,7 @@ namespace Vera.Azure.Stores
         {
             var queryable = _container.GetItemLinqQueryable<Document<EventLog>>(requestOptions: new QueryRequestOptions
                 {
-                    PartitionKey = new PartitionKey(eventLogCriteria.SupplierSystemId)
+                    PartitionKey = new PartitionKey(eventLogCriteria.SupplierId.ToString())
                 })
                 .Where(x => x.Value.Supplier.AccountId == eventLogCriteria.AccountId);
 

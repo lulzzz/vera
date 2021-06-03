@@ -71,7 +71,7 @@ namespace Vera.Azure.Stores
         {
             return new(
                 p => p.Id,
-                p => p.Supplier.Id.ToString(),
+                p => p.SupplierId.ToString(),
                 period,
                 DocumentType
             );

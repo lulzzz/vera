@@ -20,7 +20,7 @@ namespace Vera.Norway.Audit
             _reportStore = reportStore;
         }
 
-        public Task<string> ResolveName(AuditCriteria criteria, int sequence, int total)
+        public Task<string> ResolveName(string supplierSystemId, int sequence, int total)
         {
             // Currently only support generating one file at a time
 
@@ -29,7 +29,7 @@ namespace Vera.Norway.Audit
             var creationTime = _dateProvider.Now.ToString("yyyyMMddHHmmss");
 
             // Format as defined in the "Naming of the SAF-T data file"
-            return Task.FromResult($"{type}_{criteria.SupplierSystemId}_{creationTime}_{sequence}_{total}.xml");
+            return Task.FromResult($"{type}_{supplierSystemId}_{creationTime}_{sequence}_{total}.xml");
         }
 
         public async Task Write(AuditContext context, AuditCriteria criteria, Stream stream)

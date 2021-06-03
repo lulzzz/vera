@@ -58,14 +58,14 @@ namespace Vera.Host.Services
 
         public override async Task<Supplier> Get(GetSupplierRequest request, ServerCallContext context)
         {
-            var supplier = await GetAndValidateSupplier(request.SystemId, context);
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SystemId);
 
             return supplier.Pack();
         }
 
         public override async Task<Supplier> Update(UpdateSupplierRequest request, ServerCallContext context)
         {
-            var supplier = await GetAndValidateSupplier(request.SystemId, context);
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SystemId);
             var requestSupplier = request.Supplier;
 
             supplier.Name = requestSupplier.Name;
@@ -82,24 +82,11 @@ namespace Vera.Host.Services
 
         public override async Task<Empty> Delete(DeleteSupplierRequest request, ServerCallContext context)
         {
-            var supplier = await GetAndValidateSupplier(request.SystemId, context);
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SystemId);
 
             await _supplierStore.Delete(supplier);
 
             return new Empty();
-        }
-
-        private async Task<Models.Supplier> GetAndValidateSupplier(string supplierSystemId, ServerCallContext context)
-        {
-            var supplier = await context.ResolveSupplier(_supplierStore, supplierSystemId);
-
-            var accountId = context.GetAccountId();
-            if (supplier.AccountId != accountId)
-            {
-                throw new RpcException(new Status(StatusCode.PermissionDenied, "Supplier cannot be accessed by this account"));
-            }
-
-            return supplier;
         }
     }
 }

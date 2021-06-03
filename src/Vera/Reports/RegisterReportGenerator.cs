@@ -19,7 +19,6 @@ namespace Vera.Reports
     {
         private readonly IDateProvider _dateProvider;
         private readonly IInvoiceStore _invoiceStore;
-        private readonly ISupplierStore _supplierStore;
         private readonly IAccountStore _accountStore;
         private readonly IPeriodStore _periodStore;
         private readonly IEventLogStore _eventLogStore;
@@ -27,14 +26,12 @@ namespace Vera.Reports
         public RegisterReportGenerator(
             IDateProvider dateProvider,
             IInvoiceStore invoiceStore,
-            ISupplierStore supplierStore,
             IAccountStore accountStore,
             IPeriodStore periodStore, 
             IEventLogStore eventLogStore)
         {
             _dateProvider = dateProvider;
             _invoiceStore = invoiceStore;
-            _supplierStore = supplierStore;
             _accountStore = accountStore;
             _periodStore = periodStore;
             _eventLogStore = eventLogStore;
@@ -48,13 +45,8 @@ namespace Vera.Reports
                 throw new ValidationException("Failed preconditions, account does not exist");
             }
 
-            var supplier = await _supplierStore.Get(account.Id, context.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new ValidationException("Failed preconditions, supplier does not exist");
-            }
-
-            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
+            var supplierId = context.SupplierId;
+            var period = await _periodStore.GetOpenPeriodForSupplier(supplierId);
             if (period == null)
             {
                 throw new ValidationException("Failed preconditions, an open period does not exist");
@@ -68,14 +60,14 @@ namespace Vera.Reports
                 AccountId = account.Id,
                 StartDate = today,
                 EndDate = tomorrow,
-                SupplierSystemId = supplier.SystemId,
+                SupplierId = supplierId,
                 RegisterId = context.RegisterId
             });
 
             var events = await _eventLogStore.List(new EventLogs.EventLogCriteria
             {
                 AccountId = account.Id,
-                SupplierSystemId = supplier.SystemId,
+                SupplierId = supplierId,
                 StartDate = today,
                 EndDate = tomorrow,
                 RegisterId = context.RegisterId,
@@ -90,7 +82,7 @@ namespace Vera.Reports
                 return new RegisterReport
                 {
                     Account = AccountReport.FromAccount(account),
-                    SupplierId = supplier.Id,
+                    SupplierId = supplierId,
                     Date = _dateProvider.Now,
                     ReportType = context.ReportType,
                     RegisterId = context.RegisterId,
@@ -200,7 +192,7 @@ namespace Vera.Reports
                 CashDrawerOpenings = cashDrawerOpenings,
                 Date = _dateProvider.Now,
                 Account = AccountReport.FromAccount(account),
-                SupplierId = supplier.Id,
+                SupplierId = supplierId,
                 Payments = paymentsReport.ToList(),
                 Taxes = taxesReport.ToList(),
                 Products = productsReport.ToList(),
@@ -231,7 +223,7 @@ namespace Vera.Reports
     {
         public Guid AccountId { get; set; }
         public Guid CompanyId { get; set; }
-        public string SupplierSystemId { get; set; }
+        public Guid SupplierId { get; set; }
         public string RegisterId { get; set; }
         public ReportType ReportType { get; set; }
         public string EmployeeId { get; set; }

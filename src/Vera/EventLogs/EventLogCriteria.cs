@@ -7,7 +7,7 @@ namespace Vera.EventLogs
     {
         public Guid AccountId { get; set; }
 
-        public string SupplierSystemId { get; set; }
+        public Guid SupplierId { get; set; }
 
         public DateTime? StartDate { get; set; }
         

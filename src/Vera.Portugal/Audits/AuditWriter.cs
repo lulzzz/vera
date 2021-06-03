@@ -27,9 +27,9 @@ namespace Vera.Portugal.Audits
             _wdStore = wdStore;
         }
 
-        public Task<string> ResolveName(AuditCriteria criteria, int sequence, int total)
+        public Task<string> ResolveName(string supplierSystemId, int sequence, int total)
         {
-            return Task.FromResult($"{criteria.SupplierSystemId}-{DateTime.UtcNow:yyyyMMdd}-{sequence}_{total}.xml");
+            return Task.FromResult($"{supplierSystemId}-{DateTime.UtcNow:yyyyMMdd}-{sequence}_{total}.xml");
         }
 
         public async Task Write(AuditContext context, AuditCriteria criteria, Stream stream)

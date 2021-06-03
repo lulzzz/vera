@@ -13,6 +13,8 @@ namespace Vera.Models
 
         public Guid Id { get; set; }
 
+        public Guid SupplierId { get; set; }
+
         /// <summary>
         /// The opening time of the period, the date time when the period was created
         /// </summary>
@@ -23,8 +25,6 @@ namespace Vera.Models
         /// </summary>
         public DateTime Closing { get; set; }
         public bool IsClosed => Closing != DateTime.MinValue;
-
-        public Supplier Supplier { get; set; }
 
         /// <summary>
         /// A collection of registers in a certain period

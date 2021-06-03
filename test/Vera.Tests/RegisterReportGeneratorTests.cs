@@ -28,16 +28,12 @@ namespace Vera.Tests
 
             var dateProvider = new Mock<RealLifeDateProvider>();
             var invoiceStore = new Mock<IInvoiceStore>();
-            var supplierStore = new Mock<ISupplierStore>();
             var accountStore = new Mock<IAccountStore>();
             var periodStore = new Mock<IPeriodStore>();
             var eventLogStore = new Mock<IEventLogStore>();
 
             invoiceStore.Setup(i => i.List(It.IsAny<AuditCriteria>()))
                 .ReturnsAsync(new List<Invoice>());
-
-            supplierStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<string>()))
-                .ReturnsAsync(new Supplier());
 
             accountStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<Guid>()))
                 .ReturnsAsync(new Account());
@@ -52,11 +48,11 @@ namespace Vera.Tests
             {
                 AccountId = Guid.NewGuid(),
                 CompanyId = Guid.NewGuid(),
-                SupplierSystemId = "1",
+                SupplierId = Guid.NewGuid(),
                 RegisterId = registerId.ToString()
             };
             var generator = new RegisterReportGenerator(dateProvider.Object, invoiceStore.Object,
-                supplierStore.Object, accountStore.Object, periodStore.Object, eventLogStore.Object);
+                accountStore.Object, periodStore.Object, eventLogStore.Object);
 
             var report = await generator.Generate(context);
 
@@ -107,13 +103,9 @@ namespace Vera.Tests
                     invoice1, invoice2, invoice3, invoice4
                 });
 
-            var supplierStore = new Mock<ISupplierStore>();
             var accountStore = new Mock<IAccountStore>();
             var periodStore = new Mock<IPeriodStore>();
             var eventLogStore = new Mock<IEventLogStore>();
-
-            supplierStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<string>()))
-                .ReturnsAsync(supplier);
 
             accountStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<Guid>()))
                 .ReturnsAsync(account);
@@ -128,11 +120,11 @@ namespace Vera.Tests
             {
                 AccountId = account.Id,
                 CompanyId = account.CompanyId,
-                SupplierSystemId = "1",
+                SupplierId = Guid.NewGuid(),
                 RegisterId = registerId
             };
             var generator = new RegisterReportGenerator(dateProvider.Object, invoiceStore.Object,
-                supplierStore.Object, accountStore.Object, periodStore.Object, eventLogStore.Object);
+                accountStore.Object, periodStore.Object, eventLogStore.Object);
 
             var report = await generator.Generate(context);
 
@@ -154,7 +146,7 @@ namespace Vera.Tests
             var account = new Account();
             var supplier = new Supplier();
             var registerId = Guid.NewGuid();
-            var period = new Period { Supplier = supplier };
+            var period = new Period { SupplierId = supplier.Id };
             period.Registers.Add(new PeriodRegisterEntry { RegisterId = registerId, OpeningAmount = 10m });
 
             var calculator = new InvoiceTotalsCalculator();
@@ -173,13 +165,9 @@ namespace Vera.Tests
                 {
                     invoice1,
                 });
-            var supplierStore = new Mock<ISupplierStore>();
             var accountStore = new Mock<IAccountStore>();
             var periodStore = new Mock<IPeriodStore>();
             var eventLogStore = new Mock<IEventLogStore>();
-
-            supplierStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<string>()))
-                .ReturnsAsync(supplier);
 
             accountStore.Setup(s => s.Get(It.IsAny<Guid>(), It.IsAny<Guid>()))
                 .ReturnsAsync(account);
@@ -191,7 +179,7 @@ namespace Vera.Tests
                 .ReturnsAsync(new List<EventLog>());
 
             var generator = new RegisterReportGenerator(dateProvider.Object, invoiceStore.Object,
-                supplierStore.Object, accountStore.Object, periodStore.Object, eventLogStore.Object);
+                accountStore.Object, periodStore.Object, eventLogStore.Object);
 
             var handler = new Mock<IHandlerChain<RegisterReport>>();
             var reportHandlerFactory = new Mock<IReportHandlerFactory>();

@@ -62,7 +62,7 @@ namespace Vera.Bootstrap
             {
                 AccountId = account.Id,
                 CompanyId = account.CompanyId,
-                SupplierSystemId = period.Supplier.SystemId,
+                SupplierId = period.SupplierId,
                 ReportType = ReportType.Z,
                 EmployeeId = model.EmployeeId
             };

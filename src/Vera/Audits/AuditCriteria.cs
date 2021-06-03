@@ -14,8 +14,8 @@ namespace Vera.Audits
         /// <summary>
         /// SystemId of the supplier of the invoice(s).
         /// </summary>
-        /// <see cref="Vera.Models.Invoice.Supplier"/>
-        public string SupplierSystemId { get; set; }
+        /// <see cref="Invoice.Supplier"/>
+        public Guid SupplierId { get; set; }
 
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }

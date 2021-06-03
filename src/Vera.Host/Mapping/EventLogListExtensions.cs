@@ -7,7 +7,8 @@ namespace Vera.Host.Mapping
     public static class EventLogListExtensions
     {
         public static EventLogCriteria BuildListCriteria(this ListEventLogRequest request,
-            Guid accountId)
+            Guid accountId,
+            Guid supplierId)
         {
             var unpackedType = request.Type.Unpack();
 
@@ -20,7 +21,7 @@ namespace Vera.Host.Mapping
                 Type = type,
                 RegisterId = request.RegisterId,
                 AccountId = accountId,
-                SupplierSystemId = request.SupplierSystemId
+                SupplierId = supplierId
             };
 
             return criteria;

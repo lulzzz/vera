@@ -16,7 +16,6 @@ using Vera.Host.Mapping;
 using Vera.Host.Security;
 using Vera.Reports;
 using Vera.Stores;
-using Vera.Thermal;
 
 namespace Vera.Host.Services
 {
@@ -25,6 +24,7 @@ namespace Vera.Host.Services
     {
         private readonly IRegisterReportGenerator _registerReportGenerator;
         private readonly IAccountStore _accountStore;
+        private readonly ISupplierStore _supplierStore;
         private readonly IReportStore _reportStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
         private readonly IReportHandlerFactory _reportHandlerFactory;
@@ -33,13 +33,15 @@ namespace Vera.Host.Services
             IAccountStore accountStore,
             IReportStore reportStore,
             IAccountComponentFactoryCollection accountComponentFactoryCollection,
-            IReportHandlerFactory reportHandlerFactory)
+            IReportHandlerFactory reportHandlerFactory, 
+            ISupplierStore supplierStore)
         {
             _registerReportGenerator = registerReportGenerator;
             _accountStore = accountStore;
             _reportStore = reportStore;
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
             _reportHandlerFactory = reportHandlerFactory;
+            _supplierStore = supplierStore;
         }
 
         public override async Task<RegisterReport> GenerateDailyXReport(GenerateDailyXReportRequest request, ServerCallContext context)
@@ -49,11 +51,13 @@ namespace Vera.Host.Services
                 throw new RpcException(new Status(StatusCode.InvalidArgument, "Failed preconditions, invalid arguments"));
             }
 
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
+
             var registerReportContext = new RegisterReportContext
             {
                 AccountId = context.GetAccountId(),
                 CompanyId = context.GetCompanyId(),
-                SupplierSystemId = request.SupplierSystemId,
+                SupplierId = supplier.Id,
                 RegisterId = request.RegisterId,
                 EmployeeId = request.EmployeeId,
                 ReportType = Models.ReportType.X

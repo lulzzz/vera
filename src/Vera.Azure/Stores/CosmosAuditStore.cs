@@ -22,7 +22,7 @@ namespace Vera.Azure.Stores
             {
                 Id = Guid.NewGuid(),
                 AccountId = criteria.AccountId,
-                SupplierSystemId = criteria.SupplierSystemId,
+                SupplierId = criteria.SupplierId,
                 Date = DateTime.UtcNow,
                 Start = criteria.StartDate,
                 End = criteria.EndDate

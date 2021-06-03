@@ -1,7 +1,6 @@
 ﻿using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Vera.Bootstrap;
@@ -14,7 +13,6 @@ using Vera.Host.Security;
 using static Vera.Bootstrap.PeriodManager;
 using Vera.Stores;
 using System.Linq;
-using System.Diagnostics;
 
 namespace Vera.Host.Services
 {
@@ -62,7 +60,7 @@ namespace Vera.Host.Services
                 var period = new Models.Period
                 {
                     Opening = _dateProvider.Now,
-                    Supplier = supplier
+                    SupplierId = supplier.Id
                 };
 
                 await _periodStore.Store(period);
@@ -77,14 +75,13 @@ namespace Vera.Host.Services
         public override async Task<Empty> ClosePeriod(ClosePeriodRequest request, ServerCallContext context)
         {
             var account = await context.ResolveAccount(_accountStore);
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
+
             var period = await GetAndValidate(new PeriodValidationModel
             {
-                AccountId = account.Id,
-                SupplierSystemId = request.SupplierSystemId,
+                SupplierId = supplier.Id,
                 PeriodId = request.Id
             });
-
-            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
             var registersToClose = request.Registers.Select(x => Guid.Parse(x.Key));
 
@@ -124,11 +121,12 @@ namespace Vera.Host.Services
 
         public override async Task<Period> Get(GetPeriodRequest request, ServerCallContext context)
         {
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
+
             var period = await GetAndValidate(new PeriodValidationModel
             {
-                AccountId = context.GetAccountId(),
-                SupplierSystemId = request.SupplierSystemId,
-                PeriodId = request.Id
+                PeriodId = request.Id,
+                SupplierId = supplier.Id
             });
 
             return period.Pack();
@@ -149,13 +147,7 @@ namespace Vera.Host.Services
 
         private async Task<Models.Period> GetAndValidate(PeriodValidationModel model)
         {
-            var supplier = await _supplierStore.Get(model.AccountId, model.SupplierSystemId);
-            if (supplier == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "supplier does not exist"));
-            }
-
-            var period = await _periodStore.Get(Guid.Parse(model.PeriodId), supplier.Id);
+            var period = await _periodStore.Get(Guid.Parse(model.PeriodId), model.SupplierId);
             if (period == null)
             {
                 throw new RpcException(new Status(StatusCode.FailedPrecondition, "period does not exist"));
@@ -166,8 +158,7 @@ namespace Vera.Host.Services
 
         public class PeriodValidationModel
         {
-            public Guid AccountId { get; set; }
-            public string SupplierSystemId { get; set; }
+            public Guid SupplierId { get; set; }
             public string PeriodId { get; set; }
         }
     }

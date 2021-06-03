@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
-using Vera.Models;
 using Vera.Stores;
 
 namespace Vera.Host.Services
@@ -14,15 +13,11 @@ namespace Vera.Host.Services
     {
         private readonly IEventLogStore _eventLogStore;
         private readonly ISupplierStore _supplierStore;
-        private readonly IPeriodStore _periodStore;
 
-        public EventLogService(IEventLogStore eventLogStore,
-            ISupplierStore supplierStore, 
-            IPeriodStore periodStore)
+        public EventLogService(IEventLogStore eventLogStore, ISupplierStore supplierStore)
         {
             _eventLogStore = eventLogStore;
             _supplierStore = supplierStore;
-            _periodStore = periodStore;
         }
 
         public override async Task<CreateEventLogReply> Create(CreateEventLogRequest request, ServerCallContext context)
@@ -46,8 +41,9 @@ namespace Vera.Host.Services
         public override async Task<ListEventLogReply> List(ListEventLogRequest request, ServerCallContext context)
         {
             var accountId = context.GetAccountId();
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
             
-            var criteria = request.BuildListCriteria(accountId);
+            var criteria = request.BuildListCriteria(accountId, supplier.Id);
 
             var eventLogs = await _eventLogStore.List(criteria);
 

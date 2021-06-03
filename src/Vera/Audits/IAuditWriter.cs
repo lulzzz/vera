@@ -13,7 +13,7 @@ namespace Vera.Audits
         /// <param name="sequence"></param>
         /// <param name="total"></param>
         /// <returns></returns>
-        Task<string> ResolveName(AuditCriteria criteria, int sequence, int total);
+        Task<string> ResolveName(string supplierSystemId, int sequence, int total);
 
         /// <summary>
         /// Write the contents of the audit to the given stream.

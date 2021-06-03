@@ -46,7 +46,7 @@ namespace Vera.Azure.Stores
             var queryable = _container.GetItemLinqQueryable<Document<Invoice>>()
                 .Where(x => 
                     x.Value.AccountId == criteria.AccountId && 
-                    x.Value.Supplier.SystemId == criteria.SupplierSystemId && 
+                    x.Value.Supplier.Id == criteria.SupplierId && 
                     x.Value.Date >= criteria.StartDate && 
                     x.Value.Date <= criteria.EndDate
                 );

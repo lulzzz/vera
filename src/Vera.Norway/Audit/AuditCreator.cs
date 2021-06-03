@@ -180,7 +180,7 @@ namespace Vera.Norway.Audit
 
             // Physical locations (the shops)
             var invoicesBySupplier = context.Invoices
-              .Where(i => i.Supplier.SystemId == criteria.SupplierSystemId).ToList();
+              .Where(i => i.Supplier.Id == criteria.SupplierId).ToList();
 
             var location = await CreateLocationAsync(context, invoicesBySupplier);
 

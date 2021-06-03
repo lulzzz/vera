@@ -15,6 +15,7 @@ namespace Vera.Host.Services
     public class AuditService : Grpc.AuditService.AuditServiceBase
     {
         private readonly IAccountStore _accountStore;
+        private readonly ISupplierStore _supplierStore;
         private readonly IInvoiceStore _invoiceStore;
         private readonly IEventLogStore _eventsLogStore;
         private readonly IBlobStore _blobStore;
@@ -29,7 +30,8 @@ namespace Vera.Host.Services
             IAuditStore auditStore,
             IAccountComponentFactoryCollection accountComponentFactoryCollection,
             IBackgroundTaskQueue backgroundTaskQueue,
-            IEventLogStore eventsStore)
+            IEventLogStore eventsStore, 
+            ISupplierStore supplierStore)
         {
             _accountStore = accountStore;
             _invoiceStore = invoiceStore;
@@ -38,11 +40,13 @@ namespace Vera.Host.Services
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
             _backgroundTaskQueue = backgroundTaskQueue;
             _eventsLogStore = eventsStore;
+            _supplierStore = supplierStore;
         }
 
         public override async Task<CreateAuditReply> Create(CreateAuditRequest request, ServerCallContext context)
         {
             var account = await context.ResolveAccount(_accountStore);
+            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
             // TODO(kevin): validate the request, start < end and supplier is not empty/nil
@@ -50,7 +54,7 @@ namespace Vera.Host.Services
             var audit = await _auditStore.Create(new AuditCriteria
             {
                 AccountId = account.Id,
-                SupplierSystemId = request.SupplierSystemId,
+                SupplierId = supplier.Id,
                 StartDate = request.StartDate.ToDateTime(),
                 EndDate = request.EndDate.ToDateTime()
             });
@@ -60,6 +64,7 @@ namespace Vera.Host.Services
                 _blobStore,
                 _auditStore,
                 _eventsLogStore,
+                _supplierStore,
                 factory.CreateAuditWriter()
             );
 
