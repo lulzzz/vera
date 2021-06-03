@@ -6,7 +6,6 @@ namespace Vera.Germany
 {
     public class Configuration : AbstractAccountConfiguration
     {
-
         public override void Initialize(IDictionary<string, string> config)
         {
             string value;

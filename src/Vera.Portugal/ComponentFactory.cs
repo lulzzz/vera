@@ -49,9 +49,14 @@ namespace Vera.Portugal
             return new InvoiceNumberGenerator();
         }
 
-        public IPackageSigner CreatePackageSigner()
+        public IInvoiceSigner CreateInvoiceSigner()
         {
-            return new PackageSigner(_rsa, _configuration.PrivateKeyVersion);
+            return new InvoiceSigner(_rsa, _configuration.PrivateKeyVersion);
+        }
+
+        public IReportSigner CreateReportSigner()
+        {
+            return new NoopPackageSigner();
         }
 
         public IThermalReceiptGenerator CreateThermalReceiptGenerator()

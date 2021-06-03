@@ -14,7 +14,7 @@ namespace Vera.Invoices
         private readonly ILogger<InvoicePersistenceHandler> _logger;
         private readonly IChainStore _chainStore;
         private readonly IInvoiceStore _invoiceStore;
-        private readonly IPackageSigner _signer;
+        private readonly IInvoiceSigner _signer;
         private readonly IInvoiceNumberGenerator _invoiceNumberGenerator;
         private readonly IBucketGenerator<Invoice> _invoiceBucketGenerator;
 
@@ -22,7 +22,7 @@ namespace Vera.Invoices
             ILogger<InvoicePersistenceHandler> logger,
             IChainStore chainStore,
             IInvoiceStore invoiceStore, 
-            IPackageSigner signer,
+            IInvoiceSigner signer,
             IInvoiceNumberGenerator invoiceNumberGenerator,
             IBucketGenerator<Invoice> invoiceBucketGenerator
         )
@@ -45,7 +45,7 @@ namespace Vera.Invoices
 
             invoice.Sequence = last.NextSequence;
             invoice.Number = await _invoiceNumberGenerator.Generate(invoice);
-            invoice.Signature = await _signer.Sign(new Package(invoice, last.Signature));
+            invoice.Signature = await _signer.Sign(invoice, last.Signature);
 
             await _invoiceStore.Store(invoice);
 

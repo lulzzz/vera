@@ -10,6 +10,6 @@ namespace Vera.Invoices
         IEnumerable<IInvoiceValidator> CreateInvoiceValidators();
         IBucketGenerator<Invoice> CreateInvoiceBucketGenerator();
         IInvoiceNumberGenerator CreateInvoiceNumberGenerator();
-        IPackageSigner CreatePackageSigner();
+        IInvoiceSigner CreateInvoiceSigner();
     }
 }

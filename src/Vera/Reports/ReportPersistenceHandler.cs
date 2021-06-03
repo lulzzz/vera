@@ -14,13 +14,13 @@ namespace Vera.Reports
         private readonly ILogger<ReportPersistenceHandler> _logger;
         private readonly IChainStore _chainStore;
         private readonly IReportStore _reportStore;
-        private readonly IPackageSigner _signer;
+        private readonly IReportSigner _signer;
         private readonly IBucketGenerator<RegisterReport> _reportBucketGenerator;
 
         public ReportPersistenceHandler(ILogger<ReportPersistenceHandler> logger,
             IChainStore chainStore,
             IReportStore reportStore,
-            IPackageSigner signer,
+            IReportSigner signer,
             IBucketGenerator<RegisterReport> reportBucketGenerator)
         {
             _logger = logger;
@@ -40,7 +40,7 @@ namespace Vera.Reports
 
             report.Sequence = last.NextSequence;
             report.Number = last.NextSequence.ToString();
-            report.Signature = await _signer.Sign(new Package(report, last.Signature));
+            report.Signature = await _signer.Sign(report, last.Signature);
 
             await _reportStore.Store(report);
 

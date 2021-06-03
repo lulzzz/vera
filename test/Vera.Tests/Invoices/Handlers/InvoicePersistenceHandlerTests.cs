@@ -28,7 +28,7 @@ namespace Vera.Tests.Invoices.Handlers
         private readonly Mock<ILogger<InvoicePersistenceHandler>> logger;
         private readonly Mock<IBucketGenerator<Invoice>> bucketGenerator;
         private readonly Mock<IInvoiceNumberGenerator> invoiceNumberGenerator;
-        private readonly Mock<IPackageSigner> signer;
+        private readonly Mock<IInvoiceSigner> signer;
         private readonly InvoicePersistenceHandler persistanceHandler;
 
         public InvoicePersistenceHandlerTests()
@@ -42,7 +42,7 @@ namespace Vera.Tests.Invoices.Handlers
             logger = new Mock<ILogger<InvoicePersistenceHandler>>();
             bucketGenerator = new Mock<IBucketGenerator<Invoice>>();
             invoiceNumberGenerator = new Mock<IInvoiceNumberGenerator>();
-            signer = new Mock<IPackageSigner>();
+            signer = new Mock<IInvoiceSigner>();
 
             bucketGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
                 .Returns(expectedBucket);
@@ -50,7 +50,7 @@ namespace Vera.Tests.Invoices.Handlers
             invoiceNumberGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
                 .ReturnsAsync(expectedNumber);
 
-            signer.Setup(x => x.Sign(It.IsAny<Package>()))
+            signer.Setup(x => x.Sign(It.IsAny<Invoice>(), It.IsAny<Signature>()))
                 .ReturnsAsync(new Signature { Output = signature });
 
             last.SetupGet(x => x.NextSequence)

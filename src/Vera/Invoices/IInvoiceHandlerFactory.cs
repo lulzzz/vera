@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Vera.Concurrency;
+using Vera.Dependencies;
 using Vera.Dependencies.Handlers;
 using Vera.Models;
 using Vera.Stores;
@@ -8,7 +9,7 @@ namespace Vera.Invoices
 {
     public interface IInvoiceHandlerFactory
     {
-        IHandlerChain<Invoice> Create(IInvoiceComponentFactory factory);
+        IHandlerChain<Invoice> Create(IComponentFactory factory);
         string Name { get; }
     }
 
@@ -38,7 +39,7 @@ namespace Vera.Invoices
             _periodStore = periodStore;
         }
 
-        public IHandlerChain<Invoice> Create(IInvoiceComponentFactory factory)
+        public IHandlerChain<Invoice> Create(IComponentFactory factory)
         {
             var head = new InvoiceSupplierHandler(_supplierStore);
          
@@ -46,7 +47,7 @@ namespace Vera.Invoices
                 _loggerFactory.CreateLogger<InvoicePersistenceHandler>(),
                 _chainStore,
                 _invoiceStore,
-                factory.CreatePackageSigner(),
+                factory.CreateInvoiceSigner(),
                 factory.CreateInvoiceNumberGenerator(),
                 factory.CreateInvoiceBucketGenerator()
             );

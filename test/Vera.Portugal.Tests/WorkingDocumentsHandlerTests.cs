@@ -42,7 +42,7 @@ namespace Vera.Portugal.Tests
             var wdStore = new Mock<IWorkingDocumentStore>();
             var chainStore = new Mock<IChainStore>();
             var last = new Mock<IChainable>();
-            var signer = new Mock<IPackageSigner>();
+            var signer = new Mock<IInvoiceSigner>();
             var logger = new Mock<ILogger<WorkingDocumentsHandler>>();
 
             last.SetupGet(x => x.NextSequence)

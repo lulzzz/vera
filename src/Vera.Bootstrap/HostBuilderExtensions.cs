@@ -5,12 +5,12 @@ using Vera.Dependencies;
 using Vera.Models;
 using Vera.Norway;
 using Vera.Portugal;
-using Vera.Portugal.Invoices;
 using Vera.Reports;
 using Vera.Security;
 using Vera.Services;
 using Vera.Stores;
 using Vera.Invoices;
+using Vera.Germany;
 
 namespace Vera.Bootstrap
 {
@@ -42,6 +42,7 @@ namespace Vera.Bootstrap
             // Registration of all the certification implementations
             builder.UseVeraPortugal();
             builder.UseVeraNorway();
+            builder.UseVeraGermany();
 
             return builder;
         }

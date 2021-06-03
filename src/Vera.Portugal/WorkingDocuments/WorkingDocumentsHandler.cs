@@ -15,13 +15,13 @@ namespace Vera.Portugal.WorkingDocuments
     {
         private readonly IWorkingDocumentStore _wdStore;
         private readonly IChainStore _chainStore;
-        private readonly IPackageSigner _signer;
+        private readonly IInvoiceSigner _signer;
         private readonly ILogger<WorkingDocumentsHandler> _logger;
 
         public WorkingDocumentsHandler(
             IWorkingDocumentStore wdStore, 
-            IChainStore chainStore, 
-            IPackageSigner signer, 
+            IChainStore chainStore,
+            IInvoiceSigner signer, 
             ILogger<WorkingDocumentsHandler> logger)
         {
             _wdStore = wdStore;
@@ -55,15 +55,13 @@ namespace Vera.Portugal.WorkingDocuments
             wd.Sequence = last.NextSequence;
             wd.Number = $"{Models.WorkType.CM} {wd.SupplierSystemId}/{wd.Sequence}";
 
-            var package = new Package
+            var wdInvoice = new Invoice
             {
                 Number = wd.Number,
-                Timestamp = wd.CreationTime,
-                Gross = wd.Lines.Sum(l => l.Gross),
-                PreviousSignature = last.Signature?.Output
+                Date = wd.CreationTime,
+                Totals = new Totals { Gross = wd.Lines.Sum(l => l.Gross) }
             };
-
-            wd.Signature = await _signer.Sign(package);
+            wd.Signature = await _signer.Sign(wdInvoice, last.Signature);
 
             await _wdStore.Store(wd);
 

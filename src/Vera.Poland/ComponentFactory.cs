@@ -35,9 +35,14 @@ namespace Vera.Poland
             throw new NotImplementedException();
         }
 
-        public IPackageSigner CreatePackageSigner()
+        public IInvoiceSigner CreateInvoiceSigner()
         {
             throw new NotImplementedException();
+        }
+
+        public IReportSigner CreateReportSigner()
+        {
+            return new NoopPackageSigner();
         }
 
         public IThermalReceiptGenerator CreateThermalReceiptGenerator()

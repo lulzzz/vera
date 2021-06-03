@@ -49,7 +49,7 @@ namespace Vera.Reports
                 _loggerFactory.CreateLogger<ReportPersistenceHandler>(),
                 _chainStore,
                 _reportStore,
-                factory.CreatePackageSigner(),
+                factory.CreateReportSigner(),
                 _reportBucketGenerator
             );
 

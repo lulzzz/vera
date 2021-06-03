@@ -20,7 +20,7 @@ namespace Vera.Portugal.Models
         public DateTime CreationTime { get; set; }
 
         /// <summary>
-        /// Signature details of the invoice.
+        /// Signature details of the working document.
         /// </summary>
         public Signature Signature { get; set; } = new();
 

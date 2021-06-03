@@ -6,6 +6,7 @@ using Vera.Models;
 using Vera.Portugal.WorkingDocuments;
 using Vera.Portugal.Stores;
 using Vera.Stores;
+using Vera.Dependencies;
 
 namespace Vera.Portugal.Invoices
 {
@@ -37,15 +38,16 @@ namespace Vera.Portugal.Invoices
             _wdStore = wdStore;
         }
 
-        public IHandlerChain<Invoice> Create(IInvoiceComponentFactory factory)
+        public IHandlerChain<Invoice> Create(IComponentFactory factory)
         {
-            var signer = factory.CreatePackageSigner();
+            var signer = factory.CreateInvoiceSigner();
+
             var bucketGenerator = factory.CreateInvoiceBucketGenerator();
             var head = new InvoiceSupplierHandler(_supplierStore);
 
             var wdHandler = new WorkingDocumentsHandler(
                 _wdStore, 
-                _chainStore, 
+                _chainStore,
                 signer, 
                 _loggerFactory.CreateLogger<WorkingDocumentsHandler>()
             );

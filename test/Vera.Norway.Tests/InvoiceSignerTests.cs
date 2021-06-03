@@ -5,29 +5,31 @@ using System.Text;
 using System.Threading.Tasks;
 using Vera.Invoices;
 using Vera.Models;
-using Vera.Signing;
 using Xunit;
 
 namespace Vera.Norway.Tests
 {
-    public class PackageSignerTests
+    public class InvoiceSignerTests
     {
         [Fact]
         public async Task Should_generate_correct_signature()
         {
-            var package = new Package
+            var invoice = new Invoice
             {
-                Timestamp = new DateTime(1999, 10, 20, 13, 31, 22),
+                Date = new DateTime(1999, 10, 20, 13, 31, 22),
                 Number = "t123/1",
-                Net = -100m,
-                Gross = -123.2323m,
-                PreviousSignature = Encoding.UTF8.GetBytes("abcdefg")
+                Totals = new Totals
+                {
+                    Net = -100m,
+                    Gross = -123.2323m,
+                }
             };
+            var previousSignature = new Signature { Output = Encoding.UTF8.GetBytes("abcdefg") };
 
             const string expectedSignature = "abcdefg;1999-10-20;13:31:22;t123/1;-123.23;-100.00;";
 
-            var signer = new PackageSigner(RSA.Create(), 1);
-            var result = await signer.Sign(package);
+            var signer = new InvoiceSigner(RSA.Create(), 1);
+            var result = await signer.Sign(invoice, previousSignature);
 
             Assert.Equal(expectedSignature, result.Input);
             Assert.Equal(256, result.Output.Length);
@@ -65,10 +67,8 @@ namespace Vera.Norway.Tests
 
             const string expectedSignature = "0;1999-10-20;13:31:22;1001;105.00;84.42;";
 
-            Signature prevSignature = null;
-            var package2 = new Package(invoice, prevSignature);
-            var signer2 = new PackageSigner(RSA.Create(), 1);
-            var result2 = await signer2.Sign(package2);
+            var signer2 = new InvoiceSigner(RSA.Create(), 1);
+            var result2 = await signer2.Sign(invoice, null);
 
             Assert.Equal(expectedSignature, result2.Input);
             Assert.Equal(256, result2.Output.Length);

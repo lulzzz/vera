@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Vera.Tests.TestParameters
 {
@@ -19,6 +18,8 @@ namespace Vera.Tests.TestParameters
         {
             yield return new object[] { "PT" };
             yield return new object[] { "NO" };
+            //TODO(andrei): FiskalyClient needs configuration to work
+            //yield return new object[] { "DE" };
         }
     }
 }

@@ -80,6 +80,11 @@ namespace Vera.Models
         public int FiscalYear { get; set; }
 
         /// <summary>
+        /// ISO4217 currency code of the invoice.
+        /// </summary>
+        public string CurrencyCode { get; set; }
+
+        /// <summary>
         /// Generic free-for-all remark field. Generally used for printing on the receipt.
         /// </summary>
         public string? Remark { get; set; }

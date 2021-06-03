@@ -25,13 +25,13 @@ namespace Vera.Tests.Invoices
             var invoiceStore = new Mock<IInvoiceStore>();
             var chainStore = new Mock<IChainStore>();
             var last = new Mock<IChainable>();
-            var factory = new Mock<IInvoiceComponentFactory>();
+            var factory = new Mock<IComponentFactory>();
             var supplierStore = new Mock<ISupplierStore>();
             var periodStore = new Mock<IPeriodStore>();
 
             var bucketGenerator = new Mock<IBucketGenerator<Invoice>>();
             var invoiceNumberGenerator = new Mock<IInvoiceNumberGenerator>();
-            var signer = new Mock<IPackageSigner>();
+            var signer = new Mock<IInvoiceSigner>();
 
             factory.Setup(f => f.CreateInvoiceBucketGenerator())
                 .Returns(bucketGenerator.Object);
@@ -39,7 +39,7 @@ namespace Vera.Tests.Invoices
             factory.Setup(f => f.CreateInvoiceNumberGenerator())
                 .Returns(invoiceNumberGenerator.Object);
 
-            factory.Setup(f => f.CreatePackageSigner())
+            factory.Setup(f => f.CreateInvoiceSigner())
                 .Returns(signer.Object);
 
             factory.Setup(f => f.CreateInvoiceValidators())
@@ -51,7 +51,7 @@ namespace Vera.Tests.Invoices
             invoiceNumberGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
                 .ReturnsAsync(expectedNumber);
 
-            signer.Setup(x => x.Sign(It.IsAny<Package>()))
+            signer.Setup(x => x.Sign(It.IsAny<Invoice>(), It.IsAny<Signature>()))
                 .ReturnsAsync(new Signature());
 
             last.SetupGet(x => x.NextSequence)
