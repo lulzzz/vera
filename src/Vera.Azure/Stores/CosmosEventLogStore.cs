@@ -22,7 +22,7 @@ namespace Vera.Azure.Stores
         {
             var byId = new Document<EventLog>(
                 document => document.Id,
-                document => document.Supplier.SystemId,
+                document => document.Supplier.Id.ToString(),
                 eventLog
             );
 
