@@ -40,14 +40,16 @@ namespace Vera.Bootstrap
                 collection.AddTransient<IReportHandlerFactory, ReportHandlerFactory>();
                 collection.AddTransient<IDateProvider, RealLifeDateProvider>();
 
+                // Adds support for injecting the IHttpClientFactory etc.
                 collection.AddHttpClient();
             });
 
             // Registration of all the certification implementations
-            builder.UseVeraPortugal();
-            builder.UseVeraNorway();
-            builder.UseVeraGermany();
-            builder.UseVeraSweden();
+            builder
+                .UseVeraPortugal()
+                .UseVeraNorway()
+                .UseVeraSweden()
+                .UseVeraGermany();
 
             return builder;
         }

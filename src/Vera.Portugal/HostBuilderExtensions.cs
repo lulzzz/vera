@@ -24,9 +24,13 @@ namespace Vera.Portugal
                     .GetSection(CosmosContainerOptions.Section)
                     .Get<CosmosContainerOptions>() ?? new CosmosContainerOptions();
 
-                collection.AddSingleton<IWorkingDocumentStore, CosmosWorkingDocumentStore>(sp => new CosmosWorkingDocumentStore(
-                    sp.GetService<CosmosClient>()
-                        .GetContainer(cosmosOptions.Database, cosmosContainerOptions.Documents)));
+                collection.AddSingleton<IWorkingDocumentStore, CosmosWorkingDocumentStore>(sp =>
+                {
+                    var client = sp.GetRequiredService<CosmosClient>();
+                    var container = client.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Documents);
+
+                    return new CosmosWorkingDocumentStore(container);
+                });
 
                 collection.AddSingleton<IAccountComponentFactory, AccountComponentFactory>();
                 collection.AddTransient<IInvoiceHandlerFactory, PortugalInvoiceHandlerFactory>();
