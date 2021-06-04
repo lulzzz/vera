@@ -13,5 +13,6 @@ namespace Vera.Stores
         Task<ICollection<Register>> GetOpenRegistersForSupplier(Guid supplierId);
         Task<ICollection<Register>> GetRegistersBasedOnSupplier(IEnumerable<Guid> registersIds, Guid supplierId);
         Task Update(Register register);
+        Task<int> GetTotalRegisters(Guid supplierId);
     }
 }

@@ -17,7 +17,7 @@ namespace Vera.Poland
     {
         public IConfigurationValidator CreateConfigurationValidator()
         {
-            return new ConfigurationValidator();
+            return new DefaultConfigurationValidator<Configuration>();
         }
 
         public IEnumerable<IInvoiceValidator> CreateInvoiceValidators()

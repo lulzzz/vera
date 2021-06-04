@@ -30,6 +30,8 @@ message Supplier {
     Address address = 5;
     
     string timeZone = 6;
+    
+    string emailAddress = 7;
 }
 
 message Register {

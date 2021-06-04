@@ -105,7 +105,10 @@ namespace Vera.Host.Services
             var account = await context.ResolveAccount(_accountStore);
             
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
-            await factory.CreateRegisterInitializer().Initialize(newRegister);
+
+            var registerInitializationContext = new RegisterInitializationContext(account, supplier, newRegister);
+            
+            await factory.CreateRegisterInitializer().Initialize(registerInitializationContext);
 
             await _registerStore.Store(newRegister);
 

@@ -6,4 +6,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Vera.Documents\Vera.Documents.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers" />
+  </ItemGroup>
 </Project>

@@ -68,5 +68,7 @@ namespace Vera.Germany
                 });
             }
         }
+
+        public Task Initialize(RegisterInitializationContext context) => throw new System.NotImplementedException();
     }
 }

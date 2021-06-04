@@ -11,6 +11,8 @@ using Vera.Services;
 using Vera.Stores;
 using Vera.Invoices;
 using Vera.Germany;
+using Vera.Sweden;
+using Vera.Sweden.InfrasecHttpClient;
 
 namespace Vera.Bootstrap
 {
@@ -37,12 +39,15 @@ namespace Vera.Bootstrap
                 collection.AddSingleton<IBucketGenerator<RegisterReport>, ReportBucketGenerator>();
                 collection.AddTransient<IReportHandlerFactory, ReportHandlerFactory>();
                 collection.AddTransient<IDateProvider, RealLifeDateProvider>();
+
+                collection.AddHttpClient();
             });
 
             // Registration of all the certification implementations
             builder.UseVeraPortugal();
             builder.UseVeraNorway();
             builder.UseVeraGermany();
+            builder.UseVeraSweden();
 
             return builder;
         }

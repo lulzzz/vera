@@ -5,9 +5,9 @@ namespace Vera.Registers
 {
     public class SimpleRegisterInitializer : IRegisterInitializer
     {
-        public Task Initialize(Register register)
+        public Task Initialize(RegisterInitializationContext context)
         {
-            register.Status = RegisterStatus.Open;
+            context.Register.Status = RegisterStatus.Open;
 
             return Task.CompletedTask;
         }

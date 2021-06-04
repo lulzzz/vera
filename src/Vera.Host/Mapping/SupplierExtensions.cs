@@ -11,7 +11,8 @@
                 TaxRegistrationNumber = supplier.TaxRegistrationNumber ?? string.Empty,
                 SystemId = supplier.SystemId,
                 Address = supplier.Address.Pack(),
-                TimeZone = supplier.TimeZone
+                TimeZone = supplier.TimeZone,
+                EmailAddress = supplier.EmailAddress
             };
 
             return result;

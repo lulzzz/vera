@@ -37,5 +37,9 @@ namespace Vera.Models
         /// The id of the supplier timezone (ISO standard)
         /// </summary>
         public string TimeZone { get; set; }
+        /// <summary>
+        /// Email Address of the supplier
+        /// </summary>
+        public string EmailAddress { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Azure.Cosmos.Linq;
 using Vera.Azure.Extensions;
 using Vera.Models;
 using Vera.Stores;
@@ -19,7 +20,20 @@ namespace Vera.Azure.Stores
         {
             _container = container;
         }
-
+        
+        public async Task<int> GetTotalRegisters(Guid supplierId)
+        {
+            var totalRegisters = await _container.GetItemLinqQueryable<Document<Register>>(
+                    requestOptions: new QueryRequestOptions
+                    {
+                        PartitionKey = new PartitionKey(supplierId.ToString())
+                    })
+                .Where(x => x.Value.SupplierId == supplierId)
+                .CountAsync();
+            
+            return totalRegisters;
+        }
+        
         public async Task<Register> Get(Guid registerId, Guid supplierId)
         {
             try

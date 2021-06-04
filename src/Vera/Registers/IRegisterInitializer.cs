@@ -8,6 +8,6 @@ namespace Vera.Registers
         /// <summary>
         /// Initializes the register and changes its status to Open (<see cref="RegisterStatus"/>)
         /// </summary>
-        Task Initialize(Register register);
+        Task Initialize(RegisterInitializationContext context);
     }
 }

@@ -2,6 +2,7 @@ using Vera.Audits;
 using Vera.Configuration;
 using Vera.Invoices;
 using Vera.Printing;
+using Vera.Models;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Thermal;
