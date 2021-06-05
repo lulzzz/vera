@@ -1,6 +1,8 @@
 using Grpc.Core;
 using System.Threading.Tasks;
+using Bogus;
 using Vera.Grpc;
+using Vera.Grpc.Shared;
 using Vera.Host.Security;
 
 namespace Vera.Integration.Tests
@@ -35,23 +37,24 @@ namespace Vera.Integration.Tests
             }, AuthorizedMetadata);
         }
 
-        public async Task<OpenRegisterReply> OpenRegister(decimal amount)
+        public async Task<string> OpenRegister(decimal amount)
         {
             var createRegisterRequest = new CreateRegisterRequest()
             {
                 SupplierSystemId = SupplierSystemId,
+                SystemId = new Faker().Random.AlphaNumeric(16)
             };
 
-            var register = await Register.CreateRegisterAsync(createRegisterRequest, AuthorizedMetadata);
+            await Register.CreateRegisterAsync(createRegisterRequest, AuthorizedMetadata);
 
-            var reply = await Register.OpenRegisterAsync(new OpenRegisterRequest
+            await Period.OpenRegisterAsync(new OpenRegisterRequest
             {
                 SupplierSystemId = SupplierSystemId,
                 OpeningAmount = amount,
-                RegisterId = register.Id,
+                RegisterSystemId = createRegisterRequest.SystemId,
             }, AuthorizedMetadata);
 
-            return reply;
+            return createRegisterRequest.SystemId;
         }
 
         public string AccountId { get; }
@@ -73,7 +76,7 @@ namespace Vera.Integration.Tests
         public ReportService.ReportServiceClient Report { get; set; }
 
         public EventLogService.EventLogServiceClient EventLog { get; set; }
-        
+
         public MessageTemplateService.MessageTemplateServiceClient MessageTemplateClient { get; }
     }
 }

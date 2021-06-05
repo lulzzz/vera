@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Grpc.Core;
 using Microsoft.AspNetCore.Authorization;
+using Vera.EventLogs;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
@@ -13,28 +15,42 @@ namespace Vera.Host.Services
     {
         private readonly IEventLogStore _eventLogStore;
         private readonly ISupplierStore _supplierStore;
+        private readonly IRegisterStore _registerStore;
+        private readonly IEventLogCreator _eventLogCreator;
 
-        public EventLogService(IEventLogStore eventLogStore, ISupplierStore supplierStore)
+        public EventLogService(
+            IEventLogStore eventLogStore,
+            ISupplierStore supplierStore,
+            IRegisterStore registerStore,
+            IEventLogCreator eventLogCreator
+        )
         {
             _eventLogStore = eventLogStore;
             _supplierStore = supplierStore;
+            _registerStore = registerStore;
+            _eventLogCreator = eventLogCreator;
         }
 
         public override async Task<CreateEventLogReply> Create(CreateEventLogRequest request, ServerCallContext context)
         {
-            var eventLog = request.Eventlog.Unpack();
+            var log = request.Eventlog;
 
-            ValidateType(eventLog);
+            var supplier = await context.ResolveSupplier(_supplierStore, log.SupplierSystemId);
 
-            var supplier = await context.ResolveSupplier(_supplierStore, request.Eventlog.SupplierSystemId);
+            var newLog = new Vera.Models.EventLog
+            {
+                Date = log.Timestamp.ToDateTime(),
+                Supplier = supplier,
+                RegisterSystemId = log.RegisterSystemId,
+                EmployeeId = log.EmployeeId,
+                Type = log.Type.Unpack()
+            };
 
-            eventLog.Supplier = supplier;
-
-            await _eventLogStore.Store(eventLog);
+            await _eventLogCreator.Create(newLog);
 
             return new CreateEventLogReply
             {
-                Id = eventLog.Id.ToString()
+                Id = newLog.Id.ToString()
             };
         }
 
@@ -42,8 +58,25 @@ namespace Vera.Host.Services
         {
             var accountId = context.GetAccountId();
             var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
-            
-            var criteria = request.BuildListCriteria(accountId, supplier.Id);
+
+            var unpackedType = request.Type.Unpack();
+
+            Vera.Models.EventLogType? type = unpackedType == Models.EventLogType.None ? null : unpackedType;
+
+            var criteria = new EventLogCriteria
+            {
+                EndDate = request.EndDate?.ToDateTime(),
+                StartDate = request.StartDate?.ToDateTime(),
+                Type = type,
+                AccountId = accountId,
+                SupplierId = supplier.Id
+            };
+
+            if (!string.IsNullOrEmpty(request.RegisterSystemId))
+            {
+                var register = await _registerStore.GetBySystemIdAndSupplierId(supplier.Id, request.RegisterSystemId);
+                criteria.RegisterId = register.Id;
+            }
 
             var eventLogs = await _eventLogStore.List(criteria);
 
@@ -52,25 +85,6 @@ namespace Vera.Host.Services
             reply.EventLogs.AddRange(eventLogs.Pack());
 
             return reply;
-        }
-
-        private static void ValidateType(Models.EventLog eventLog)
-        {
-            switch (eventLog.Type)
-            {
-                case Vera.Models.EventLogType.None:
-                    FailedPrecondition("Type required for event");
-                    break;
-                case Vera.Models.EventLogType.CloseCashDrawer when string.IsNullOrEmpty(eventLog.RegisterId):
-                    FailedPrecondition($"Register required for event {eventLog.Type}");
-                    break;
-            }
-        }
-
-        private static void FailedPrecondition(string detail)
-        {
-            throw new RpcException(
-                new Status(StatusCode.FailedPrecondition, detail));
         }
     }
 }

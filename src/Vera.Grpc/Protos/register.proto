@@ -5,21 +5,10 @@ import "Protos/shared.proto";
 package vera.grpc;
 
 service RegisterService {
-	rpc OpenRegister(OpenRegisterRequest) returns (OpenRegisterReply);
-	rpc CloseRegister(CloseRegisterRequest) returns (CloseRegisterReply);
 	rpc CreateRegister(CreateRegisterRequest) returns (CreateRegisterReply);
 	rpc Get(GetRegisterRequest) returns (GetRegisterReply);
 	rpc GetAll(GetAllRegistersRequest) returns (GetAllRegistersReply);
-}
-
-message OpenRegisterRequest {
-	string supplierSystemId = 1;
-	vera.grpc.shared.DecimalValue openingAmount = 2;
-	string registerId = 3;
-}
-
-message OpenRegisterReply {
-	string id = 1;
+	rpc CloseRegister(CloseRegisterRequest) returns (CloseRegisterReply);
 }
 
 message CloseRegisterRequest {
@@ -33,10 +22,10 @@ message CloseRegisterReply {
 
 message CreateRegisterRequest {
 	string supplierSystemId = 1;
-	
+
     // Identifier of the register in the external system
     string systemId = 2;
-    
+
 	string name = 3;
 }
 

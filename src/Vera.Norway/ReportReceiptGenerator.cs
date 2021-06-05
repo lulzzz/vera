@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using Vera.Documents.Nodes;
 using Vera.Extensions;
+using Vera.Models;
 using Vera.Reports;
 
 namespace Vera.Norway
@@ -30,16 +31,26 @@ namespace Vera.Norway
         private IEnumerable<IThermalNode> GenerateHeader(ReceiptReportContext context)
         {
             var account = context.RegisterReport.Account;
+
             yield return new TextThermalNode(context.Header)
             {
                 Bold = true,
                 FontSize = FontSize.Large
             };
-            yield return new TextThermalNode($"{context.RegisterReport.ReportType} Report #{context.RegisterReport.Number}")
+
+            var reportType = context.RegisterReport.Type switch
+            {
+                RegisterReportType.Current => "X",
+                RegisterReportType.EndOfDay => "Z",
+                _ => throw new ArgumentOutOfRangeException()
+            };
+
+            yield return new TextThermalNode($"{reportType} Report #{context.RegisterReport.Number}")
             {
                 Bold = true,
                 FontSize = FontSize.Large
             };
+
             yield return new TextThermalNode(account.Name);
             yield return new TextThermalNode($"ORG NR: {account.TaxRegistrationNumber}");
             yield return new TextThermalNode($"Foretaksregisteret");
@@ -235,7 +246,7 @@ namespace Vera.Norway
 
         private IEnumerable<IThermalNode> GenerateFooter(ReceiptReportContext context)
         {
-            yield return new TextThermalNode($"Kassapunkt ID: {context.RegisterReport.RegisterId}");
+            yield return new TextThermalNode($"Kassapunkt ID: {context.RegisterReport.RegisterSystemId}");
 
             yield return new SpacingThermalNode(1);
 

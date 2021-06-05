@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Vera.Models;
 
 namespace Vera.Signing
@@ -8,8 +9,13 @@ namespace Vera.Signing
         Task<Signature> Sign(RegisterReport report, Signature previousSignature);
     }
 
-    public class NoopPackageSigner : IReportSigner
+    public class NullReportSigner : IReportSigner
     {
-        public Task<Signature> Sign(RegisterReport report, Signature previousSignature) => null;
+        public Task<Signature> Sign(RegisterReport report, Signature previousSignature) =>
+            Task.FromResult(new Signature
+            {
+                Input = string.Empty,
+                Output = Array.Empty<byte>()
+            });
     }
 }

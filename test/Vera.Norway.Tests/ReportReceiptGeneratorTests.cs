@@ -78,9 +78,9 @@ namespace Vera.Norway.Tests
                     Return = -2.41m
                 },
                 Number = "354",
-                ReportType = ReportType.X,
-                RegisterId = registerId,
-                CashDrawerOpenings = 6 
+                Type = RegisterReportType.Current,
+                RegisterSystemId = registerId,
+                CashDrawerOpenings = 6
             };
 
             var context = new ReceiptReportContext

@@ -20,7 +20,7 @@ namespace Vera.Azure.Stores
         {
             _container = container;
         }
-        
+
         public async Task<int> GetTotalRegisters(Guid supplierId)
         {
             var totalRegisters = await _container.GetItemLinqQueryable<Document<Register>>(
@@ -30,11 +30,11 @@ namespace Vera.Azure.Stores
                     })
                 .Where(x => x.Value.SupplierId == supplierId)
                 .CountAsync();
-            
+
             return totalRegisters;
         }
-        
-        public async Task<Register> Get(Guid registerId, Guid supplierId)
+
+        public async Task<Register> Get(Guid supplierId, Guid registerId)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace Vera.Azure.Stores
             }
         }
 
-        public Task<Register> GetBySystemIdAndSupplierId(string systemId, Guid supplierId)
+        public Task<Register> GetBySystemIdAndSupplierId(Guid supplierId, string systemId)
         {
             try
             {
@@ -78,34 +78,6 @@ namespace Vera.Azure.Stores
                 .Where(x => x.Value.Status == RegisterStatus.Open);
 
             return queryable.ToListAsync();
-        }
-
-        public async Task<ICollection<Register>> GetRegistersBasedOnSupplier(IEnumerable<Guid> registersIds, Guid supplierId)
-        {
-            var query = new StringBuilder(@"
-                SELECT value c[""Value""] 
-                FROM c 
-                WHERE 
-                    ARRAY_CONTAINS(@registersIds, c[""Value""].Id)"
-            );
-
-            var definition = new QueryDefinition(query.ToString())
-                .WithParameter("@registersIds", registersIds);
-
-            var iterator = _container.GetItemQueryIterator<Register>(definition, requestOptions: new QueryRequestOptions
-            {
-                PartitionKey = new PartitionKey(supplierId.ToString())
-            });
-
-            var registers = new List<Register>();
-
-            while (iterator.HasMoreResults)
-            {
-                var results = await iterator.ReadNextAsync();
-                registers.AddRange(results);
-            }
-
-            return registers;
         }
 
         public async Task Store(Register register)

@@ -26,7 +26,7 @@ namespace Vera.Tests.Shared
 
         public InvoiceBuilder WithRegister(string registerId)
         {
-            _invoice.RegisterId = registerId;
+            _invoice.RegisterSystemId = registerId;
             return this;
         }
 

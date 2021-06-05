@@ -33,14 +33,14 @@ namespace Vera.Integration.Tests.Portugal
                 AccountId = Guid.Parse(client.AccountId),
                 SupplierSystemId = client.SupplierSystemId
             };
-            
+
             var result = scenario.Execute();
 
             await client.OpenPeriod();
 
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
             var invoice = result.Invoice;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -71,7 +71,7 @@ namespace Vera.Integration.Tests.Portugal
                     await Task.Delay(100);
                 }
             }
-            
+
             Assert.False(string.IsNullOrEmpty(location));
         }
 
@@ -98,7 +98,7 @@ namespace Vera.Integration.Tests.Portugal
 
             await client.OpenPeriod();
 
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             foreach (var product in products)
             {
@@ -111,7 +111,7 @@ namespace Vera.Integration.Tests.Portugal
                 var result = scenario.Execute();
 
                 var invoice = result.Invoice;
-                invoice.RegisterId = openRegisterReply.Id;
+                invoice.RegisterSystemId = registerSystemId;
                 await client.Invoice.CreateAsync(new CreateInvoiceRequest
                 {
                     Invoice = invoice.Pack()

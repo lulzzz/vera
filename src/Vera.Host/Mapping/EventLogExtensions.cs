@@ -13,7 +13,7 @@ namespace Vera.Host.Mapping
             var result = new Vera.Models.EventLog
             {
                 Date = eventLog.Timestamp.ToDateTime(),
-                RegisterId = eventLog.RegisterId,
+                RegisterSystemId = eventLog.RegisterSystemId,
                 Type = eventLog.Type.Unpack()
             };
 

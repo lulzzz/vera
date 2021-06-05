@@ -19,7 +19,7 @@ namespace Vera.Germany.Invoices
 
         public Task<Signature> Sign(Invoice invoice, Signature previousSignature)
         {
-            var clientId = invoice.RegisterId;
+            var clientId = invoice.RegisterSystemId;
 
             var tss = _fiskalyClient.GetTss(invoice.Supplier.Id.ToString());
             var client = _fiskalyClient.GetClient(clientId, tss._id);
@@ -49,10 +49,10 @@ namespace Vera.Germany.Invoices
             var signatureOutput = EncodingHelper.Encode(transactionModel.Signature.Value);
             var signatureInput = JsonConvert.SerializeObject(createTransactionModel);
 
-            return Task.FromResult(new Signature 
-            { 
+            return Task.FromResult(new Signature
+            {
                 Input = signatureInput,
-                Output = signatureOutput 
+                Output = signatureOutput
             });
         }
     }

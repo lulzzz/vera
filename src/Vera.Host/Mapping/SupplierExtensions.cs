@@ -12,7 +12,7 @@
                 SystemId = supplier.SystemId,
                 Address = supplier.Address.Pack(),
                 TimeZone = supplier.TimeZone,
-                EmailAddress = supplier.EmailAddress
+                EmailAddress = supplier.EmailAddress ?? string.Empty
             };
 
             return result;

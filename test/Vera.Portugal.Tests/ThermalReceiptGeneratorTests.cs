@@ -104,7 +104,7 @@ namespace Vera.Portugal.Tests
                     SystemId = "007",
                     FirstName = "Kevin"
                 },
-                RegisterId = "ST01.44",
+                RegisterSystemId = "ST01.44",
                 Date = DateTime.UtcNow,
                 FiscalPeriod = 1,
                 FiscalYear = 2020,

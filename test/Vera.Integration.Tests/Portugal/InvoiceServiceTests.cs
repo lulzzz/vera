@@ -34,10 +34,10 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
-            
+            var registerSystemId = await client.OpenRegister(100m);
+
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -59,10 +59,10 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
             // Create same transaction twice to verify sequence is incremented
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
@@ -95,7 +95,7 @@ namespace Vera.Integration.Tests.Portugal
                 AccountId = client.AccountId,
                 Invoice = invoice.Pack()
             }, client.AuthorizedMetadata);
-            
+
             Assert.Empty(validationReply.Results);
         }
 
@@ -112,7 +112,7 @@ namespace Vera.Integration.Tests.Portugal
 
             var result = scenario.Execute();
             var invoice = result.Invoice;
-            
+
             invoice.Lines.Add(new Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",
@@ -125,13 +125,13 @@ namespace Vera.Integration.Tests.Portugal
                     Code = "IVA"
                 },
             });
-            
+
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
                 AccountId = client.AccountId,
                 Invoice = invoice.Pack()
             }, client.AuthorizedMetadata);
- 
+
             Assert.Contains(validationReply.Results, x => x.Key == "Lines");
         }
 
@@ -145,20 +145,20 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
             };
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
-            var getByNumberRequest = new GetInvoiceByNumberRequest 
-            { 
-                AccountId = client.AccountId, 
-                Number = createInvoiceReply.Number 
+            var getByNumberRequest = new GetInvoiceByNumberRequest
+            {
+                AccountId = client.AccountId,
+                Number = createInvoiceReply.Number
             };
 
             var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
@@ -170,21 +170,21 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_create_invoice_with_period()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            
+
             var builder = new InvoiceBuilder();
             var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
             };
-            
+
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
             var getByNumberRequest = new GetInvoiceByNumberRequest
@@ -197,7 +197,7 @@ namespace Vera.Integration.Tests.Portugal
 
             var getPeriodRequest = new GetCurrentPeriodRequest { SupplierSystemId = client.SupplierSystemId };
             var getCurrentPeriodReply = await client.Period.GetCurrentPeriodAsync(getPeriodRequest, client.AuthorizedMetadata);
-            
+
             Assert.Equal(getCurrentPeriodReply.Id, getInvoiceReply.PeriodId);
         }
 
@@ -222,13 +222,13 @@ namespace Vera.Integration.Tests.Portugal
             };
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var builder = new InvoiceBuilder();
             var invoice = builder
                 .Reset()
                 .WithAccount(Guid.Parse(client.AccountId))
-                .WithRegister("1.1")
+                .WithRegister(registerSystemId)
                 .WithEmployee()
                 .WithCustomer()
                 .WithSupplier(client.SupplierSystemId)
@@ -242,7 +242,6 @@ namespace Vera.Integration.Tests.Portugal
                 })
                 .Build();
 
-            invoice.RegisterId = openRegisterReply.Id;
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -267,8 +266,8 @@ namespace Vera.Integration.Tests.Portugal
                })
                .Build();
 
-            invoice2.RegisterId = openRegisterReply.Id;
-            
+            invoice2.RegisterSystemId = registerSystemId;
+
             var createInvoiceRequest2 = new CreateInvoiceRequest
             {
                 Invoice = invoice2.Pack()

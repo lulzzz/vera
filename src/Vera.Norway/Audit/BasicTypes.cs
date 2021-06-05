@@ -200,8 +200,8 @@ namespace Vera.Norway.Audit
                 EventLogType.Logout => "User has logged out",
                 EventLogType.OpenCashDrawer => "Cash drawer was opened",
                 EventLogType.CloseCashDrawer => "Cash drawer was closed",
-                EventLogType.XReport => "XReport generated",
-                EventLogType.ZReport => "ZReport generated",
+                EventLogType.CurrentRegisterReportCreated => "XReport generated",
+                EventLogType.EndOfDayRegisterReportCreated => "ZReport generated",
                 EventLogType.ReceiptPrinted => "Receipt was printed",
                 EventLogType.ReceiptReprinted => "Receipt was reprinted",
                 _ => throw new NotSupportedException($"{eventLogType} not supported")
@@ -215,8 +215,8 @@ namespace Vera.Norway.Audit
                 EventLogType.Logout => PredefinedEventBasics.EmployeeLogout,
                 EventLogType.OpenCashDrawer => PredefinedEventBasics.OpenCashDrawer,
                 EventLogType.CloseCashDrawer => PredefinedEventBasics.CloseCashDrawer,
-                EventLogType.XReport => PredefinedEventBasics.XReport,
-                EventLogType.ZReport => PredefinedEventBasics.ZReport,
+                EventLogType.CurrentRegisterReportCreated => PredefinedEventBasics.XReport,
+                EventLogType.EndOfDayRegisterReportCreated => PredefinedEventBasics.ZReport,
                 EventLogType.ReceiptPrinted => PredefinedEventBasics.SalesReceipt,
                 EventLogType.ReceiptReprinted => PredefinedEventBasics.CopyReceipt,
                 _ => PredefinedEventBasics.Other

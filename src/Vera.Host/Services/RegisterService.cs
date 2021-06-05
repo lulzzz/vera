@@ -3,75 +3,42 @@ using Microsoft.AspNetCore.Authorization;
 using System;
 using System.Threading.Tasks;
 using Vera.Bootstrap;
-using Vera.Extensions;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
 using Vera.Models;
 using Vera.Stores;
-using Period = Vera.Models.Period;
+using Register = Vera.Models.Register;
+using RegisterStatus = Vera.Models.RegisterStatus;
 
 namespace Vera.Host.Services
 {
     [Authorize]
     public class RegisterService : Grpc.RegisterService.RegisterServiceBase
     {
-        private readonly IPeriodStore _periodStore;
         private readonly ISupplierStore _supplierStore;
         private readonly IRegisterStore _registerStore;
         private readonly IAccountStore _accountStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
 
-        public RegisterService(IPeriodStore periodStore,
+        public RegisterService(
             ISupplierStore supplierStore,
             IRegisterStore registerStore,
-            IAccountComponentFactoryCollection accountComponentFactoryCollection,
-            IAccountStore accountStore)
+            IAccountStore accountStore,
+            IAccountComponentFactoryCollection accountComponentFactoryCollection
+        )
         {
-            _periodStore = periodStore;
             _supplierStore = supplierStore;
             _registerStore = registerStore;
-            _accountComponentFactoryCollection = accountComponentFactoryCollection;
             _accountStore = accountStore;
-        }
-
-        public override async Task<OpenRegisterReply> OpenRegister(OpenRegisterRequest request, ServerCallContext context)
-        {
-            var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
-
-            var period = await _periodStore.GetOpenPeriodForSupplier(supplier.Id);
-            if (period == null)
-            {
-                throw new RpcException(new Status(StatusCode.FailedPrecondition, "no open period"));
-            }
-
-            var register = await _registerStore.Get(Guid.Parse(request.RegisterId), supplier.Id);
-            if (register == null)
-            {
-                throw new RpcException(new Status(StatusCode.NotFound, "register not found for supplier"));
-            }
-
-            var registerEntry = new Models.PeriodRegisterEntry
-            {
-                OpeningAmount = request.OpeningAmount,
-                RegisterId = register.Id
-            };
-            
-            period.Registers.Add(registerEntry);
-
-            await _periodStore.Update(period);
-
-            return new OpenRegisterReply
-            {
-                Id = registerEntry.RegisterId.ToString()
-            };
+            _accountComponentFactoryCollection = accountComponentFactoryCollection;
         }
 
         public override async Task<CloseRegisterReply> CloseRegister(CloseRegisterRequest request, ServerCallContext context)
         {
             var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
-            
-            var register = await _registerStore.GetBySystemIdAndSupplierId(request.SystemId, supplier.Id);
+
+            var register = await _registerStore.GetBySystemIdAndSupplierId(supplier.Id, request.SystemId);
             if (register == null)
             {
                 throw new RpcException(new Status(StatusCode.NotFound, "Register does not exist"));
@@ -103,11 +70,11 @@ namespace Vera.Host.Services
             };
 
             var account = await context.ResolveAccount(_accountStore);
-            
+
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
 
             var registerInitializationContext = new RegisterInitializationContext(account, supplier, newRegister);
-            
+
             await factory.CreateRegisterInitializer().Initialize(registerInitializationContext);
 
             await _registerStore.Store(newRegister);
@@ -122,7 +89,7 @@ namespace Vera.Host.Services
         {
             var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
 
-            var register = await _registerStore.Get(Guid.Parse(request.Id), supplier.Id);
+            var register = await _registerStore.Get(supplier.Id, Guid.Parse(request.Id));
             if (register == null)
             {
                 return new GetRegisterReply();

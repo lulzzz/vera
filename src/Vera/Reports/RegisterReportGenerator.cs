@@ -27,7 +27,7 @@ namespace Vera.Reports
             IDateProvider dateProvider,
             IInvoiceStore invoiceStore,
             IAccountStore accountStore,
-            IPeriodStore periodStore, 
+            IPeriodStore periodStore,
             IEventLogStore eventLogStore)
         {
             _dateProvider = dateProvider;
@@ -39,13 +39,14 @@ namespace Vera.Reports
 
         public async Task<RegisterReport> Generate(RegisterReportContext context)
         {
-            var account = await _accountStore.Get(context.CompanyId, context.AccountId); 
+            var account = await _accountStore.Get(context.CompanyId, context.AccountId);
             if (account == null)
             {
                 throw new ValidationException("Failed preconditions, account does not exist");
             }
 
             var supplierId = context.SupplierId;
+
             var period = await _periodStore.GetOpenPeriodForSupplier(supplierId);
             if (period == null)
             {
@@ -54,7 +55,7 @@ namespace Vera.Reports
 
             var today = _dateProvider.Now.Date;
             var tomorrow = today.AddDays(1);
-            
+
             var invoicesByRegister = await _invoiceStore.List(new Audits.AuditCriteria
             {
                 AccountId = account.Id,
@@ -73,9 +74,10 @@ namespace Vera.Reports
                 RegisterId = context.RegisterId,
                 Type = EventLogType.OpenCashDrawer
             });
-            var cashDrawerOpenings = events?.Count ?? 0;
 
-            var register = period.Registers.FirstOrDefault(r => r.RegisterId == Guid.Parse(context.RegisterId));
+            var register = period.Registers.First(r => r.RegisterId == context.RegisterId);
+
+            var cashDrawerOpenings = events?.Count ?? 0;
 
             if (invoicesByRegister == null || !invoicesByRegister.Any())
             {
@@ -84,8 +86,9 @@ namespace Vera.Reports
                     Account = AccountReport.FromAccount(account),
                     SupplierId = supplierId,
                     Date = _dateProvider.Now,
-                    ReportType = context.ReportType,
+                    Type = context.RegisterReportType,
                     RegisterId = context.RegisterId,
+                    RegisterSystemId = register.RegisterSystemId,
                     RegisterOpeningAmount = register.OpeningAmount,
                     CashDrawerOpenings = cashDrawerOpenings
                 };
@@ -160,7 +163,8 @@ namespace Vera.Reports
             var settlements = invoicesByRegister
                 .SelectMany(i => i.Lines)
                 .Where(l => l.Settlements != null)
-                .SelectMany(l => l.Settlements);
+                .SelectMany(l => l.Settlements)
+                .ToList();
 
             var settlementsReport = new
             {
@@ -168,10 +172,13 @@ namespace Vera.Reports
                 Amount = settlements.Sum(s => s.Amount)
             };
 
-            var returnInvoices = invoicesByRegister.Where(i => i.Lines.Any(l => l.CreditReference != null));
+            var returnInvoices = invoicesByRegister
+                .Where(i => i.Lines.Any(l => l.CreditReference != null))
+                .ToList();
+
             var returnsReport = new
             {
-                Count = returnInvoices.Count(),
+                Count = returnInvoices.Count,
                 Amount = returnInvoices.Sum(i => i.Totals.Gross)
             };
 
@@ -188,6 +195,7 @@ namespace Vera.Reports
             return new RegisterReport
             {
                 RegisterId = context.RegisterId,
+                RegisterSystemId = register.RegisterSystemId,
                 RegisterOpeningAmount = register.OpeningAmount,
                 CashDrawerOpenings = cashDrawerOpenings,
                 Date = _dateProvider.Now,
@@ -214,7 +222,7 @@ namespace Vera.Reports
                     Return = totalAmountReturns,
                     Net = totalAmountNet
                 },
-                ReportType = context.ReportType
+                Type = context.RegisterReportType
             };
         }
     }
@@ -224,8 +232,8 @@ namespace Vera.Reports
         public Guid AccountId { get; set; }
         public Guid CompanyId { get; set; }
         public Guid SupplierId { get; set; }
-        public string RegisterId { get; set; }
-        public ReportType ReportType { get; set; }
+        public Guid RegisterId { get; set; }
+        public RegisterReportType RegisterReportType { get; set; }
         public string EmployeeId { get; set; }
     }
 }

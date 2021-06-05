@@ -7,7 +7,10 @@ package vera.grpc;
 
 service PeriodService {
 	rpc OpenPeriod(OpenPeriodRequest) returns (OpenPeriodReply);
+	rpc OpenRegister(OpenRegisterRequest) returns (vera.grpc.shared.Empty);
+
 	rpc ClosePeriod(ClosePeriodRequest) returns (vera.grpc.shared.Empty);
+
 	rpc Get(GetPeriodRequest) returns (Period);
 	rpc GetCurrentPeriod(GetCurrentPeriodRequest) returns (Period);
 }
@@ -20,11 +23,21 @@ message OpenPeriodReply {
 	string id = 1;
 }
 
+message OpenRegisterRequest {
+	string supplierSystemId = 1;
+	string registerSystemId = 2;
+	vera.grpc.shared.DecimalValue openingAmount = 3;
+}
+
 message ClosePeriodRequest {
 	string id = 1;
 	string supplierSystemId = 2;
-	map<string,ClosePeriodRegisterEntry> registers = 3;
-	string employeeId = 4;
+
+	// Employee that is responsible for closing the period
+	string employeeId = 3;
+
+    // Collection of registers with their closing amounts
+	repeated RegisterCloseEntry registers = 4;
 }
 
 message GetPeriodRequest {
@@ -38,10 +51,10 @@ message GetCurrentPeriodRequest {
 
 message Period {
     string id = 1;
-	
+
 	google.protobuf.Timestamp opening = 2;
 	google.protobuf.Timestamp closing = 3;
-	
+
 	string supplierSystemId = 4;
 	repeated PeriodRegisterEntry registers = 5;
 }
@@ -53,9 +66,7 @@ message PeriodRegisterEntry {
 	vera.grpc.shared.DecimalValue closingAmount = 3;
 }
 
-message ClosePeriodRegisterEntry {
-	string id = 1;
-
-	vera.grpc.shared.DecimalValue openingAmount = 2;
-	vera.grpc.shared.DecimalValue closingAmount = 3;
+message RegisterCloseEntry {
+	string systemId = 1;
+	vera.grpc.shared.DecimalValue amount = 2;
 }

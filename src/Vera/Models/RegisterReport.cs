@@ -14,7 +14,8 @@ namespace Vera.Models
         public Guid Id { get; set; }
         public DateTime Date { get; set; }
         public Guid SupplierId { get; set; }
-        public string RegisterId { get; set; }
+        public Guid RegisterId { get; set; }
+        public string RegisterSystemId { get; set; }
         public decimal RegisterOpeningAmount { get; set; }
         public int CashDrawerOpenings { get; set; }
         public string EmployeeId { get; set; }
@@ -28,7 +29,7 @@ namespace Vera.Models
         public TotalsReport Totals { get; set; }
 
         /// <summary>
-        // Sequence number of the report
+        /// Sequence number of the report.
         /// </summary>
         public int Sequence { get; set; }
 
@@ -37,7 +38,7 @@ namespace Vera.Models
         /// </summary>
         public string Number { get; set; }
         public Signature Signature { get; set; }
-        public ReportType ReportType { get; set; }
+        public RegisterReportType Type { get; set; }
 
         public class AccountReport
         {

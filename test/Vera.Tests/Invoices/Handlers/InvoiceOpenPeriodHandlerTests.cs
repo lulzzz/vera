@@ -19,7 +19,7 @@ namespace Vera.Tests.Invoices.Handlers
                 Supplier = new Models.Supplier()
             };
             var openPeriodHandler = new InvoiceOpenPeriodHandler(periodStore.Object);
-            
+
             var ex = await Assert.ThrowsAsync<ValidationException>(() => openPeriodHandler.Handle(invoice));
 
             Assert.Equal("An open period is required", ex.Message);
@@ -48,15 +48,15 @@ namespace Vera.Tests.Invoices.Handlers
         [Fact]
         public async Task Should_assign_the_current_open_period()
         {
-            var registerId = Guid.NewGuid();
+            var registerId = Guid.NewGuid().ToString();
             var periodStore = new Mock<IPeriodStore>();
             var invoice = new Models.Invoice
             {
                 Supplier = new Models.Supplier(),
-                RegisterId = registerId.ToString()
+                RegisterSystemId = registerId
             };
             var period = new Models.Period();
-            period.Registers.Add(new Models.PeriodRegisterEntry { RegisterId = registerId });
+            period.Registers.Add(new Models.PeriodRegisterEntry { RegisterSystemId = registerId });
 
             periodStore.Setup(s => s.GetOpenPeriodForSupplier(It.IsAny<Guid>()))
                 .ReturnsAsync(period);

@@ -27,7 +27,7 @@ namespace Vera.Host.Mapping
                 Manual = invoice.Manual,
                 Remark = invoice.Remark,
                 AccountId = Guid.Parse(invoice.Account),
-                RegisterId = invoice.RegisterId,
+                RegisterSystemId = invoice.RegisterId,
                 Supplier = new Supplier
                 {
                     SystemId = invoice.SupplierSystemId
@@ -74,7 +74,7 @@ namespace Vera.Host.Mapping
                 PeriodYear = invoice.FiscalYear,
                 Timestamp = invoice.Date.ToTimestamp(),
                 SystemId = invoice.SystemId ?? string.Empty,
-                RegisterId = invoice.RegisterId ?? string.Empty,
+                RegisterId = invoice.RegisterSystemId ?? string.Empty,
                 Remark = invoice.Remark ?? string.Empty,
                 SupplierSystemId = invoice.Supplier.SystemId,
                 Employee = new Employee

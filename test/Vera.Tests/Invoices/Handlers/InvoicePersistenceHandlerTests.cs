@@ -74,7 +74,7 @@ namespace Vera.Tests.Invoices.Handlers
         {
             var invoice = new Invoice
             {
-                RegisterId = registerId.ToString(),
+                RegisterSystemId = registerId.ToString(),
                 Supplier = supplier
             };
 
@@ -94,7 +94,7 @@ namespace Vera.Tests.Invoices.Handlers
         {
             var invoice = new Invoice
             {
-                RegisterId = registerId.ToString(),
+                RegisterSystemId = registerId.ToString(),
                 Supplier = supplier
             };
 
@@ -111,7 +111,7 @@ namespace Vera.Tests.Invoices.Handlers
         {
             var invoice = new Invoice
             {
-                RegisterId = registerId.ToString(),
+                RegisterSystemId = registerId.ToString(),
                 Supplier = supplier
             };
 

@@ -25,15 +25,15 @@ namespace Vera.Integration.Tests.Portugal
             _fixture = fixture;
             _setup = fixture.CreateSetup();
         }
-        
+
         [Fact]
         public async Task Test_B2C_Scenarios()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            
+
             var httpClient = _fixture.CreateClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue(MetadataKeys.Authorization));
-            
+
             _auditResultsStore = new AuditResultsStore(httpClient);
 
             var allTaxRates = new Dictionary<TaxesCategory, decimal>()
@@ -43,7 +43,7 @@ namespace Vera.Integration.Tests.Portugal
                 {TaxesCategory.Low, 1.06m},
                 {TaxesCategory.Zero, 1m},
             };
-            
+
             // Scenarios from top to bottom
             // https://www.notion.so/Pre-audit-Portugal-79e136a1932847818b7d9f44c09db0e5
             var scenarios = new Test[]
@@ -213,8 +213,8 @@ namespace Vera.Integration.Tests.Portugal
                         {
                             {TaxesCategory.High, 1.23m},
                             {TaxesCategory.Zero, 1m}
-                        }, 
-                        100m, 
+                        },
+                        100m,
                         100m * 0.088m
                     ),
                     Expected = new()
@@ -227,7 +227,7 @@ namespace Vera.Integration.Tests.Portugal
             };
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoiceNumbers = new List<string>();
 
@@ -235,18 +235,18 @@ namespace Vera.Integration.Tests.Portugal
             {
                 var scenario = test.Scenario;
                 var expected = test.Expected;
-                
+
                 scenario.AccountId = Guid.Parse(client.AccountId);
                 scenario.SupplierSystemId = client.SupplierSystemId;
 
                 var result = scenario.Execute();
                 var invoice = result.Invoice;
-                invoice.RegisterId = openRegisterReply.Id;
+                invoice.RegisterSystemId = registerSystemId;
                 var createInvoiceRequest = new CreateInvoiceRequest
                 {
                     Invoice = invoice.Pack()
                 };
-        
+
                 var reply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
                 Assert.Contains(expected.Type.ToString(), reply.Number);
@@ -264,11 +264,11 @@ namespace Vera.Integration.Tests.Portugal
             }
 
             var getAuditReply = await client.GenerateAuditFile();
-            
+
             await _auditResultsStore.LoadInvoicesFromAuditAsync(client.AccountId, getAuditReply.Location);
 
             var calculator = new InvoiceTotalsCalculator();
-            
+
             foreach (var expected in _auditResultsStore.ExpectedResults)
             {
                 var got = _auditResultsStore.GetAuditEntry(expected.InvoiceNumber);
@@ -276,11 +276,11 @@ namespace Vera.Integration.Tests.Portugal
                 Assert.NotNull(got);
 
                 var expectedInvoice = expected.Invoice;
-                
+
                 Assert.Equal(expected.InvoiceType, got.InvoiceType);
-                
+
                 var totals = calculator.Calculate(expectedInvoice);
-                
+
                 Assert.Equal(totals.Gross.Round(2), got.GrossTotal);
                 Assert.Equal(totals.Net.Round(2), got.NetTotal);
             }

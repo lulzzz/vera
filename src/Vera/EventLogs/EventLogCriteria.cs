@@ -10,10 +10,10 @@ namespace Vera.EventLogs
         public Guid SupplierId { get; set; }
 
         public DateTime? StartDate { get; set; }
-        
+
         public DateTime? EndDate { get; set; }
 
-        public string? RegisterId { get; set; }
+        public Guid? RegisterId { get; set; }
 
         public EventLogType? Type { get; set; }
     }

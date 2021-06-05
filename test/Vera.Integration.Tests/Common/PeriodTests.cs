@@ -22,13 +22,14 @@ namespace Vera.Integration.Tests.Common
             _setup = fixture.CreateSetup();
         }
 
-        [Fact]
-        public async Task Should_open_close_period()
+        [Theory]
+        [ClassData(typeof(CertificationKeys))]
+        public async Task Should_open_close_period(string certification)
         {
             var accountContext = new AccountContext
             {
                 AccountName = _faker.Company.CompanyName(),
-                Certification = "123",
+                Certification = certification,
                 SupplierSystemId = _faker.Random.AlphaNumeric(10)
             };
 
@@ -47,18 +48,19 @@ namespace Vera.Integration.Tests.Common
             Assert.NotNull(period);
             Assert.NotNull(period.Opening);
             Assert.NotNull(period.SupplierSystemId);
-            Assert.Equal(DateTime.MinValue, period.Closing.ToDateTime());
+            Assert.Null(period.Closing);
 
             var closePeriodRequest = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId
             };
+
             await client.Period.ClosePeriodAsync(closePeriodRequest, client.AuthorizedMetadata);
 
             period = await client.Period.GetAsync(getPeriodRequest, client.AuthorizedMetadata);
 
-            Assert.NotEqual(DateTime.MinValue, period.Closing.ToDateTime());
+            Assert.NotNull(period.Closing);
         }
 
         [Fact]
@@ -66,41 +68,42 @@ namespace Vera.Integration.Tests.Common
         {
             var client = await _setup.CreateClient(Portugal.Constants.Account);
 
-            var openPeriodRequest = new OpenPeriodRequest { SupplierSystemId = client.SupplierSystemId };
-            var openPeriodReply = await client.Period.OpenPeriodAsync(openPeriodRequest, client.AuthorizedMetadata);
-
             var createRegisterRequest = new CreateRegisterRequest()
             {
                 SupplierSystemId = client.SupplierSystemId,
+                SystemId = "123"
             };
 
-            var register = await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
+            await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
+
+            var openPeriodRequest = new OpenPeriodRequest
+            {
+                SupplierSystemId = client.SupplierSystemId
+            };
+
+            var openPeriodReply = await client.Period.OpenPeriodAsync(openPeriodRequest, client.AuthorizedMetadata);
 
             var openRegisterRequest = new OpenRegisterRequest
             {
                 OpeningAmount = 10m,
                 SupplierSystemId = client.SupplierSystemId,
-                RegisterId = register.Id
+                RegisterSystemId = createRegisterRequest.SystemId
             };
 
-            var openRegisterReply = await client.Register.OpenRegisterAsync(openRegisterRequest, client.AuthorizedMetadata);
+            await client.Period.OpenRegisterAsync(openRegisterRequest, client.AuthorizedMetadata);
 
-            var registerEntries = new Dictionary<string, ClosePeriodRegisterEntry>
-            {
-                {
-                    openRegisterReply.Id,
-                    new ClosePeriodRegisterEntry
-                    {
-                        Id = openRegisterReply.Id,
-                        ClosingAmount = 100m,
-                    }
-                }
-            };
             var closePeriodRequest = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId,
-                Registers = { registerEntries }
+                Registers =
+                {
+                    new RegisterCloseEntry
+                    {
+                        SystemId = createRegisterRequest.SystemId,
+                        Amount = 100m
+                    }
+                }
             };
 
             await client.Period.ClosePeriodAsync(closePeriodRequest, client.AuthorizedMetadata);
@@ -110,9 +113,10 @@ namespace Vera.Integration.Tests.Common
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId
             };
+
             var period = await client.Period.GetAsync(getPeriodRequest, client.AuthorizedMetadata);
 
-            Assert.NotEqual(DateTime.MinValue, period.Closing.ToDateTime());
+            Assert.NotNull(period.Closing);
         }
 
         [Theory]
@@ -134,18 +138,20 @@ namespace Vera.Integration.Tests.Common
             var createRegisterRequest = new CreateRegisterRequest()
             {
                 SupplierSystemId = client.SupplierSystemId,
+                SystemId = "123"
             };
 
-            var register = await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
+            await client.Register.CreateRegisterAsync(createRegisterRequest, client.AuthorizedMetadata);
 
             var openRegisterRequest = new OpenRegisterRequest
             {
                 OpeningAmount = 10m,
                 SupplierSystemId = client.SupplierSystemId,
-                RegisterId = register.Id
+                RegisterSystemId = createRegisterRequest.SystemId
             };
 
-            var openRegisterReply = await client.Register.OpenRegisterAsync(openRegisterRequest, client.AuthorizedMetadata);
+            await client.Period.OpenRegisterAsync(openRegisterRequest, client.AuthorizedMetadata);
+
             var getPeriodRequest = new GetPeriodRequest
             {
                 Id = openPeriodReply.Id,
@@ -153,73 +159,67 @@ namespace Vera.Integration.Tests.Common
             };
 
             var scenarios = new List<ClosePeriodRequest>();
-            var registerEntries = new Dictionary<string, ClosePeriodRegisterEntry>
-            {
-                {
-                    openRegisterReply.Id,
-                    new ClosePeriodRegisterEntry
-                    {
-                        Id = openRegisterReply.Id,
-                        ClosingAmount = 100m,
-                    }
-                },
-                {
-                    openPeriodReply.Id,
-                    new ClosePeriodRegisterEntry
-                    {
-                        Id = openPeriodReply.Id,
-                        ClosingAmount = 200m
-                    }
-                }
-            };
 
-            //no registers
-            var closePeriodRequest1 = new ClosePeriodRequest
+            var closePeriodWithNoRegistersRequest = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId
             };
-            scenarios.Add(closePeriodRequest1);
 
-            //more registers
-            var closePeriodRequest2 = new ClosePeriodRequest
+            scenarios.Add(closePeriodWithNoRegistersRequest);
+
+            var closePeriodWithTooManyRegistersRequest = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId,
-                Registers = { registerEntries }
+                Registers =
+                {
+                    new RegisterCloseEntry
+                    {
+                        SystemId = createRegisterRequest.SystemId,
+                        Amount = 100m
+                    },
+                    new RegisterCloseEntry
+                    {
+                        SystemId = "321",
+                        Amount = 200m
+                    },
+                }
             };
-            scenarios.Add(closePeriodRequest2);
 
-            var lastRegisterItem = new Dictionary<string, ClosePeriodRegisterEntry> {
-                { registerEntries.Last().Key,registerEntries.Last().Value}
-            };
+            scenarios.Add(closePeriodWithTooManyRegistersRequest);
 
-            //wrong register
-            var closePeriodRequest3 = new ClosePeriodRequest
+            var closePeriodWithWrongRegisterRequest = new ClosePeriodRequest
             {
                 Id = openPeriodReply.Id,
                 SupplierSystemId = client.SupplierSystemId,
-                Registers = { lastRegisterItem }
+                Registers =
+                {
+                    new RegisterCloseEntry
+                    {
+                        SystemId = "321",
+                        Amount = 200m
+                    },
+                }
             };
-            scenarios.Add(closePeriodRequest3);
 
-            foreach (var closeRequest in scenarios)
+            scenarios.Add(closePeriodWithWrongRegisterRequest);
+
+            foreach (var scenario in scenarios)
             {
                 try
                 {
-                    await client.Period.ClosePeriodAsync(closeRequest, client.AuthorizedMetadata);
+                    await client.Period.ClosePeriodAsync(scenario, client.AuthorizedMetadata);
 
-                    //not reachable
+                    // Should not be reached
                     Assert.True(false);
 
                 }
-                catch (RpcException ex)
+                catch (RpcException)
                 {
-                    Assert.True(ex.StatusCode == StatusCode.FailedPrecondition);
-
                     var period = await client.Period.GetAsync(getPeriodRequest, client.AuthorizedMetadata);
 
-                    Assert.Equal(DateTime.MinValue, period.Closing.ToDateTime());
+                    Assert.Null(period.Closing);
                 }
             }
         }

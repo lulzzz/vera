@@ -15,8 +15,8 @@ namespace Vera.Host.Mapping
                 EventLogType.Logout => Vera.Models.EventLogType.Logout,
                 EventLogType.OpenCashDrawer => Vera.Models.EventLogType.OpenCashDrawer,
                 EventLogType.CloseCashDrawer => Vera.Models.EventLogType.CloseCashDrawer,
-                EventLogType.XReport => Vera.Models.EventLogType.XReport,
-                EventLogType.ZReport => Vera.Models.EventLogType.ZReport,
+                EventLogType.XReport => Vera.Models.EventLogType.CurrentRegisterReportCreated,
+                EventLogType.ZReport => Vera.Models.EventLogType.EndOfDayRegisterReportCreated,
                 EventLogType.ReceiptPrinted => Vera.Models.EventLogType.ReceiptPrinted,
                 EventLogType.ReceiptReprinted => Vera.Models.EventLogType.ReceiptReprinted,
                 _ => throw new ArgumentOutOfRangeException()
@@ -33,8 +33,8 @@ namespace Vera.Host.Mapping
                 Vera.Models.EventLogType.Logout => EventLogType.Logout,
                 Vera.Models.EventLogType.OpenCashDrawer => EventLogType.OpenCashDrawer,
                 Vera.Models.EventLogType.CloseCashDrawer => EventLogType.CloseCashDrawer,
-                Vera.Models.EventLogType.XReport => EventLogType.XReport,
-                Vera.Models.EventLogType.ZReport => EventLogType.ZReport,
+                Vera.Models.EventLogType.CurrentRegisterReportCreated => EventLogType.XReport,
+                Vera.Models.EventLogType.EndOfDayRegisterReportCreated => EventLogType.ZReport,
                 Vera.Models.EventLogType.ReceiptPrinted => EventLogType.ReceiptPrinted,
                 Vera.Models.EventLogType.ReceiptReprinted => EventLogType.ReceiptReprinted,
                 _ => throw new ArgumentOutOfRangeException()

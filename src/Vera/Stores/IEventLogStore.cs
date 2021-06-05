@@ -15,6 +15,6 @@ namespace Vera.Stores
         /// <summary>
         /// Lists the event logs
         /// </summary>
-        Task<ICollection<EventLog>> List(EventLogCriteria eventLogCriteria);
+        Task<ICollection<EventLog>> List(EventLogCriteria criteria);
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Vera.Concurrency;
 using Vera.Dependencies;
+using Vera.EventLogs;
 using Vera.Models;
 using Vera.Norway;
 using Vera.Portugal;
@@ -11,6 +12,7 @@ using Vera.Services;
 using Vera.Stores;
 using Vera.Invoices;
 using Vera.Germany;
+using Vera.Periods;
 using Vera.Sweden;
 using Vera.Sweden.InfrasecHttpClient;
 
@@ -27,7 +29,9 @@ namespace Vera.Bootstrap
                 collection.AddTransient<IPasswordStrategy, Pbkdf2PasswordStrategy>();
                 collection.AddTransient<IAccountComponentFactoryCollection, AccountComponentFactoryCollection>();
                 collection.AddTransient<IRegisterReportGenerator, RegisterReportGenerator>();
-                collection.AddTransient<PeriodManager>();
+                collection.AddTransient<IPeriodOpener, PeriodOpener>();
+                collection.AddTransient<IPeriodCloser, PeriodCloser>();
+                collection.AddTransient<IEventLogCreator, EventLogCreator>();
                 collection.AddTransient<IInvoiceHandlerFactory, InvoiceHandlerFactory>();
 
                 // Stores

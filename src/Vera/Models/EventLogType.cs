@@ -8,8 +8,8 @@
         Logout,
         OpenCashDrawer,
         CloseCashDrawer,
-        XReport,
-        ZReport,
+        CurrentRegisterReportCreated,
+        EndOfDayRegisterReportCreated,
         ReceiptPrinted,
         ReceiptReprinted
     }

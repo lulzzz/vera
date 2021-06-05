@@ -27,7 +27,7 @@ namespace Vera.Integration.Tests.Norway
             var client = await _setup.CreateClient(Constants.Account);
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var scenario1 = new SellSingleStaticProductScenario(1.23m, 100m, PaymentCategory.Cash)
             {
@@ -53,18 +53,18 @@ namespace Vera.Integration.Tests.Norway
                 SupplierSystemId = client.SupplierSystemId
             };
 
-            var invoice1 = await CreateInvoice(client, scenario1, openRegisterReply.Id);
-            var invoice2 = await CreateInvoice(client, scenario2, openRegisterReply.Id);
-            var invoiceReturn = await CreateInvoice(client, returnScenario, openRegisterReply.Id);
-            var invoiceDiscount = await CreateInvoice(client, discountScenario, openRegisterReply.Id);
+            var invoice1 = await CreateInvoice(client, scenario1, registerSystemId);
+            var invoice2 = await CreateInvoice(client, scenario2, registerSystemId);
+            var invoiceReturn = await CreateInvoice(client, returnScenario, registerSystemId);
+            var invoiceDiscount = await CreateInvoice(client, discountScenario, registerSystemId);
 
-            var request = new GenerateDailyXReportRequest
+            var request = new GenerateCurrentReportRequest
             {
-                RegisterId = openRegisterReply.Id,
+                RegisterSystemId = registerSystemId,
                 SupplierSystemId = client.SupplierSystemId
             };
 
-            var report = await client.Report.GenerateDailyXReportAsync(request, client.AuthorizedMetadata);
+            var report = await client.Report.GenerateCurrentReportAsync(request, client.AuthorizedMetadata);
 
             Assert.NotNull(report);
 
@@ -73,24 +73,24 @@ namespace Vera.Integration.Tests.Norway
                 Type = ReportOutputType.Json,
                 ReportNumber = report.Number
             }, client.AuthorizedMetadata);
-            
+
             Assert.NotNull(renderReportReply);
-            
+
             Assert.Equal(ReportOutputType.Json, renderReportReply.Type);
             Assert.NotNull(renderReportReply.Content);
 
             var reportContent = renderReportReply.Content.ToStringUtf8();
-            
+
             Assert.NotNull(reportContent);
 
             Assert.Contains("X Report ", reportContent);
         }
-        
+
         internal async Task<Models.Invoice> CreateInvoice(SetupClient client, Scenario scenario, string registerId)
         {
             var result = scenario.Execute();
             var invoice = result.Invoice;
-            invoice.RegisterId = registerId;
+            invoice.RegisterSystemId = registerId;
 
             var createInvoiceRequest = new Grpc.CreateInvoiceRequest
             {

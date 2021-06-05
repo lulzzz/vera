@@ -30,7 +30,6 @@ namespace Vera.Integration.Tests.Common
             {
                 SupplierSystemId = supplier.SystemId,
                 Timestamp = Timestamp.FromDateTime(DateTime.UtcNow),
-                RegisterId = "1234",
                 Type = EventLogType.ReceiptPrinted
             };
 
@@ -45,7 +44,6 @@ namespace Vera.Integration.Tests.Common
             var listAllEventsReply =
                 await client.EventLog.ListAsync(new ListEventLogRequest
                 {
-                    RegisterId = "1234",
                     SupplierSystemId = supplier.SystemId
                 }, client.AuthorizedMetadata);
 

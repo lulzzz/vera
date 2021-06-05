@@ -14,8 +14,16 @@ namespace Vera.Models
 
         public EventLogType Type { get; set; }
 
-        public string? RegisterId { get; set; }
-            
+        /// <summary>
+        /// Register for which this event was logged. Can be null because not all events require a register.
+        /// </summary>
+        public Guid? RegisterId { get; set; }
+
+        /// <summary>
+        /// <see cref="RegisterId"/>
+        /// </summary>
+        public string? RegisterSystemId { get; set; }
+
         /// <summary>
         /// Supplier that triggered the event log.
         /// </summary>

@@ -27,7 +27,7 @@ namespace Vera.Invoices
             IInvoiceStore invoiceStore,
             IChainStore chainStore,
             ILocker locker,
-            ISupplierStore supplierStore, 
+            ISupplierStore supplierStore,
             IPeriodStore periodStore
         )
         {
@@ -42,7 +42,7 @@ namespace Vera.Invoices
         public IHandlerChain<Invoice> Create(IComponentFactory factory)
         {
             var head = new InvoiceSupplierHandler(_supplierStore);
-         
+
             var persistenceHandler = new InvoicePersistenceHandler(
                 _loggerFactory.CreateLogger<InvoicePersistenceHandler>(),
                 _chainStore,
@@ -51,7 +51,7 @@ namespace Vera.Invoices
                 factory.CreateInvoiceNumberGenerator(),
                 factory.CreateInvoiceBucketGenerator()
             );
-            
+
             head.WithNext(new InvoiceOpenPeriodHandler(_periodStore))
                 .WithNext(new InvoiceTotalsHandler())
                 .WithNext(new InvoiceValidationHandler(factory.CreateInvoiceValidators()))

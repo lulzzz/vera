@@ -7,7 +7,7 @@ namespace Vera.Reports
     {
         public string Generate(RegisterReport report)
         {
-            return $"{report.SupplierId}-{report.ReportType}";
+            return $"{report.SupplierId}-{report.Type}";
         }
     }
 }

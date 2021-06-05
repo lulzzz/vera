@@ -25,16 +25,20 @@ namespace Vera.Host.Services
         private readonly IRegisterReportGenerator _registerReportGenerator;
         private readonly IAccountStore _accountStore;
         private readonly ISupplierStore _supplierStore;
+        private readonly IRegisterStore _registerStore;
         private readonly IReportStore _reportStore;
         private readonly IAccountComponentFactoryCollection _accountComponentFactoryCollection;
         private readonly IReportHandlerFactory _reportHandlerFactory;
 
-        public ReportService(IRegisterReportGenerator registerReportGenerator,
+        public ReportService(
+            IRegisterReportGenerator registerReportGenerator,
             IAccountStore accountStore,
             IReportStore reportStore,
             IAccountComponentFactoryCollection accountComponentFactoryCollection,
-            IReportHandlerFactory reportHandlerFactory, 
-            ISupplierStore supplierStore)
+            IReportHandlerFactory reportHandlerFactory,
+            ISupplierStore supplierStore,
+            IRegisterStore registerStore
+        )
         {
             _registerReportGenerator = registerReportGenerator;
             _accountStore = accountStore;
@@ -42,31 +46,33 @@ namespace Vera.Host.Services
             _accountComponentFactoryCollection = accountComponentFactoryCollection;
             _reportHandlerFactory = reportHandlerFactory;
             _supplierStore = supplierStore;
+            _registerStore = registerStore;
         }
 
-        public override async Task<RegisterReport> GenerateDailyXReport(GenerateDailyXReportRequest request, ServerCallContext context)
+        public override async Task<RegisterReport> GenerateCurrentReport(GenerateCurrentReportRequest request, ServerCallContext context)
         {
-            if (string.IsNullOrEmpty(request.SupplierSystemId) || string.IsNullOrEmpty(request.RegisterId))
+            if (string.IsNullOrEmpty(request.SupplierSystemId) || string.IsNullOrEmpty(request.RegisterSystemId))
             {
-                throw new RpcException(new Status(StatusCode.InvalidArgument, "Failed preconditions, invalid arguments"));
+                throw new RpcException(new Status(StatusCode.InvalidArgument, "both supplier and register are required"));
             }
 
             var supplier = await context.ResolveSupplier(_supplierStore, request.SupplierSystemId);
+            var register = await _registerStore.GetBySystemIdAndSupplierId(supplier.Id, request.RegisterSystemId);
 
             var registerReportContext = new RegisterReportContext
             {
                 AccountId = context.GetAccountId(),
                 CompanyId = context.GetCompanyId(),
                 SupplierId = supplier.Id,
-                RegisterId = request.RegisterId,
+                RegisterId = register.Id,
                 EmployeeId = request.EmployeeId,
-                ReportType = Models.ReportType.X
+                RegisterReportType = Models.RegisterReportType.Current
             };
 
             var report = await _registerReportGenerator.Generate(registerReportContext);
 
             var account = await context.ResolveAccount(_accountStore);
-            
+
             var factory = _accountComponentFactoryCollection.GetComponentFactory(account);
             var handler = _reportHandlerFactory.Create(factory);
 
@@ -115,12 +121,9 @@ namespace Vera.Host.Services
         public override async Task<RenderReportReply> RenderReport(RenderReportRequest request, ServerCallContext context)
         {
             var account = await context.ResolveAccount(_accountStore);
-            var report = await _reportStore.GetByNumber(account.Id, request.ReportNumber);
-            if (report == null)
-            {
-                throw new RpcException(new Status(StatusCode.NotFound, "report not found"));
-            }
-            
+
+            var report = await _reportStore.GetByNumber(account.Id, request.ReportNumber) ??
+                         throw new RpcException(new Status(StatusCode.NotFound, "report not found"));
 
             await using var ms = new MemoryStream(8192);
             await using var sw = new StreamWriter(ms, Encoding.UTF8);
@@ -134,6 +137,7 @@ namespace Vera.Host.Services
             };
 
             var componentFactory = _accountComponentFactoryCollection.GetComponentFactory(account);
+
             var receiptReportContext = new ReceiptReportContext
             {
                 RegisterReport = report,

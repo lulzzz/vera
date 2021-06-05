@@ -44,14 +44,14 @@ namespace Vera.Azure.Stores
         public Task<ICollection<Invoice>> List(AuditCriteria criteria)
         {
             var queryable = _container.GetItemLinqQueryable<Document<Invoice>>()
-                .Where(x => 
-                    x.Value.AccountId == criteria.AccountId && 
-                    x.Value.Supplier.Id == criteria.SupplierId && 
-                    x.Value.Date >= criteria.StartDate && 
+                .Where(x =>
+                    x.Value.AccountId == criteria.AccountId &&
+                    x.Value.Supplier.Id == criteria.SupplierId &&
+                    x.Value.Date >= criteria.StartDate &&
                     x.Value.Date <= criteria.EndDate
                 );
 
-            if (!string.IsNullOrEmpty(criteria.RegisterId))
+            if (criteria.RegisterId.HasValue)
             {
                 queryable = queryable.Where(x => x.Value.RegisterId == criteria.RegisterId);
             }

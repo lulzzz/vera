@@ -41,7 +41,7 @@ namespace Vera.Models
         /// Unique sequence number of the invoice in the chain that it belongs to.
         /// </summary>
         public int Sequence { get; set; }
-        
+
         public string ReturnedInvoiceNumber { get; set; }
 
         /// <summary>
@@ -71,10 +71,12 @@ namespace Vera.Models
         /// </summary>
         public Guid PeriodId { get; set; }
 
+        public Guid RegisterId { get; set; }
+
         /// <summary>
         /// Identifier of the cash register that created the invoice.
         /// </summary>
-        public string RegisterId { get; set; }
+        public string RegisterSystemId { get; set; }
 
         public int FiscalPeriod { get; set; }
         public int FiscalYear { get; set; }

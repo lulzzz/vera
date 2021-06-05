@@ -56,7 +56,7 @@ namespace Vera.Norway
 
         public IReportSigner CreateReportSigner()
         {
-            return new NoopPackageSigner();
+            return new NullReportSigner();
         }
 
         public IThermalReceiptGenerator CreateThermalReceiptGenerator()

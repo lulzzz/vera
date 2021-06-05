@@ -27,7 +27,8 @@ namespace Vera.Portugal.Invoices
             ILocker locker,
             ISupplierStore supplierStore,
             IPeriodStore periodStore,
-            IWorkingDocumentStore wdStore)
+            IWorkingDocumentStore wdStore
+        )
         {
             _loggerFactory = loggerFactory;
             _invoiceStore = invoiceStore;
@@ -46,9 +47,9 @@ namespace Vera.Portugal.Invoices
             var head = new InvoiceSupplierHandler(_supplierStore);
 
             var wdHandler = new WorkingDocumentsHandler(
-                _wdStore, 
+                _wdStore,
                 _chainStore,
-                signer, 
+                signer,
                 _loggerFactory.CreateLogger<WorkingDocumentsHandler>()
             );
 

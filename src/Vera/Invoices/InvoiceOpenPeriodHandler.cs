@@ -19,20 +19,22 @@ namespace Vera.Invoices
         public override async Task Handle(Invoice invoice)
         {
             var period = await _periodStore.GetOpenPeriodForSupplier(invoice.Supplier.Id);
-            
+
             if (period == null || period.IsClosed)
             {
                 throw new ValidationException("An open period is required");
             }
 
-            invoice.PeriodId = period.Id;
+            var openRegister = period.Registers.FirstOrDefault(x => x.RegisterSystemId == invoice.RegisterSystemId);
 
-            var register = period.Registers.FirstOrDefault(r => r.RegisterId.ToString() == invoice.RegisterId);
-            if (register == null)
+            if (openRegister == null)
             {
                 throw new ValidationException("An open register is required");
             }
-            
+
+            invoice.PeriodId = period.Id;
+            invoice.RegisterId = openRegister.RegisterId;
+
             await base.Handle(invoice);
         }
     }

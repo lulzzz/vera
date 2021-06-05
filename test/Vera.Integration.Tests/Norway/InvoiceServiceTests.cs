@@ -27,10 +27,10 @@ namespace Vera.Integration.Tests.Norway
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
-            
+            var registerSystemId = await client.OpenRegister(100m);
+
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -54,11 +54,11 @@ namespace Vera.Integration.Tests.Norway
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
-            
+            invoice.RegisterSystemId = registerSystemId;
+
             // Create same transaction twice to verify sequence is incremented
             var first = await client.Invoice.CreateAsync(new CreateInvoiceRequest
             {
@@ -86,13 +86,13 @@ namespace Vera.Integration.Tests.Norway
 
             var result = scenario.Execute();
             var invoice = result.Invoice;
-            
+
             var validationReply = await client.Invoice.ValidateAsync(new ValidateInvoiceRequest
             {
                 AccountId = client.AccountId,
                 Invoice = invoice.Pack()
             }, client.AuthorizedMetadata);
-            
+
             Assert.Empty(validationReply.Results);
         }
 
@@ -106,10 +106,10 @@ namespace Vera.Integration.Tests.Norway
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -117,10 +117,10 @@ namespace Vera.Integration.Tests.Norway
             };
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
-            var getByNumberRequest = new GetInvoiceByNumberRequest 
-            { 
-                AccountId = client.AccountId, 
-                Number = createInvoiceReply.Number 
+            var getByNumberRequest = new GetInvoiceByNumberRequest
+            {
+                AccountId = client.AccountId,
+                Number = createInvoiceReply.Number
             };
 
             var getInvoiceReply = client.Invoice.GetByNumber(getByNumberRequest, client.AuthorizedMetadata);
@@ -132,22 +132,22 @@ namespace Vera.Integration.Tests.Norway
         public async Task Should_create_invoice_with_period()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            
+
             var builder = new InvoiceBuilder();
             var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
             };
-            
+
             var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
 
             var getByNumberRequest = new GetInvoiceByNumberRequest
@@ -160,7 +160,7 @@ namespace Vera.Integration.Tests.Norway
 
             var getPeriodRequest = new GetCurrentPeriodRequest { SupplierSystemId = client.SupplierSystemId };
             var getCurrentPeriodReply = await client.Period.GetCurrentPeriodAsync(getPeriodRequest, client.AuthorizedMetadata);
-            
+
             Assert.Equal(getCurrentPeriodReply.Id, getInvoiceReply.PeriodId);
         }
     }

@@ -17,8 +17,9 @@ namespace Vera.Audits
         /// <see cref="Invoice.Supplier"/>
         public Guid SupplierId { get; set; }
 
+        public Guid? RegisterId { get; set; }
+
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public string RegisterId { get; set; }
     }
 }

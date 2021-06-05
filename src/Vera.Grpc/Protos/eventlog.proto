@@ -24,11 +24,11 @@ message ListEventLogRequest {
 	// End of the period to get the event logs for
 	google.protobuf.Timestamp endDate = 2;
 
-	string registerId = 3;
+    string supplierSystemId = 3;
 
-	EventLogType type = 4;
+	string registerSystemId = 4;
 
-	string supplierSystemId = 5;
+	EventLogType type = 5;
 }
 
 message ListEventLogReply {
@@ -36,39 +36,28 @@ message ListEventLogReply {
 }
 
 message EventLog {
-	// Timestamp of the event log
 	google.protobuf.Timestamp timestamp = 1;
-
 	string supplierSystemId = 2;
-
-	string registerId = 3;
-
+	string registerSystemId = 3;
 	EventLogType type = 4;
+	string employeeId = 5;
 }
 
 message EventLogItem {
-
 	string id = 1;
-
 	string supplierSystemId = 2;
-
 	EventLogType type = 3;
-
-
-	// Timestamp of the event log
 	google.protobuf.Timestamp timestamp = 4;
-
 	string registerId = 5;
 }
 
 enum EventLogType {
-	
 	NONE = 0;
 
 	APP_START = 1;
-        
+
 	LOGIN = 2;
-        
+
 	LOGOUT = 3;
 
 	OPEN_CASH_DRAWER = 4;

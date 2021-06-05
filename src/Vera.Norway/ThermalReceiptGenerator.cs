@@ -276,7 +276,7 @@ namespace Vera.Norway
         private IEnumerable<IThermalNode> GenerateFooter(ThermalReceiptContext context)
         {
             yield return new TextThermalNode($"Operatør: {context.Invoice.Employee.SystemId}");
-            yield return new TextThermalNode($"Kassapunkt ID: {context.Invoice.RegisterId}");
+            yield return new TextThermalNode($"Kassapunkt ID: {context.Invoice.RegisterSystemId}");
 
             yield return new TextThermalNode(context.SoftwareVersion);
 

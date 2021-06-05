@@ -40,9 +40,9 @@ namespace Vera.Integration.Tests.Norway
 
             await client.OpenPeriod();
 
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
             var invoice = result.Invoice;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {
@@ -91,7 +91,7 @@ namespace Vera.Integration.Tests.Norway
 
             await client.OpenPeriod();
 
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoiceNumbers = new List<string>();
 
@@ -106,7 +106,7 @@ namespace Vera.Integration.Tests.Norway
                 var result = scenario.Execute();
 
                 var invoice = result.Invoice;
-                invoice.RegisterId = openRegisterReply.Id;
+                invoice.RegisterSystemId = registerSystemId;
 
                 var createdInvoiceReply = await client.Invoice.CreateAsync(new CreateInvoiceRequest
                 {

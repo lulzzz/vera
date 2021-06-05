@@ -35,7 +35,7 @@ namespace Vera.Austria
                 Bold = true,
                 FontSize = FontSize.Large
             };
-            yield return new TextThermalNode($"{context.RegisterReport.ReportType} Report #{context.RegisterReport.Number}")
+            yield return new TextThermalNode($"{context.RegisterReport.Type} Report #{context.RegisterReport.Number}")
             {
                 Bold = true,
                 FontSize = FontSize.Large
@@ -239,7 +239,7 @@ namespace Vera.Austria
 
         private IEnumerable<IThermalNode> GenerateFooter(ReceiptReportContext context)
         {
-            yield return new TextThermalNode($"KassenID: {context.RegisterReport.RegisterId}");
+            yield return new TextThermalNode($"KassenID: {context.RegisterReport.RegisterSystemId}");
 
             yield return new SpacingThermalNode(1);
 

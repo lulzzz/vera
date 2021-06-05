@@ -8,13 +8,11 @@ namespace Vera.Host.Mapping
     {
         public static Period Pack(this Models.Period period)
         {
-            var closingUtc = period.Closing == DateTime.MinValue ? DateTime.SpecifyKind(period.Closing, DateTimeKind.Utc) : period.Closing;
-            
             var result = new Period
             {
                 Id = period.Id.ToString(),
                 Opening = period.Opening.ToTimestamp(),
-                Closing = closingUtc.ToTimestamp()
+                Closing = period.Closing?.ToTimestamp()
             };
 
             return result;

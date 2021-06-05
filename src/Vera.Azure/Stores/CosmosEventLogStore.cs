@@ -29,32 +29,32 @@ namespace Vera.Azure.Stores
             await _container.CreateItemAsync(byId);
         }
 
-        public Task<ICollection<EventLog>> List(EventLogCriteria eventLogCriteria)
+        public Task<ICollection<EventLog>> List(EventLogCriteria criteria)
         {
             var queryable = _container.GetItemLinqQueryable<Document<EventLog>>(requestOptions: new QueryRequestOptions
                 {
-                    PartitionKey = new PartitionKey(eventLogCriteria.SupplierId.ToString())
+                    PartitionKey = new PartitionKey(criteria.SupplierId.ToString())
                 })
-                .Where(x => x.Value.Supplier.AccountId == eventLogCriteria.AccountId);
+                .Where(x => x.Value.Supplier.AccountId == criteria.AccountId);
 
-            if (eventLogCriteria.StartDate.HasValue)
+            if (criteria.StartDate.HasValue)
             {
-                queryable = queryable.Where(x => x.Value.Date >= eventLogCriteria.StartDate.Value);
+                queryable = queryable.Where(x => x.Value.Date >= criteria.StartDate.Value);
             }
 
-            if (eventLogCriteria.EndDate.HasValue)
+            if (criteria.EndDate.HasValue)
             {
-                queryable = queryable.Where(x => x.Value.Date <= eventLogCriteria.EndDate.Value);
+                queryable = queryable.Where(x => x.Value.Date <= criteria.EndDate.Value);
             }
 
-            if (eventLogCriteria.Type.HasValue)
+            if (criteria.Type.HasValue)
             {
-                queryable = queryable.Where(x => x.Value.Type == eventLogCriteria.Type.Value);
+                queryable = queryable.Where(x => x.Value.Type == criteria.Type.Value);
             }
 
-            if (!string.IsNullOrEmpty(eventLogCriteria.RegisterId))
+            if (criteria.RegisterId.HasValue)
             {
-                queryable = queryable.Where(x => x.Value.RegisterId == eventLogCriteria.RegisterId);
+                queryable = queryable.Where(x => x.Value.RegisterId == criteria.RegisterId);
             }
 
             return queryable.ToListAsync();

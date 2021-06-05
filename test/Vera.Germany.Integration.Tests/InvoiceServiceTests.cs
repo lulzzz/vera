@@ -29,10 +29,10 @@ namespace Vera.Germany.Integration.Tests
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()

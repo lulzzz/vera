@@ -20,16 +20,17 @@ namespace Vera.Integration.Tests.Portugal
         public async Task Should_be_able_to_generate_a_receipt()
         {
             var client = await _setup.CreateClient(Constants.Account);
-            
+
             var builder = new InvoiceBuilder();
             var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
             var createInvoiceRequest = new CreateInvoiceRequest
             {
                 Invoice = invoice.Pack()
@@ -61,10 +62,10 @@ namespace Vera.Integration.Tests.Portugal
             director.ConstructAnonymousWithSingleProductPaidWithCash();
 
             await client.OpenPeriod();
-            var openRegisterReply = await client.OpenRegister(100m);
+            var registerSystemId = await client.OpenRegister(100m);
 
             var invoice = builder.Result;
-            invoice.RegisterId = openRegisterReply.Id;
+            invoice.RegisterSystemId = registerSystemId;
 
             var createInvoiceRequest = new CreateInvoiceRequest
             {

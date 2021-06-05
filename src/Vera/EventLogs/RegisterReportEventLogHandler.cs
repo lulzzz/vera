@@ -14,7 +14,7 @@ namespace Vera.EventLogs
         private readonly IDateProvider _dateProvider;
 
         public RegisterReportEventLogHandler(
-            IEventLogStore eventLogStore, 
+            IEventLogStore eventLogStore,
             ISupplierStore supplierStore,
             IDateProvider dateProvider)
         {
@@ -23,16 +23,9 @@ namespace Vera.EventLogs
             _dateProvider = dateProvider;
         }
 
-        public override async Task Handle(RegisterReport entity)
+        public override Task Handle(RegisterReport entity)
         {
-            if (!CanContinue(entity.ReportType))
-            {
-                await base.Handle(entity);
-            } 
-            else
-            {
-                await HandleEventLogEvent(entity);
-            }
+            return WillHandleReport(entity.Type) ? HandleEventLogEvent(entity) : base.Handle(entity);
         }
 
         private async Task HandleEventLogEvent(RegisterReport entity)
@@ -48,11 +41,11 @@ namespace Vera.EventLogs
                 Date = _dateProvider.Now,
                 Supplier = supplier,
                 RegisterId = entity.RegisterId,
-                Type = entity.ReportType switch
+                Type = entity.Type switch
                 {
-                    ReportType.X => EventLogType.XReport,
-                    ReportType.Z => EventLogType.ZReport,
-                    _ => throw new ArgumentOutOfRangeException()
+                    RegisterReportType.Current => EventLogType.CurrentRegisterReportCreated,
+                    RegisterReportType.EndOfDay => EventLogType.EndOfDayRegisterReportCreated,
+                    _ => throw new ArgumentOutOfRangeException(nameof(entity), $"{nameof(entity)}.{nameof(entity.Type)}")
                 },
                 ReportNumber = entity.Number,
                 EmployeeId = entity.EmployeeId
@@ -61,6 +54,7 @@ namespace Vera.EventLogs
             await _eventLogStore.Store(eventLog);
         }
 
-        private static bool CanContinue(ReportType reportType) => reportType == ReportType.X || reportType == ReportType.Z;
+        private static bool WillHandleReport(RegisterReportType type) =>
+            type is RegisterReportType.Current or RegisterReportType.EndOfDay;
     }
 }

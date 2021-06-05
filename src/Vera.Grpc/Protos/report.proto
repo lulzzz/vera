@@ -7,20 +7,20 @@ import "google/protobuf/timestamp.proto";
 package vera.grpc;
 
 service ReportService {
-    rpc GenerateDailyXReport(GenerateDailyXReportRequest) returns(RegisterReport);
-    rpc RenderReport(RenderReportRequest) returns (.vera.grpc.RenderReportReply);
+    rpc GenerateCurrentReport(GenerateCurrentReportRequest) returns (RegisterReport);
+    rpc RenderReport(RenderReportRequest) returns (vera.grpc.RenderReportReply);
 }
 
-message GenerateDailyXReportRequest{
+message GenerateCurrentReportRequest {
     string supplierSystemId = 1;
-    string registerId = 2;
+    string registerSystemId = 2;
     string employeeId = 3;
 }
 
 message RegisterReport {
 	//Timestamp when the report was generated
 	google.protobuf.Timestamp timestamp = 1;
-	
+
     string accountName = 2;
     string taxNumber = 3;
 
@@ -65,7 +65,7 @@ message ProductReport {
 message EmployeePaymentsReport {
     EmployeeReport employee = 1;
     PaymentReport payment = 2;
-} 
+}
 
 message EmployeeReport {
     string systemId = 1;

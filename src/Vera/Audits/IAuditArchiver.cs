@@ -48,7 +48,7 @@ namespace Vera.Audits
             }
 
             // TODO: extract "archiver" interface? to make it more testable and don't depend on filesystem
-            await using var streamToZip = File.Create(Path.GetTempFileName());
+            await using var streamToZip = File.Open(Path.GetTempFileName(), FileMode.Open, FileAccess.ReadWrite);
 
             using (var archive = new ZipArchive(streamToZip, ZipArchiveMode.Create, true))
             {
@@ -77,6 +77,7 @@ namespace Vera.Audits
                 AccountId = account.Id,
                 SupplierId = audit.SupplierId,
             };
+
             var eventLogCriteria = new EventLogCriteria
             {
                 AccountId = account.Id,
@@ -91,6 +92,7 @@ namespace Vera.Audits
             var sequence = 1;
             var ranges = GetDateRanges(audit).ToList();
             var supplier = await _supplierStore.Get(account.Id, audit.SupplierId);
+
             foreach (var (start, end) in ranges)
             {
                 eventLogCriteria.StartDate = auditCriteria.StartDate = start;
@@ -103,7 +105,7 @@ namespace Vera.Audits
 
                 var entryName = await _auditWriter.ResolveName(supplier.SystemId, sequence++, ranges.Count);
 
-                await using var stream = archive.CreateEntry(entryName, CompressionLevel.Fastest).Open();
+                await using var stream = archive.CreateEntry(entryName).Open();
                 await _auditWriter.Write(context, auditCriteria, stream);
             }
         }
