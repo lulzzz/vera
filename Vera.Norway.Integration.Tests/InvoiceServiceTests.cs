@@ -2,11 +2,12 @@ using System;
 using System.Threading.Tasks;
 using Vera.Grpc;
 using Vera.Host.Mapping;
+using Vera.Integration.Tests;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
 using Xunit;
 
-namespace Vera.Integration.Tests.Norway
+namespace Vera.Norway.Integration.Tests
 {
     public class InvoiceServiceTests : IClassFixture<ApiWebApplicationFactory>
     {

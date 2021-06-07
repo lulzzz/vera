@@ -1,18 +1,19 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Protobuf.WellKnownTypes;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
+using Vera.Integration.Tests;
 using Vera.Integration.Tests.Common;
 using Vera.Models;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
 using Xunit;
 
-namespace Vera.Integration.Tests.Norway
+namespace Vera.Norway.Integration.Tests
 {
     public class AuditServiceTests : IClassFixture<ApiWebApplicationFactory>
     {

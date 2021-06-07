@@ -10,7 +10,7 @@ using Vera.Grpc;
 using Vera.Portugal.Models;
 using Invoice = Vera.Models.Invoice;
 
-namespace Vera.Integration.Tests.Portugal
+namespace Vera.Portugal.Integration.Tests
 {
     public class AuditResultsStore
     {
@@ -68,7 +68,7 @@ namespace Vera.Integration.Tests.Portugal
             var auditFiles = await GetAuditFileAsync(accountId, name);
             var invoices = new List<Invoice>();
             var workingDocuments = new List<WorkingDocument>();
-            
+
             foreach (var file in auditFiles)
             {
                 invoices.AddRange(file.SourceDocuments.SalesInvoices.Invoice.Select(inv => new Invoice
@@ -78,13 +78,13 @@ namespace Vera.Integration.Tests.Portugal
                 workingDocuments.AddRange(file.SourceDocuments.WorkingDocuments.WorkDocument.Select(wd => new WorkingDocument
                 {
                     Number = wd.DocumentNumber,
-                    Lines = wd.Line.Select(l => new Models.InvoiceLine
+                    Lines = wd.Line.Select(l => new Vera.Models.InvoiceLine
                     {
                         Description = l.Description,
                         Quantity = Convert.ToInt32(l.Quantity),
                         UnitPrice = l.UnitPrice,
                         Gross = l.Item,
-                        Product = new Models.Product
+                        Product = new Vera.Models.Product
                         {
                             Code = l.ProductCode,
                             Description = l.ProductDescription,
@@ -96,9 +96,9 @@ namespace Vera.Integration.Tests.Portugal
             return (invoices, workingDocuments);
         }
 
-        public async Task<IEnumerable<Models.Product>> LoadProductsFromAuditAsync(string accountId, string name)
+        public async Task<IEnumerable<Vera.Models.Product>> LoadProductsFromAuditAsync(string accountId, string name)
         {
-            var products = new List<Models.Product>();
+            var products = new List<Vera.Models.Product>();
             var auditFiles = await GetAuditFileAsync(accountId, name);
 
             foreach (var file in auditFiles)
@@ -107,7 +107,7 @@ namespace Vera.Integration.Tests.Portugal
                 if (auditProducts != null)
                 {
                     products.AddRange(
-                        auditProducts.Select(p => new Models.Product
+                        auditProducts.Select(p => new Vera.Models.Product
                         {
                             Code = p.ProductCode,
                             Description = p.ProductDescription

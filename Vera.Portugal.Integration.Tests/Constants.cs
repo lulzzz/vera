@@ -1,6 +1,7 @@
-﻿using System;
+using System;
+using Vera.Integration.Tests;
 
-namespace Vera.Integration.Tests.Norway
+namespace Vera.Portugal.Integration.Tests
 {
     public static class Constants
     {
@@ -19,15 +20,19 @@ G+hF21DP+lyncvizVZ1Kkf/DfqxPBcZT6pFnuO1weumUTwWAQ6oB4lz4ddnAGsfR
 DJfosgBbn3Jkxh2TdcsCQQDhjs8VIbJITJtCvsfmi0SykOyuDvFZlEWqy/io12ge
 tq4HEcmINDkh3fy0/V5XRqzAmGlH6dgxPMgEdddzdRrl
 -----END RSA PRIVATE KEY-----";
-
+        
         public static AccountContext Account => new()
         {
             AccountName = "Store",
-            Certification = "NO",
+            Certification = "PT",
             Configuration =
             {
                 {"PrivateKey", Pk},
                 {"PrivateKeyVersion", "1"},
+                {"ProductCompanyTaxId", "123 123 123"},
+                {"SocialCapital", "1234"},
+                {"CertificateNumber", "9999"},
+                {"CertificateName", "PELICANTHEORY - UNIPESSOAL LDA"}
             },
             SupplierSystemId = Guid.NewGuid().ToString()
         };

@@ -5,12 +5,13 @@ using Google.Protobuf.WellKnownTypes;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
+using Vera.Integration.Tests;
 using Vera.Models;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
 using Xunit;
 
-namespace Vera.Integration.Tests.Portugal
+namespace Vera.Portugal.Integration.Tests
 {
     public class AuditServiceTests : IClassFixture<ApiWebApplicationFactory>
     {

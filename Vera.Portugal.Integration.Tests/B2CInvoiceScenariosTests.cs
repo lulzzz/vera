@@ -5,6 +5,7 @@ using Vera.Extensions;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
+using Vera.Integration.Tests;
 using Vera.Integration.Tests.Common;
 using Vera.Invoices;
 using Vera.Models;
@@ -12,7 +13,7 @@ using Vera.Portugal.Models;
 using Vera.Tests.Scenario;
 using Xunit;
 
-namespace Vera.Integration.Tests.Portugal
+namespace Vera.Portugal.Integration.Tests
 {
     public class B2CInvoiceScenariosTests : IClassFixture<ApiWebApplicationFactory>
     {

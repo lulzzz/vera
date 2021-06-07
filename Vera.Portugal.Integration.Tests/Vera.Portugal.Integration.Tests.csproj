@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\src\Vera.Portugal\Vera.Portugal.csproj" />
+      <ProjectReference Include="..\test\Vera.Integration.Tests\Vera.Integration.Tests.csproj" />
+      <ProjectReference Include="..\test\Vera.Tests\Vera.Tests.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+    </ItemGroup>
+
+</Project>

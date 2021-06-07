@@ -6,12 +6,13 @@ using Vera.Dependencies;
 using Vera.Grpc;
 using Vera.Host.Mapping;
 using Vera.Host.Security;
+using Vera.Integration.Tests;
 using Vera.Models;
 using Vera.Tests.Scenario;
 using Vera.Tests.Shared;
 using Xunit;
 
-namespace Vera.Integration.Tests.Portugal
+namespace Vera.Portugal.Integration.Tests
 {
     public class InvoiceServiceTests : IClassFixture<ApiWebApplicationFactory>
     {
@@ -113,7 +114,7 @@ namespace Vera.Integration.Tests.Portugal
             var result = scenario.Execute();
             var invoice = result.Invoice;
 
-            invoice.Lines.Add(new Models.InvoiceLine
+            invoice.Lines.Add(new Vera.Models.InvoiceLine
             {
                 Description = "trigger mixed quantities",
                 Product = ProductFactory.CreateRandomProduct(),
@@ -213,7 +214,7 @@ namespace Vera.Integration.Tests.Portugal
 
             var auditResultsStore = new AuditResultsStore(httpClient);
 
-            var product = new Models.Product
+            var product = new Vera.Models.Product
             {
                 Code = "Gift",
                 Type = ProductType.GiftCard,

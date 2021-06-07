@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Vera.Norway.Audit;
 
-namespace Vera.Integration.Tests.Norway
+namespace Vera.Norway.Integration.Tests
 {
     public class AuditResultsStore
     {
