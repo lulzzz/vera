@@ -20,3 +20,8 @@ jobs:
         run: dotnet test --nologo --filter FullyQualifiedName~Integration
         env:
           VERA__COSMOS__CONNECTIONSTRING: ${{ secrets.COSMOS_CONNECTION_STRING }}
+      - name: 'Upload Auditers Output'
+        uses: actions/upload-artifact@v2
+        with:
+          name: Auditers_Output
+          path: ./test/Vera.Integration.Tests/bin/Debug/Auditers_Output
