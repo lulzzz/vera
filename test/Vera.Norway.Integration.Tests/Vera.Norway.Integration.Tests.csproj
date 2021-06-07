@@ -7,9 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\src\Vera.Norway\Vera.Norway.csproj" />
-      <ProjectReference Include="..\test\Vera.Integration.Tests\Vera.Integration.Tests.csproj" />
-      <ProjectReference Include="..\test\Vera.Tests\Vera.Tests.csproj" />
+      <ProjectReference Include="..\..\src\Vera.Norway\Vera.Norway.csproj" />
+      <ProjectReference Include="..\Vera.Integration.Tests\Vera.Integration.Tests.csproj" />
+      <ProjectReference Include="..\Vera.Tests\Vera.Tests.csproj" />
     </ItemGroup>
 
     <ItemGroup>
