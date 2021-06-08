@@ -32,9 +32,9 @@ namespace Vera.Norway.Integration.Tests
             return _actualResults.TryGetValue(invoiceNumber, out var invoice) ? invoice : null;
         }
 
-        public async Task LoadInvoicesFromAuditAsync(string accountId, string name)
+        public async Task LoadInvoicesFromAuditAsync(string name)
         {
-            var auditFiles = await GetAuditFileAsync(accountId, name);
+            var auditFiles = await GetAuditFileAsync(name);
 
             foreach (var file in auditFiles)
             {
@@ -58,10 +58,10 @@ namespace Vera.Norway.Integration.Tests
             }
         }
 
-        public async Task<IEnumerable<Models.Product>> LoadProductsFromAuditAsync(string accountId, string name)
+        public async Task<IEnumerable<Models.Product>> LoadProductsFromAuditAsync(string name)
         {
             var products = new List<Models.Product>();
-            var auditFiles = await GetAuditFileAsync(accountId, name);
+            var auditFiles = await GetAuditFileAsync(name);
 
             foreach (var file in auditFiles)
             {
@@ -80,10 +80,15 @@ namespace Vera.Norway.Integration.Tests
             return products;
         }
 
-        private async Task<IEnumerable<Auditfile>> GetAuditFileAsync(string accountId, string name)
+        private async Task<IEnumerable<Auditfile>> GetAuditFileAsync(string name)
         {
+            var response = await _httpClient.GetAsync($"download/audit/{name}");
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new FileNotFoundException(response.ReasonPhrase);
+            }
+
             var serializer = new XmlSerializer(typeof(Auditfile));
-            var response = await _httpClient.GetAsync($"download/audit/{accountId}/{name}");
             var result = await response.Content.ReadAsStreamAsync();
 
             using var zipArchive = new ZipArchive(result);

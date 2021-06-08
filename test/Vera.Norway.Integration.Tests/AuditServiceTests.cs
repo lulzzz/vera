@@ -77,8 +77,8 @@ namespace Vera.Norway.Integration.Tests
         {
             var client = await _setup.CreateClient(Constants.Account);
             var httpClient = _fixture.CreateClient();
-
             httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue(MetadataKeys.Authorization));
+            httpClient.DefaultRequestHeaders.Add(MetadataKeys.AccountId, client.AccountId);
 
             var invoiceResolver = new AuditResultsStore(httpClient);
 
@@ -118,7 +118,7 @@ namespace Vera.Norway.Integration.Tests
             }
 
             var getAuditReply = await client.GenerateAuditFile();
-            var auditProducts = await invoiceResolver.LoadProductsFromAuditAsync(client.AccountId, getAuditReply.Location);
+            var auditProducts = await invoiceResolver.LoadProductsFromAuditAsync(getAuditReply.Location);
 
             var auditersOutput = new AuditersOutput(client, httpClient, Constants.Account.Certification);
             await auditersOutput.StoreAuditFilesInAuditersOutput(getAuditReply.Location, "Should_validate_total_products_added", invoiceNumbers);

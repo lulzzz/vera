@@ -35,9 +35,9 @@ namespace Vera.Portugal.Integration.Tests
             return _actualResults.TryGetValue(invoiceNumber, out var invoice) ? invoice : null;
         }
 
-        public async Task LoadInvoicesFromAuditAsync(string accountId, string name)
+        public async Task LoadInvoicesFromAuditAsync(string name)
         {
-            var auditFiles = await GetAuditFileAsync(accountId, name);
+            var auditFiles = await GetAuditFileAsync(name);
 
             foreach (var file in auditFiles)
             {
@@ -65,7 +65,7 @@ namespace Vera.Portugal.Integration.Tests
 
         public async Task<(IEnumerable<Invoice> invoices, IEnumerable<WorkingDocument> workingDocuments)> LoadInvoicesAndWorkingDocumentsFromAuditAsync(string accountId, string name)
         {
-            var auditFiles = await GetAuditFileAsync(accountId, name);
+            var auditFiles = await GetAuditFileAsync(name);
             var invoices = new List<Invoice>();
             var workingDocuments = new List<WorkingDocument>();
 
@@ -96,10 +96,10 @@ namespace Vera.Portugal.Integration.Tests
             return (invoices, workingDocuments);
         }
 
-        public async Task<IEnumerable<Vera.Models.Product>> LoadProductsFromAuditAsync(string accountId, string name)
+        public async Task<IEnumerable<Vera.Models.Product>> LoadProductsFromAuditAsync(string name)
         {
             var products = new List<Vera.Models.Product>();
-            var auditFiles = await GetAuditFileAsync(accountId, name);
+            var auditFiles = await GetAuditFileAsync(name);
 
             foreach (var file in auditFiles)
             {
@@ -118,12 +118,16 @@ namespace Vera.Portugal.Integration.Tests
             return products;
         }
 
-        private async Task<IEnumerable<AuditFile>> GetAuditFileAsync(string accountId, string name)
+        private async Task<IEnumerable<AuditFile>> GetAuditFileAsync(string name)
         {
             var serializer = new XmlSerializer(typeof(AuditFile));
-            var response = await _httpClient.GetAsync($"download/audit/{accountId}/{name}");
-            var result = await response.Content.ReadAsStreamAsync();
+            var response = await _httpClient.GetAsync($"download/audit/{name}");
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new FileNotFoundException(response.ReasonPhrase);
+            }
 
+            var result = await response.Content.ReadAsStreamAsync();
             using var zipArchive = new ZipArchive(result);
 
             var files = new List<AuditFile>();

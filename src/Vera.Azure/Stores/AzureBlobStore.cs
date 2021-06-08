@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
@@ -11,6 +11,7 @@ namespace Vera.Azure.Stores
 {
     public class AzureBlobStore : IBlobStore
     {
+        private const string accountMeta = "account_id";
         private readonly string _containerName;
         private readonly BlobServiceClient _client;
 
@@ -31,10 +32,15 @@ namespace Vera.Azure.Stores
 
             var client = container.GetBlockBlobClient(name);
 
-            await client.UploadAsync(blob.Content, new BlobHttpHeaders
-            {
-                ContentType = blob.MimeType
-            });
+            await client.UploadAsync(blob.Content,
+                new BlobHttpHeaders
+                {
+                    ContentType = blob.MimeType
+                },
+                new Dictionary<string, string>
+                {
+                    { accountMeta, accountId.ToString() }
+                });
 
             return name;
         }
@@ -54,14 +60,18 @@ namespace Vera.Azure.Stores
             {
                 return null;
             }
-            
-            var response = await client.DownloadAsync();
 
-            return new Blob
+            var response = await client.DownloadAsync();
+            if (response.Value.Details.Metadata.TryGetValue(accountMeta, out var meta) && meta == accountId.ToString())
             {
-                MimeType = response.Value.ContentType,
-                Content = response.Value.Content
-            };
+                return new Blob
+                {
+                    MimeType = response.Value.ContentType,
+                    Content = response.Value.Content
+                };
+            }
+
+            return null;
         }
     }
 }

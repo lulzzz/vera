@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Vera.Host.Security;
 using Vera.Stores;
 
 namespace Vera.Host.Controllers
@@ -16,16 +17,23 @@ namespace Vera.Host.Controllers
             _blobStore = blobStore;
         }
 
-        [HttpGet("/download/audit/{accountId}/{name}")]
-        public async Task<IActionResult> Download(Guid accountId, string name)
+        [HttpGet("/download/audit/{name}")]
+        public async Task<IActionResult> Download(string name)
         {
-            // TODO(kevin): check that account is allowed to access
-            
-            var blob = await _blobStore.Read(accountId, name);
+            if (HttpContext.Request.Headers.TryGetValue(MetadataKeys.AccountId, out var accountIdValue) &&
+                Guid.TryParse(accountIdValue, out var accountId))
+            {
+                var blob = await _blobStore.Read(accountId, name);
 
-            if (blob == null) return NotFound(name);
-            
-            return File(blob.Content, blob.MimeType);
+                if (blob != null)
+                {
+                    return File(blob.Content, blob.MimeType);
+                }
+
+                return NotFound(name);
+            }
+
+            return Forbid(name);
         }
     }
 }

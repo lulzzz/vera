@@ -34,6 +34,7 @@ namespace Vera.Portugal.Integration.Tests
 
             var httpClient = _fixture.CreateClient();
             httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue(MetadataKeys.Authorization));
+            httpClient.DefaultRequestHeaders.Add(MetadataKeys.AccountId, client.AccountId);
 
             _auditResultsStore = new AuditResultsStore(httpClient);
 
@@ -265,8 +266,8 @@ namespace Vera.Portugal.Integration.Tests
             }
 
             var getAuditReply = await client.GenerateAuditFile();
-
-            await _auditResultsStore.LoadInvoicesFromAuditAsync(client.AccountId, getAuditReply.Location);
+            
+            await _auditResultsStore.LoadInvoicesFromAuditAsync(getAuditReply.Location);
 
             var calculator = new InvoiceTotalsCalculator();
 

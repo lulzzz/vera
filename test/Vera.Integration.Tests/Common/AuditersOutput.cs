@@ -27,7 +27,7 @@ namespace Vera.Integration.Tests.Common
 
         public async Task StoreAuditFilesInAuditersOutput(string auditFileLocation, string testName, IEnumerable<string> invoiceNumbers)
         {
-            await WriteAuditFileZipEntries(_setupClient.AccountId, auditFileLocation, testName);
+            await WriteAuditFileZipEntries(auditFileLocation, testName);
 
             var receiptFileNo = 0;
 
@@ -38,9 +38,9 @@ namespace Vera.Integration.Tests.Common
             }
         }
 
-        private async Task WriteAuditFileZipEntries(string accountId, string name, string testName)
+        private async Task WriteAuditFileZipEntries(string name, string testName)
         {
-            var response = await _httpClient.GetAsync($"download/audit/{accountId}/{name}");
+            var response = await _httpClient.GetAsync($"download/audit/{name}");
             var result = await response.Content.ReadAsStreamAsync();
 
             using var zipArchive = new ZipArchive(result);

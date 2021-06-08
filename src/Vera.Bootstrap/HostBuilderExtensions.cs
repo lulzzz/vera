@@ -15,6 +15,7 @@ using Vera.Germany;
 using Vera.Periods;
 using Vera.Sweden;
 using Vera.Sweden.InfrasecHttpClient;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Vera.Bootstrap
 {
@@ -35,8 +36,8 @@ namespace Vera.Bootstrap
                 collection.AddTransient<IInvoiceHandlerFactory, InvoiceHandlerFactory>();
 
                 // Stores
-                collection.AddSingleton<IBlobStore, TemporaryBlobStore>();
-                collection.AddSingleton<ILocker, InMemoryLocker>();
+                collection.TryAddSingleton<IBlobStore, TemporaryBlobStore>();
+                collection.TryAddSingleton<ILocker, InMemoryLocker>();
 
                 // Services
                 collection.AddTransient<IUserRegisterService, UserRegisterService>();

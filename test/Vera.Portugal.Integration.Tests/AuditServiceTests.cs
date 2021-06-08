@@ -61,19 +61,9 @@ namespace Vera.Portugal.Integration.Tests
 
             Assert.NotNull(createAuditReply.AuditId);
 
-            var location = string.Empty;
-            for (var i = 0; i < 5 && string.IsNullOrEmpty(location); i++)
-            {
-                var reply = await client.GetAuditReplyAsync(createAuditReply.AuditId);
-                location = reply.Location;
+            var reply = await client.GetAuditReplyAsync(createAuditReply.AuditId);
 
-                if (string.IsNullOrEmpty(location))
-                {
-                    await Task.Delay(100);
-                }
-            }
-
-            Assert.False(string.IsNullOrEmpty(location));
+            Assert.False(string.IsNullOrEmpty(reply.Location));
         }
 
         /// <summary>
@@ -86,6 +76,7 @@ namespace Vera.Portugal.Integration.Tests
             var httpClient = _fixture.CreateClient();
 
             httpClient.DefaultRequestHeaders.Add("Authorization", client.AuthorizedMetadata.GetValue(MetadataKeys.Authorization));
+            httpClient.DefaultRequestHeaders.Add(MetadataKeys.AccountId, client.AccountId);
 
             var invoiceResolver = new AuditResultsStore(httpClient);
 
@@ -120,7 +111,7 @@ namespace Vera.Portugal.Integration.Tests
             }
 
             var getAuditReply = await client.GenerateAuditFile();
-            var auditProducts = await invoiceResolver.LoadProductsFromAuditAsync(client.AccountId, getAuditReply.Location);
+            var auditProducts = await invoiceResolver.LoadProductsFromAuditAsync(getAuditReply.Location);
 
             Assert.Equal(2, auditProducts.Count());
         }
