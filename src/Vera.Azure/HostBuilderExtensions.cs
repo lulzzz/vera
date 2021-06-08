@@ -19,7 +19,7 @@ namespace Vera.Azure
     {
         private static readonly SemaphoreSlim Lock = new(1, 1);
         private static volatile bool _created;
-        
+
         public static IHost ConfigureCosmos(this IHost host)
         {
             if (_created) return host;
@@ -27,11 +27,14 @@ namespace Vera.Azure
             // Running on the background to prevent deadlocks that occur
             // when running the async code below synchronously and I did
             // not find a way to run this before startup with the IHostBuilder
-            Task.Run(async () =>
+            var task = Task.Run(async () =>
             {
                 if (_created) return;
-                
-                await Lock.WaitAsync();
+
+                if (!await Lock.WaitAsync(TimeSpan.FromSeconds(30)))
+                {
+                    throw new TimeoutException("failed to acquire lock for configuring cosmos in time");
+                }
 
                 if (_created)
                 {
@@ -54,7 +57,7 @@ namespace Vera.Azure
                 var client = scope.ServiceProvider.GetRequiredService<CosmosClient>();
 
                 var throughput = ThroughputProperties.CreateManualThroughput(400);
-                
+
                 var response = await client.CreateDatabaseIfNotExistsAsync(cosmosOptions.Database, throughput);
 
                 const string partitionKeyPath = "/PartitionKey";
@@ -85,9 +88,26 @@ namespace Vera.Azure
 
                 Lock.Release();
             });
-            
-            while (!_created) { }
-            
+
+            var start = DateTime.Now;
+
+            while (!task.IsCompleted && (DateTime.Now - start).TotalSeconds < 15) { }
+
+            if (!_created)
+            {
+                var additional = "";
+
+                if (task.Exception != null)
+                {
+                    foreach (var e in task.Exception.InnerExceptions)
+                    {
+                        additional += e.Message + Environment.NewLine;
+                    }
+                }
+
+                throw new Exception($"task is completed, but cosmos containers were not created: {task.Status}. {additional}");
+            }
+
             return host;
         }
 
