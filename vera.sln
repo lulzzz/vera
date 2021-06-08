@@ -53,7 +53,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Sweden", "src\Vera.Swe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Sweden.Tests", "src\Vera.Sweden.Tests\Vera.Sweden.Tests.csproj", "{F1AF7117-3049-4966-88FE-F3E7C23D1895}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Sweden.Integration.Tests", "src\Vera.Sweden.Integration.Tests\Vera.Sweden.Integration.Tests.csproj", "{0263919D-5C13-451A-8490-EFD3C74AA006}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Sweden.Integration.Tests", "test\Vera.Sweden.Integration.Tests\Vera.Sweden.Integration.Tests.csproj", "{0263919D-5C13-451A-8490-EFD3C74AA006}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vera.Norway.Integration.Tests", "test\Vera.Norway.Integration.Tests\Vera.Norway.Integration.Tests.csproj", "{27C49916-0D78-42B3-B62B-87D59E1E7B87}"
 EndProject
