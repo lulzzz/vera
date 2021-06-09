@@ -1,10 +1,13 @@
 using System.IO;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Security;
 using Vera.Dependencies;
 using Vera.Portugal.Stores;
+using Vera.Printing;
+using Vera.Stores;
 using PemReader = Org.BouncyCastle.OpenSsl.PemReader;
 
 namespace Vera.Portugal
@@ -12,10 +15,14 @@ namespace Vera.Portugal
     public class AccountComponentFactory : AbstractAccountComponentFactory<Configuration>
     {
         private readonly IWorkingDocumentStore _wdStore;
+        private readonly IPrintAuditTrailStore _printAuditTrailStore;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public AccountComponentFactory(IWorkingDocumentStore wdStore)
+        public AccountComponentFactory(IWorkingDocumentStore wdStore, IPrintAuditTrailStore printAuditTrailStore, ILoggerFactory loggerFactory)
         {
             _wdStore = wdStore;
+            _printAuditTrailStore = printAuditTrailStore;
+            _loggerFactory = loggerFactory;
         }
 
         protected override IComponentFactory Create(Configuration config)
@@ -35,7 +42,7 @@ namespace Vera.Portugal
                 rsa = RSA.Create(rsaParameters);
             }
 
-            return new ComponentFactory(rsa, config, _wdStore);
+            return new ComponentFactory(rsa, config, _wdStore, _printAuditTrailStore, _loggerFactory);
         }
 
         public override string Name => "PT";

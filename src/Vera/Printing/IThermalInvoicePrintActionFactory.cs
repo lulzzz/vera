@@ -1,4 +1,5 @@
-﻿using Vera.Models;
+﻿using System.Threading.Tasks;
+using Vera.Models;
 
 namespace Vera.Printing
 {
@@ -7,6 +8,6 @@ namespace Vera.Printing
     /// </summary>
     public interface IThermalInvoicePrintActionFactory
     {
-        IPrintAction Create(Account account, Invoice invoice);
+        Task<IPrintAction> Create(Account account, Invoice invoice);
     }
 }

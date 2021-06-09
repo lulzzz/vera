@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using Microsoft.Extensions.Logging;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
@@ -12,6 +13,7 @@ using Vera.Printing;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Signing;
+using Vera.Stores;
 using Vera.Thermal;
 
 namespace Vera.Portugal
@@ -21,12 +23,16 @@ namespace Vera.Portugal
         private readonly RSA _rsa;
         private readonly Configuration _configuration;
         private readonly IWorkingDocumentStore _wdStore;
+        private readonly IPrintAuditTrailStore _printAuditTrailStore;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public ComponentFactory(RSA rsa, Configuration configuration, IWorkingDocumentStore wdStore)
+        public ComponentFactory(RSA rsa, Configuration configuration, IWorkingDocumentStore wdStore, IPrintAuditTrailStore printAuditTrailStore, ILoggerFactory loggerFactory)
         {
             _rsa = rsa;
             _configuration = configuration;
             _wdStore = wdStore;
+            _printAuditTrailStore = printAuditTrailStore;
+            _loggerFactory = loggerFactory;
         }
 
         public IConfigurationValidator CreateConfigurationValidator()
@@ -96,7 +102,11 @@ namespace Vera.Portugal
         
         public IThermalInvoicePrintActionFactory CreateThermalInvoicePrintActionFactory()
         {
-            return new DoneThermalInvoicePrintActionFactory();
+            var thermalReceiptGenerator = CreateThermalReceiptGenerator();
+
+            var logger = _loggerFactory.CreateLogger<EscPosInvoicePrintActionFactory>();
+
+            return new EscPosInvoicePrintActionFactory(logger, thermalReceiptGenerator, _printAuditTrailStore);
         }
     }
 }

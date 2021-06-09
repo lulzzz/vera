@@ -40,7 +40,7 @@ namespace Vera.Host.Services
                 .GetComponentFactory(account)
                 .CreateThermalInvoicePrintActionFactory();
            
-            var action = thermalInvoicePrintActionFactory.Create(account, invoice);
+            var action = await thermalInvoicePrintActionFactory.Create(account, invoice);
             
             await Execute(requestStream, responseStream, action);
         }

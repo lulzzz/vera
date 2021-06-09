@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Vera.Models;
 
 namespace Vera.Printing
@@ -7,9 +8,9 @@ namespace Vera.Printing
     /// </summary>
     public sealed class DoneThermalInvoicePrintActionFactory: IThermalInvoicePrintActionFactory
     {
-        public IPrintAction Create(Account account, Invoice invoice)
+        public Task<IPrintAction> Create(Account account, Invoice invoice)
         {
-            return new DonePrintAction();
+            return Task.FromResult<IPrintAction>(new DonePrintAction());
         }
     }
 }

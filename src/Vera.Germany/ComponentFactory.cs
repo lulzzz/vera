@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
@@ -11,6 +12,7 @@ using Vera.Printing;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Signing;
+using Vera.Stores;
 using Vera.Thermal;
 
 namespace Vera.Germany
@@ -18,10 +20,14 @@ namespace Vera.Germany
     public class ComponentFactory : IComponentFactory
     {
         private readonly IFiskalyClient _fiskalyClient;
+        private readonly IPrintAuditTrailStore _printAuditTrailStore;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public ComponentFactory(Configuration configuration)
+        public ComponentFactory(Configuration configuration, IPrintAuditTrailStore printAuditTrailStore, ILoggerFactory loggerFactory)
         {
             _fiskalyClient = new FiskalyClient(configuration.ApiKey, configuration.ApiSecret, configuration.BaseUrl);
+            _printAuditTrailStore = printAuditTrailStore;
+            _loggerFactory = loggerFactory;
         }
 
         public IConfigurationValidator CreateConfigurationValidator()
@@ -84,7 +90,11 @@ namespace Vera.Germany
 
         public IThermalInvoicePrintActionFactory CreateThermalInvoicePrintActionFactory()
         {
-            throw new NotImplementedException();
+            var thermalReceiptGenerator = CreateThermalReceiptGenerator();
+
+            var logger = _loggerFactory.CreateLogger<EscPosInvoicePrintActionFactory>();
+
+            return new EscPosInvoicePrintActionFactory(logger, thermalReceiptGenerator, _printAuditTrailStore);
         }
     }
 }

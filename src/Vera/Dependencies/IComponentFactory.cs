@@ -6,6 +6,7 @@ using Vera.Models;
 using Vera.Registers;
 using Vera.Reports;
 using Vera.Thermal;
+using Microsoft.Extensions.Logging;
 
 namespace Vera.Dependencies
 {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using Vera.Audits;
 using Vera.Configuration;
 using Vera.Dependencies;
