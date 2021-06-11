@@ -14,5 +14,6 @@ namespace Vera.Azure.Stores
         public int Sequence { get; set; }
         public Signature Signature { get; set; }
         public string PartitionKey { get; set; }
+        public decimal CumulatedValue { get; set; }
     }
 }

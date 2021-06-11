@@ -162,6 +162,9 @@ namespace Vera.Azure
                 collection.AddSingleton<IInvoiceStore>(_ => new CosmosInvoiceStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Invoices)));
 
+                collection.AddSingleton<IGrandTotalAuditTrailStore>(_ => new CosmosGrandTotalAuditTrailStore(
+                    cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Trails)));
+
                 collection.AddSingleton<ICompanyStore>(_ => new CosmosCompanyStore(
                     cosmosClient.GetContainer(cosmosOptions.Database, cosmosContainerOptions.Companies)));
 

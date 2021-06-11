@@ -23,7 +23,7 @@ namespace Vera.Azure.Stores
             _last = last;
         }
 
-        public async Task Append(Signature signature)
+        public async Task Append(Signature signature, decimal cumulatedValue = 0)
         {
             var partitionKey = new PartitionKey(_partitionKeyValue);
 
@@ -32,7 +32,8 @@ namespace Vera.Azure.Stores
                 Id = Guid.NewGuid(),
                 Sequence = NextSequence,
                 Signature = signature,
-                PartitionKey = _partitionKeyValue
+                PartitionKey = _partitionKeyValue,
+                CumulatedValue = cumulatedValue
             };
 
             var tx = _container.CreateTransactionalBatch(partitionKey);
@@ -58,5 +59,6 @@ namespace Vera.Azure.Stores
 
         public int NextSequence => _last?.Sequence + 1 ?? 1;
         public Signature? Signature => _last?.Signature;
+        public decimal CumulatedValue => _last?.CumulatedValue ?? 0;
     }
 }

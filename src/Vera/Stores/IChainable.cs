@@ -10,7 +10,7 @@ namespace Vera.Stores
         /// </summary>
         /// <param name="signature"></param>
         /// <returns></returns>
-        Task Append(Signature signature);
+        Task Append(Signature signature, decimal cumulatedValue = 0);
         
         /// <summary>
         /// Sequence that will follow this chainable.
@@ -22,5 +22,10 @@ namespace Vera.Stores
         /// chainable in the link.
         /// </summary>
         Signature? Signature { get; }
+
+        /// <summary>
+        /// The Cumulated Value of the entire chain
+        /// </summary>
+        decimal CumulatedValue { get; }
     }
 }

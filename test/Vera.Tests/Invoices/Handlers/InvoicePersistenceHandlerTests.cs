@@ -30,6 +30,7 @@ namespace Vera.Tests.Invoices.Handlers
         private readonly Mock<IInvoiceNumberGenerator> invoiceNumberGenerator;
         private readonly Mock<IInvoiceSigner> signer;
         private readonly InvoicePersistenceHandler persistanceHandler;
+        private readonly Mock<IGrandTotalAuditTrailStore> grandTotalAuditTrailStore;
 
         public InvoicePersistenceHandlerTests()
         {
@@ -43,6 +44,7 @@ namespace Vera.Tests.Invoices.Handlers
             bucketGenerator = new Mock<IBucketGenerator<Invoice>>();
             invoiceNumberGenerator = new Mock<IInvoiceNumberGenerator>();
             signer = new Mock<IInvoiceSigner>();
+            grandTotalAuditTrailStore = new Mock<IGrandTotalAuditTrailStore>();
 
             bucketGenerator.Setup(x => x.Generate(It.IsAny<Invoice>()))
                 .Returns(expectedBucket);
@@ -65,7 +67,9 @@ namespace Vera.Tests.Invoices.Handlers
                 invoiceStore.Object,
                 signer.Object,
                 invoiceNumberGenerator.Object,
-                bucketGenerator.Object
+                bucketGenerator.Object,
+                bucketGenerator.Object,
+                grandTotalAuditTrailStore.Object
             );
         }
 
@@ -86,7 +90,7 @@ namespace Vera.Tests.Invoices.Handlers
 
             invoiceStore.Verify(s => s.Store(invoice));
 
-            last.Verify(l => l.Append(invoice.Signature));
+            last.Verify(l => l.Append(invoice.Signature, It.IsAny<decimal>()));
         }
 
         [Fact]
@@ -98,7 +102,7 @@ namespace Vera.Tests.Invoices.Handlers
                 Supplier = supplier
             };
 
-            last.Setup(x => x.Append(It.IsAny<Signature>()))
+            last.Setup(x => x.Append(It.IsAny<Signature>(), It.IsAny<decimal>()))
                 .ThrowsAsync(new Exception());
 
             await persistanceHandler.Handle(invoice);

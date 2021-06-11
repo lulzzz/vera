@@ -19,6 +19,7 @@ namespace Vera.Portugal.Invoices
         private readonly ISupplierStore _supplierStore;
         private readonly IPeriodStore _periodStore;
         private readonly IWorkingDocumentStore _wdStore;
+        private readonly IGrandTotalAuditTrailStore _grandTotalAuditTrailStore;
 
         public PortugalInvoiceHandlerFactory(
             ILoggerFactory loggerFactory,
@@ -27,7 +28,8 @@ namespace Vera.Portugal.Invoices
             ILocker locker,
             ISupplierStore supplierStore,
             IPeriodStore periodStore,
-            IWorkingDocumentStore wdStore
+            IWorkingDocumentStore wdStore,
+            IGrandTotalAuditTrailStore grandTotalAuditTrailStore
         )
         {
             _loggerFactory = loggerFactory;
@@ -37,6 +39,7 @@ namespace Vera.Portugal.Invoices
             _supplierStore = supplierStore;
             _periodStore = periodStore;
             _wdStore = wdStore;
+            _grandTotalAuditTrailStore = grandTotalAuditTrailStore;
         }
 
         public IHandlerChain<Invoice> Create(IComponentFactory factory)
@@ -59,7 +62,9 @@ namespace Vera.Portugal.Invoices
                 _invoiceStore,
                 signer,
                 factory.CreateInvoiceNumberGenerator(),
-                bucketGenerator
+                bucketGenerator,
+                factory.CreateGrandTotalAuditTrailBucketGenerator(),
+                _grandTotalAuditTrailStore
             );
 
             wdHandler.WithNext(persistenceHandler);

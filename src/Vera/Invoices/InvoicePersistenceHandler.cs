@@ -17,6 +17,8 @@ namespace Vera.Invoices
         private readonly IInvoiceSigner _signer;
         private readonly IInvoiceNumberGenerator _invoiceNumberGenerator;
         private readonly IBucketGenerator<Invoice> _invoiceBucketGenerator;
+        private readonly IBucketGenerator<Invoice> _grandTotalAuditTrailBucketGenerator;
+        private readonly IGrandTotalAuditTrailStore _grandTotalAuditTrailStore;
 
         public InvoicePersistenceHandler(
             ILogger<InvoicePersistenceHandler> logger,
@@ -24,7 +26,9 @@ namespace Vera.Invoices
             IInvoiceStore invoiceStore, 
             IInvoiceSigner signer,
             IInvoiceNumberGenerator invoiceNumberGenerator,
-            IBucketGenerator<Invoice> invoiceBucketGenerator
+            IBucketGenerator<Invoice> invoiceBucketGenerator,
+            IBucketGenerator<Invoice> grandTotalAuditTrailBucketGenerator,
+            IGrandTotalAuditTrailStore grandTotalAuditTrailStore
         )
         {
             _logger = logger;
@@ -33,32 +37,70 @@ namespace Vera.Invoices
             _signer = signer;
             _invoiceNumberGenerator = invoiceNumberGenerator;
             _invoiceBucketGenerator = invoiceBucketGenerator;
+            _grandTotalAuditTrailBucketGenerator = grandTotalAuditTrailBucketGenerator;
+            _grandTotalAuditTrailStore = grandTotalAuditTrailStore;
         }
 
         public override async Task Handle(Invoice invoice)
         {
-            var bucket = _invoiceBucketGenerator.Generate(invoice);
-            var chainContext = new ChainContext(invoice.AccountId, bucket);
-            
-            // Get last stored invoice based on the bucket for the invoice
-            var last = await _chainStore.Last(chainContext);
+            var invoiceChainContext = new ChainContext(invoice.AccountId, _invoiceBucketGenerator.Generate(invoice));
+            var grandTotalAuditTrailChainContext = new ChainContext(invoice.Supplier.Id, _grandTotalAuditTrailBucketGenerator.Generate(invoice));
 
-            invoice.Sequence = last.NextSequence;
+            var lastInvoiceChainable = await _chainStore.Last(invoiceChainContext);
+            var lastGrandTotalAuditTrailChainable = await _chainStore.Last(grandTotalAuditTrailChainContext);
+
+            invoice.Sequence = lastInvoiceChainable.NextSequence;
             invoice.Number = await _invoiceNumberGenerator.Generate(invoice);
-            invoice.Signature = await _signer.Sign(invoice, last.Signature);
+            invoice.Signature = await _signer.Sign(invoice, lastInvoiceChainable.Signature);
 
             await _invoiceStore.Store(invoice);
+            var grandTotalAuditTrail = await _grandTotalAuditTrailStore.Create(invoice, lastGrandTotalAuditTrailChainable.CumulatedValue);
 
+            await UpdateInvoiceChains(invoice, invoiceChainContext, lastInvoiceChainable,
+                grandTotalAuditTrail, grandTotalAuditTrailChainContext, lastGrandTotalAuditTrailChainable);
+            
+            await base.Handle(invoice);
+        }
+
+        private async Task UpdateInvoiceChains(Invoice invoice, ChainContext invoiceChainContext, IChainable lastInvoiceChainable,
+            GrandTotalAuditTrail grandTotalAuditTrail, ChainContext grandTotalAuditTrailChainContext, IChainable lastGrandTotalAuditTrailChainable)
+        {
             try
             {
-                await last.Append(invoice.Signature);
+                await lastInvoiceChainable.Append(invoice.Signature);
+                try
+                {
+                    await lastGrandTotalAuditTrailChainable.Append(await _signer.Sign(invoice, lastGrandTotalAuditTrailChainable.Signature), grandTotalAuditTrail.GrandTotal);
+                }
+                catch (Exception chainException)
+                {
+                    // Failed to append to the chain, means we have to
+                    // rollback the grandTotalAuditTrail because it's not stored in a chain
+                    _logger.LogError(chainException,
+                        $"failed to append to chain {grandTotalAuditTrailChainContext}, deleting created grandTotalAuditTrail {grandTotalAuditTrail.Id}");
+
+                    try
+                    {
+                        await _grandTotalAuditTrailStore.Delete(grandTotalAuditTrail);
+                        _logger.LogInformation("successfully removed grandTotalAuditTrail, chain has been restored");
+                    }
+                    catch (Exception grandTotalAuditException)
+                    {
+                        _logger.LogError(grandTotalAuditException,
+                            "failed to delete grandTotalAuditTrail after appending to the chain failed");
+                    }
+
+                    // Throw the exception again in order to remove the Invoice as well
+                    // TODO: Check if this is expected behaviour
+                    throw new Exception(chainException.Message);
+                }
             }
             catch (Exception chainException)
             {
                 // Failed to append to the chain, means we have to
                 // rollback the invoice because it's not stored in a chain
                 _logger.LogError(chainException,
-                    $"failed to append to chain {chainContext}, deleting created invoice {invoice.Id}");
+                    $"failed to append to chain {invoiceChainContext}, deleting created invoice {invoice.Id}");
 
                 try
                 {
@@ -73,8 +115,6 @@ namespace Vera.Invoices
                         "failed to delete invoice after appending to the chain failed");
                 }
             }
-            
-            await base.Handle(invoice);
         }
     }
 }

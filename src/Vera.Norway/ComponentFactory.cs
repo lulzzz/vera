@@ -49,6 +49,11 @@ namespace Vera.Norway
             return new InvoiceBucketGenerator();
         }
 
+        public IBucketGenerator<Invoice> CreateGrandTotalAuditTrailBucketGenerator()
+        {
+            return new GrandTotalAuditTrailBucketGenerator();
+        }
+
         public IInvoiceNumberGenerator CreateInvoiceNumberGenerator()
         {
             return new InvoiceNumberGenerator();

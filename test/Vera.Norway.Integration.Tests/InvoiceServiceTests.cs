@@ -18,6 +18,30 @@ namespace Vera.Norway.Integration.Tests
             _setup = fixture.CreateSetup();
         }
 
+        /*[Fact]
+        public async Task Should_create_multiple_invoices_and_their_grand_totals_and_chain_items()
+        {
+            var client = await _setup.CreateClient(Constants.Account);
+
+            var builder = new InvoiceBuilder();
+            var director = new InvoiceDirector(builder, Guid.Parse(client.AccountId), client.SupplierSystemId);
+            director.ConstructAnonymousWithSingleProductPaidWithCash();
+
+            await client.OpenPeriod();
+            var registerSystemId = await client.OpenRegister(100m);
+
+            var invoice = builder.Result;
+            invoice.RegisterSystemId = registerSystemId;
+
+            var createInvoiceRequest = new CreateInvoiceRequest
+            {
+                Invoice = invoice.Pack()
+            };
+            var createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+            createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+            createInvoiceReply = await client.Invoice.CreateAsync(createInvoiceRequest, client.AuthorizedMetadata);
+        }*/
+
         [Fact]
         public async Task Should_be_able_to_create_an_invoice()
         {

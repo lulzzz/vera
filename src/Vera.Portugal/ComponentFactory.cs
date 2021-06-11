@@ -50,6 +50,11 @@ namespace Vera.Portugal
             return new InvoiceBucketGenerator();
         }
 
+        public IBucketGenerator<Invoice> CreateGrandTotalAuditTrailBucketGenerator()
+        {
+            return new GrandTotalAuditTrailBucketGenerator();
+        }
+
         public IInvoiceNumberGenerator CreateInvoiceNumberGenerator()
         {
             return new InvoiceNumberGenerator();

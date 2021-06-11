@@ -31,6 +31,11 @@ namespace Vera.Poland
             throw new NotImplementedException();
         }
 
+        public IBucketGenerator<Invoice> CreateGrandTotalAuditTrailBucketGenerator()
+        {
+            throw new NotImplementedException();
+        }
+
         public IInvoiceNumberGenerator CreateInvoiceNumberGenerator()
         {
             throw new NotImplementedException();

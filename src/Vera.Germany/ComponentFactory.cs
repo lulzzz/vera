@@ -45,6 +45,12 @@ namespace Vera.Germany
             return new UniqueBucketPerSupplierGenerator();
         }
 
+        public IBucketGenerator<Invoice> CreateGrandTotalAuditTrailBucketGenerator()
+        {
+            //return new GrandTotalAuditTrailBucketGenerator();
+            throw new NotImplementedException();
+        }
+
         public IInvoiceNumberGenerator CreateInvoiceNumberGenerator()
         {
             return new InvoiceSequenceNumberGenerator();

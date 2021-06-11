@@ -54,6 +54,11 @@ namespace Vera.Sweden
             throw new System.NotImplementedException();
         }
 
+        public IBucketGenerator<Invoice> CreateGrandTotalAuditTrailBucketGenerator()
+        {
+            throw new System.NotImplementedException();
+        }
+
         public IInvoiceNumberGenerator CreateInvoiceNumberGenerator()
         {
             throw new System.NotImplementedException();

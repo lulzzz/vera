@@ -21,6 +21,7 @@ namespace Vera.Invoices
         private readonly ILocker _locker;
         private readonly ISupplierStore _supplierStore;
         private readonly IPeriodStore _periodStore;
+        private readonly IGrandTotalAuditTrailStore _grandTotalAuditTrailStore;
 
         public InvoiceHandlerFactory(
             ILoggerFactory loggerFactory,
@@ -28,7 +29,8 @@ namespace Vera.Invoices
             IChainStore chainStore,
             ILocker locker,
             ISupplierStore supplierStore,
-            IPeriodStore periodStore
+            IPeriodStore periodStore,
+            IGrandTotalAuditTrailStore grandTotalAuditTrailStore
         )
         {
             _loggerFactory = loggerFactory;
@@ -37,6 +39,7 @@ namespace Vera.Invoices
             _locker = locker;
             _supplierStore = supplierStore;
             _periodStore = periodStore;
+            _grandTotalAuditTrailStore = grandTotalAuditTrailStore;
         }
 
         public IHandlerChain<Invoice> Create(IComponentFactory factory)
@@ -49,7 +52,9 @@ namespace Vera.Invoices
                 _invoiceStore,
                 factory.CreateInvoiceSigner(),
                 factory.CreateInvoiceNumberGenerator(),
-                factory.CreateInvoiceBucketGenerator()
+                factory.CreateInvoiceBucketGenerator(),
+                factory.CreateGrandTotalAuditTrailBucketGenerator(),
+                _grandTotalAuditTrailStore
             );
 
             head.WithNext(new InvoiceOpenPeriodHandler(_periodStore))
